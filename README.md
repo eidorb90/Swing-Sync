@@ -1,2 +1,2 @@
 # Swing-Sync
-##cool golf app
+cool golf app
