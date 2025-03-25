@@ -93,6 +93,7 @@ class CourseSearchAPIView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    def post(self, request):
-        # here we are going to save a course to the database
-        ...
+
+# class CourseSaverView(generics.CreateAPIView):
+#     queryset = Course.objects.all()
+#     serializer_class = CourseSerializer
