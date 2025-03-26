@@ -71,9 +71,9 @@ export default function SignIn(props) {
     useEffect(() => {
         document.body.style.justifyContent = 'center';
     }, []);
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+    // const handleClickOpen = () => {
+    //     setOpen(true);
+    // };
 
     const handleClose = () => {
         setOpen(false);

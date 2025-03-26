@@ -1,9 +1,9 @@
-import SignInContainer from './layouts/signin';
+import SignUpContainer from './layouts/signup';
 
 export default function App() {
   return (
     <>
-      <SignInContainer/>
+      <SignUpContainer/>
     </>
   )
 }
