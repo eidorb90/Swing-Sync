@@ -3,8 +3,9 @@ from django.contrib.auth.models import User
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, LoginSerializer
+from .serializers import UserSerializer, LoginSerializer, CourseSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from .models import Course, Tee, Hole
 import os
 import requests
 from rest_framework.views import APIView
@@ -85,6 +86,7 @@ class CourseSearchAPIView(APIView):
                 },
             )
             response.raise_for_status()
+            self.save_course(request, response)
             return Response(response.json())
 
         except requests.RequestException as e:
@@ -93,7 +95,84 @@ class CourseSearchAPIView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+    def save_course(self, request, response):
+        try:
+            data = response.json()
 
-# class CourseSaverView(generics.CreateAPIView):
-#     queryset = Course.objects.all()
-#     serializer_class = CourseSerializer
+            for course_data in data.get("courses", []):
+                # Get location data
+                location = course_data.get("location", {})
+
+                # Create or update course
+                course, created = Course.objects.update_or_create(
+                    club_name=course_data.get("club_name"),
+                    course_name=course_data.get("course_name"),
+                    defaults={
+                        "address": location.get("address", ""),
+                        "city": location.get("city", ""),
+                        "state": location.get("state", ""),
+                        "country": location.get("country", ""),
+                        "latitude": location.get("latitude", 0.0),
+                        "longitude": location.get("longitude", 0.0),
+                    },
+                )
+
+                # Process tees by gender
+                tees_data = course_data.get("tees", {})
+
+                # Female tees
+                for tee_data in tees_data.get("female", []):
+                    self._create_or_update_tee(course, tee_data, "F")
+
+                # Male tees
+                for tee_data in tees_data.get("male", []):
+                    self._create_or_update_tee(course, tee_data, "M")
+
+        except Exception as e:
+            print(f"Error saving course data: {str(e)}")
+            # You may want to log this error properly in production
+
+    def _create_or_update_tee(self, course, tee_data, gender):
+        """Helper method to create or update a tee and its holes"""
+        tee, created = Tee.objects.update_or_create(
+            course=course,
+            tee_name=tee_data.get("tee_name"),
+            defaults={
+                "gender": gender,
+                "course_rating": tee_data.get("course_rating", 0.0),
+                "slope_rating": tee_data.get("slope_rating", 0),
+                "bogey_rating": tee_data.get("bogey_rating", 0.0),
+                "total_yards": tee_data.get("total_yards", 0),
+                "total_meters": tee_data.get("total_meters", 0),
+                "number_of_holes": tee_data.get("number_of_holes", 18),
+                "par_total": tee_data.get("par_total", 72),
+                "front_course_rating": tee_data.get("front_course_rating", 0.0),
+                "front_slope_rating": tee_data.get("front_slope_rating", 0),
+                "front_bogey_rating": tee_data.get("front_bogey_rating", 0.0),
+                "back_course_rating": tee_data.get("back_course_rating", 0.0),
+                "back_slope_rating": tee_data.get("back_slope_rating", 0),
+                "back_bogey_rating": tee_data.get("back_bogey_rating", 0.0),
+            },
+        )
+
+        # Process holes
+        for i, hole_data in enumerate(tee_data.get("holes", []), 1):
+            Hole.objects.update_or_create(
+                tee=tee,
+                hole_number=i,  # Use index+1 since holes aren't numbered in data
+                defaults={
+                    "par": hole_data.get("par", 4),
+                    "yardage": hole_data.get("yardage", 0),
+                    "handicap": hole_data.get("handicap", 0),
+                },
+            )
+        return tee
+
+
+class SavedCourseView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        courses = Course.objects.prefetch_related("tees__holes").all()
+        serializer = CourseSerializer(courses, many=True)
+        return Response(serializer.data)
