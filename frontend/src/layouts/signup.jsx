@@ -71,6 +71,9 @@ export default function SignUp(props) {
     const [firstNameErrorMessage, setFirstNameErrorMessage] = React.useState('');
     const [lastNameError, setLastNameError] = React.useState(false);
     const [lastNameErrorMessage, setLastNameErrorMessage] = React.useState('');
+    const [confirmpasswordError, setConfirmPasswordError] = React.useState(false);
+    const [confirmpasswordErrorMessage, setConfirmPasswordErrorMessage] = React.useState('');
+    
     useEffect(() => {
         document.body.style.justifyContent = 'center';
     }, []);
@@ -79,6 +82,7 @@ export default function SignUp(props) {
         const username = document.getElementById('username');
         const email = document.getElementById('email');
         const password = document.getElementById('password');
+        const confirmpassword = document.getElementById('confirmpassword');
         const firstname = document.getElementById('firstname');
         const lastName = document.getElementById('lastName');
 
@@ -105,6 +109,15 @@ export default function SignUp(props) {
             setPasswordError(false);
             setPasswordErrorMessage('');
         }
+        
+        if (!confirmpassword.value || confirmpassword.value !== password.value) {
+            setConfirmPasswordError(true);
+            setConfirmPasswordErrorMessage('Passwords do not match.');
+            isValid = false;
+        } else {
+            setConfirmPasswordError(false);
+            setConfirmPasswordErrorMessage('');
+        }
 
         if (!firstname.value || firstname.value.length < 1) {
             setFirstNameError(true);
@@ -119,8 +132,7 @@ export default function SignUp(props) {
             setLastNameError(true);
             setLastNameErrorMessage('Last name is required.');
             isValid = false;
-        }
-        else {
+        } else {
             setLastNameError(false);
             setLastNameErrorMessage('');
         }
@@ -130,7 +142,7 @@ export default function SignUp(props) {
     };
 
     const handleSubmit = (event) => {
-        if (firstNameError || emailError || passwordError || usernameError) {
+        if (firstNameError || lastNameError || emailError || confirmpasswordError || passwordError || usernameError) {
             event.preventDefault();
             return;
         }
@@ -150,7 +162,7 @@ export default function SignUp(props) {
             <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
             <SignUpContainer direction="column" justifyContent="space-between">
                 <Card variant="outlined">
-                    <SitemarkIcon />
+                    
                     <Typography
                         component="h1"
                         variant="h4"
@@ -242,15 +254,13 @@ export default function SignUp(props) {
                             <TextField
                                 required
                                 fullWidth
-                                name="password"
+                                name="confrimpassword"
                                 placeholder="••••••"
-                                type="password"
-                                id="password"
-                                autoComplete="new-password"
+                                id="confrimpassword"
                                 variant="outlined"
-                                error={passwordError}
-                                helperText={passwordErrorMessage}
-                                color={passwordError ? 'error' : 'primary'}
+                                error={confirmpasswordError}
+                                helperText={confirmpasswordErrorMessage}
+                                color={confirmpasswordError ? 'error' : 'primary'}
                             />
                         </FormControl>
                         <FormControlLabel
@@ -270,22 +280,6 @@ export default function SignUp(props) {
                         <Typography sx={{ color: 'text.secondary' }}>or</Typography>
                     </Divider>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            onClick={() => alert('Sign up with Google')}
-                            startIcon={<GoogleIcon />}
-                        >
-                            Sign up with Google
-                        </Button>
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            onClick={() => alert('Sign up with Facebook')}
-                            startIcon={<FacebookIcon />}
-                        >
-                            Sign up with Facebook
-                        </Button>
                         <Typography sx={{ textAlign: 'center' }}>
                             Already have an account?{' '}
                             <Link
