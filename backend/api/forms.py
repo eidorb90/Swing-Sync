@@ -10,7 +10,7 @@ class RegisterForm(forms.Form):
     first_name = forms.CharField(max_length=50)
     last_name = forms.CharField(max_length=50)
     phone_number = forms.CharField(max_length=15)
-    city_name = forms.CharField(max_length=50)
+    course_name = forms.CharField(max_length=50)
 
     def clean_username(self):
         username = self.cleaned_data["username"]

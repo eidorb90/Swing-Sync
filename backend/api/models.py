@@ -9,7 +9,7 @@ class User(models.Model):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     phone_number = models.CharField(max_length=15)
-    city_name = models.CharField(max_length=50)
+    course_name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.username
