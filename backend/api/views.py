@@ -1,15 +1,20 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
-from .serializers import UserSerializer, LoginSerializer, CourseSerializer
+from .serializers import (
+    UserSerializer,
+    LoginSerializer,
+    CourseSerializer,
+)
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Course, Tee, Hole
+from .models import Course, Tee, Hole, Round, HoleScore
 import os
 import requests
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db import transaction
 
 
 # Create your views here.
@@ -76,26 +81,44 @@ class CourseSearchAPIView(APIView):
             )
 
         api_key = os.getenv("GOLF_API_KEY")
+        if not api_key:
+            return Response(
+                {"error": "Golf API key not configured"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
         try:
             response = requests.get(
                 f"https://api.golfcourseapi.com/v1/search",
                 params={"search_query": search_query},
                 headers={
-                    "Authorization": f"{api_key}",
+                    "Authorization": f"Key {api_key}",
                     "Content-Type": "application/json",
                 },
             )
+
+            if response.status_code == 401:
+                return Response(
+                    {"error": "Invalid Golf API key"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+
             response.raise_for_status()
-            self.save_course(request, response)
+            self.save_course(response)
             return Response(response.json())
 
         except requests.RequestException as e:
+            error_message = f"Golf API error: {str(e)}"
+            if (
+                hasattr(e, "response") and e.response is not None
+            ):  # Safe check for response
+                error_message += f" - {e.response.text}"
             return Response(
-                {"error": f"Golf API error: {str(e)}"},
+                {"error": error_message},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    def save_course(self, request, response):
+    def save_course(self, response):
         try:
             data = response.json()
 
@@ -130,7 +153,6 @@ class CourseSearchAPIView(APIView):
 
         except Exception as e:
             print(f"Error saving course data: {str(e)}")
-            # You may want to log this error properly in production
 
     def _create_or_update_tee(self, course, tee_data, gender):
         """Helper method to create or update a tee and its holes"""
@@ -159,7 +181,7 @@ class CourseSearchAPIView(APIView):
         for i, hole_data in enumerate(tee_data.get("holes", []), 1):
             Hole.objects.update_or_create(
                 tee=tee,
-                hole_number=i,  # Use index+1 since holes aren't numbered in data
+                hole_number=i,
                 defaults={
                     "par": hole_data.get("par", 4),
                     "yardage": hole_data.get("yardage", 0),
@@ -176,3 +198,124 @@ class SavedCourseView(APIView):
         courses = Course.objects.prefetch_related("tees__holes").all()
         serializer = CourseSerializer(courses, many=True)
         return Response(serializer.data)
+
+
+class RoundView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def post(self, request, round_id=None):
+        try:
+            data = request.data.copy()
+            if round_id is not None:
+                # Handle updating an existing round
+                round = get_object_or_404(Round, id=round_id, player=request.user)
+                round.tee_id = data.get("tee_id", round.tee_id)
+                round.date_played = data.get("date_played", round.date_played)
+                round.course_id = data.get("course_id", round.course_id)
+                round.notes = data.get("notes", round.notes)
+                round.save()
+
+                # Update hole scores
+                hole_scores = data.get("hole_scores", [])
+                for score_data in hole_scores:
+                    HoleScore.objects.update_or_create(
+                        round=round,
+                        hole_id=score_data["hole_id"],
+                        defaults={
+                            "strokes": score_data["strokes"],
+                            "putts": score_data.get("putts", 0),
+                            "fairway_hit": score_data.get("fairway_hit", False),
+                            "green_in_regulation": score_data.get(
+                                "green_in_regulation", False
+                            ),
+                            "penalties": score_data.get("penalties", 0),
+                        },
+                    )
+            else:
+                # Create new round
+                round = Round.objects.create(
+                    tee_id=data["tee_id"],
+                    player=request.user,
+                    course_id=data["course_id"],
+                    notes=data.get("notes", ""),
+                )
+
+                # Create hole scores
+                hole_scores = data.get("hole_scores", [])
+                for score_data in hole_scores:
+                    HoleScore.objects.create(
+                        round=round,
+                        hole_id=score_data["hole_id"],
+                        strokes=score_data["strokes"],
+                        putts=score_data.get("putts", 0),
+                        fairway_hit=score_data.get("fairway_hit", False),
+                        green_in_regulation=score_data.get(
+                            "green_in_regulation", False
+                        ),
+                        penalties=score_data.get("penalties", 0),
+                    )
+
+            return Response(
+                {
+                    "id": round.id,
+                    "player": round.player.username,
+                    "date_played": round.date_played,
+                    "total_score": round.total_score,
+                    "message": "Scorecard updated successfully"
+                    if round_id
+                    else "Scorecard created successfully",
+                },
+                status=status.HTTP_200_OK if round_id else status.HTTP_201_CREATED,
+            )
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, round_id=None):
+        if round_id:
+            round = get_object_or_404(
+                Round.objects.prefetch_related("hole_scores"), id=round_id
+            )
+            return Response(
+                {
+                    "id": round.id,
+                    "player": round.player.username,
+                    "date_played": round.date_played,
+                    "course": round.course.course_name,
+                    "total_score": round.total_score,
+                    "front_nine": round.front_nine_score,
+                    "back_nine": round.back_nine_score,
+                    "green_in_regulation": round.green_in_regulation,
+                    "fairways_hit_percent": round.fairways_hit_percent,
+                    "putt_total": round.putt_total,
+                    "putt_per_hole": round.putt_per_hole,
+                    "penalties_total": round.penalties_total,
+                    "penalties_per_hole": round.penalties_per_hole,
+                    "hole_scores": [
+                        {
+                            "hole": score.hole.hole_number,
+                            "par": score.hole.par,
+                            "strokes": score.strokes,
+                            "putts": score.putts,
+                            "fairway_hit": score.fairway_hit,
+                            "green_in_regulation": score.green_in_regulation,
+                            "penalties": score.penalties,
+                        }
+                        for score in round.hole_scores.all()
+                    ],
+                }
+            )
+
+        rounds = Round.objects.filter(player=request.user).order_by("-date_played")
+        return Response(
+            [
+                {
+                    "id": round.id,
+                    "date_played": round.date_played,
+                    "course": round.course.course_name,
+                    "total_score": round.total_score,
+                }
+                for round in rounds
+            ]
+        )
