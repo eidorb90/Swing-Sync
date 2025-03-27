@@ -53,6 +53,16 @@ class LoginUserView(generics.GenericAPIView):
         )
 
 
+class UsersView(APIView):
+    def get(self, request, user_id=None):
+        if user_id:
+            return Response(
+                {"users": UserSerializer(User.objects.all(), many=True).data}
+            )
+
+        return Response({"users": UserSerializer(User.objects.get(pk=user_id)).data})
+
+
 class CourseSearchAPIView(APIView):
     """
     Golf Course Search API endpoint.
