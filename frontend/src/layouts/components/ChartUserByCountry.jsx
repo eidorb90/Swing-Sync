@@ -10,12 +10,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 
-import {
-  IndiaFlag,
-  UsaFlag,
-  BrazilFlag,
-  GlobeFlag,
-} from '../internals/components/CustomIcons';
+
 
 const data = [
   { label: 'India', value: 50000 },
@@ -28,25 +23,25 @@ const countries = [
   {
     name: 'India',
     value: 50,
-    flag: <IndiaFlag />,
+    
     color: 'hsl(220, 25%, 65%)',
   },
   {
     name: 'USA',
     value: 35,
-    flag: <UsaFlag />,
+    
     color: 'hsl(220, 25%, 45%)',
   },
   {
     name: 'Brazil',
     value: 10,
-    flag: <BrazilFlag />,
+    
     color: 'hsl(220, 25%, 30%)',
   },
   {
     name: 'Other',
     value: 5,
-    flag: <GlobeFlag />,
+    
     color: 'hsl(220, 25%, 20%)',
   },
 ];

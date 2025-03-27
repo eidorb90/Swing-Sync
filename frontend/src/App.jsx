@@ -1,11 +1,10 @@
-import SignInContainer from './layouts/signin';
+import Dashboard from './layouts/account';
+import SignInContainer from './layouts/account';
 
 export default function App() {
   return (
     <>
-      <SignUpContainer/>
-      <Account/>
-
+      <Dashboard/>
     </>
   )
 }

@@ -10,7 +10,8 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
-import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
+import ColorModeIconDropdown from '../theme/customizations/ColorModeIconDropdown';
+import GolfCourseIcon from '@mui/icons-material/GolfCourse';
 
 const Toolbar = styled(MuiToolbar)({
   width: '100%',
@@ -65,7 +66,7 @@ export default function AppNavbar() {
           >
             <CustomIcon />
             <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>
-              Dashboard
+              Swing Sync
             </Typography>
           </Stack>
           <ColorModeIconDropdown />
@@ -99,7 +100,7 @@ export function CustomIcon() {
         boxShadow: 'inset 0 2px 5px rgba(255, 255, 255, 0.3)',
       }}
     >
-      <DashboardRoundedIcon color="inherit" sx={{ fontSize: '1rem' }} />
+      <GolfCourseIcon color="inherit" sx={{ fontSize: '1rem' }} />
     </Box>
   );
 }
