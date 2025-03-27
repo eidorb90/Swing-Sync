@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Course, Hole, Tee
+from .models import Course, Hole, Tee, Round
+from rest_framework.permissions import IsAuthenticated
 
 
 class UserSerializer(serializers.ModelSerializer):

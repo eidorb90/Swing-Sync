@@ -10,8 +10,12 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
+<<<<<<< HEAD
 import ColorModeIconDropdown from '../theme/customizations/ColorModeIconDropdown';
 import GolfCourseIcon from '@mui/icons-material/GolfCourse';
+=======
+import ColorModeIconDropdown from '..//ColorModeIconDropdown';
+>>>>>>> 4a00341cdf9477997b135991ff3498472070d7da
 
 const Toolbar = styled(MuiToolbar)({
   width: '100%',
