@@ -2,10 +2,8 @@ import { useEffect } from 'react';
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
@@ -16,7 +14,6 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import AppTheme from './theme/AppTheme';
 import ColorModeSelect from './theme/ColorModeSelect';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from './components/CustomIcons';
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
@@ -73,7 +70,7 @@ export default function SignUp(props) {
     const [lastNameErrorMessage, setLastNameErrorMessage] = React.useState('');
     const [confirmpasswordError, setConfirmPasswordError] = React.useState(false);
     const [confirmpasswordErrorMessage, setConfirmPasswordErrorMessage] = React.useState('');
-    
+
     useEffect(() => {
         document.body.style.justifyContent = 'center';
     }, []);
@@ -109,7 +106,7 @@ export default function SignUp(props) {
             setPasswordError(false);
             setPasswordErrorMessage('');
         }
-        
+
         if (!confirmpassword.value || confirmpassword.value !== password.value) {
             setConfirmPasswordError(true);
             setConfirmPasswordErrorMessage('Passwords do not match.');
@@ -127,7 +124,7 @@ export default function SignUp(props) {
             setFirstNameError(false);
             setFirstNameErrorMessage('');
         }
-        
+
         if (!lastName.value || lastName.value.length < 1) {
             setLastNameError(true);
             setLastNameErrorMessage('Last name is required.');
@@ -136,7 +133,7 @@ export default function SignUp(props) {
             setLastNameError(false);
             setLastNameErrorMessage('');
         }
-    
+
 
         return isValid;
     };
@@ -162,7 +159,7 @@ export default function SignUp(props) {
             <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
             <SignUpContainer direction="column" justifyContent="space-between">
                 <Card variant="outlined">
-                    
+
                     <Typography
                         component="h1"
                         variant="h4"
@@ -263,10 +260,6 @@ export default function SignUp(props) {
                                 color={confirmpasswordError ? 'error' : 'primary'}
                             />
                         </FormControl>
-                        <FormControlLabel
-                            control={<Checkbox value="allowExtraEmails" color="primary" />}
-                            label="I want to receive updates via email."
-                        />
                         <Button
                             type="submit"
                             fullWidth
@@ -283,7 +276,7 @@ export default function SignUp(props) {
                         <Typography sx={{ textAlign: 'center' }}>
                             Already have an account?{' '}
                             <Link
-                                href="/material-ui/getting-started/templates/sign-in/"
+                                href="/sign-in/"
                                 variant="body2"
                                 sx={{ alignSelf: 'center' }}
                             >
