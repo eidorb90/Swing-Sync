@@ -7,6 +7,8 @@ from api.views import (
     SavedCourseView,
     RoundView,
     UsersView,
+    CourseTeeView,
+    TeeHoleView,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -27,6 +29,12 @@ urlpatterns = [
     # Course section
     path("api/course/search/", CourseSearchAPIView.as_view(), name="course_search"),
     path("api/courses/", SavedCourseView.as_view(), name="courses"),
+    path(
+        "api/courses/<int:course_id>/tees/",
+        CourseTeeView.as_view(),
+        name="course_tee_detail",
+    ),
+    path("api/tees/<int:tee_id>/holes/", TeeHoleView.as_view(), name="tee_hole_detail"),
     # Round section
     path("api/rounds/", RoundView.as_view(), name="round"),
     path("api/rounds/<int:round_id>", RoundView.as_view(), name="round_detail"),
