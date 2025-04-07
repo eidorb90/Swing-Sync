@@ -329,3 +329,23 @@ class RoundView(APIView):
                 for round in rounds
             ]
         )
+
+
+class CourseTeeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, course_id):
+        course = get_object_or_404(Course, id=course_id)
+        tees = Tee.objects.filter(course=course).prefetch_related("holes")
+        serializer = CourseSerializer(tees, many=True)
+        return Response(serializer.data)
+
+
+class TeeHoleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, tee_id):
+        tee = get_object_or_404(Tee, id=tee_id)
+        holes = Hole.objects.filter(tee=tee)
+        serializer = CourseSerializer(holes, many=True)
+        return Response(serializer.data)
