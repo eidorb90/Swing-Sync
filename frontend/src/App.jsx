@@ -1,12 +1,13 @@
-import SignInContainer from './layouts/account';
+import React from 'react';
+import { RadarChart } from '@mantine/charts';
+import { Container, Title } from '@mantine/core';
+import { data } from './data';
 
 
 export default function App() {
   return (
-    <>
-      <SignInContainer/>
-    </>
-  )
+    <h1>Swing Sync</h1>
+  );
 }
 
 

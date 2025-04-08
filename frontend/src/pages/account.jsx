@@ -1,19 +1,30 @@
 import * as React from 'react';
+
+// Material UI core
 import { alpha } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
 import Stack from '@mui/material/Stack';
-import AppNavbar from './components/AppNavbar';
-import Header from './components/Header';
-import MainGrid from './components/MainGrid';
-import SideMenu from './components/SideMenu';
-import AppTheme from './theme/AppTheme';
+
+// Local components
+import AppNavbar from '../layouts/components/AppNavbar';
+import Header from '../layouts/components/Header';
+import MainGrid from '../layouts/components/MainGrid';
+import SideMenu from '../layouts/components/SideMenu';
+import AppTheme from '../layouts/theme/AppTheme';
+
+import { RadarChart } from '@mantine/charts';
+import { Container, Title } from '@mantine/core';
+import { data } from '../data';
+
+
+// Theme customizations
 import {
   chartsCustomizations,
   dataGridCustomizations,
   datePickersCustomizations,
   treeViewCustomizations,
-} from './theme/customizations';
+} from '../layouts/theme/customizations';
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -54,6 +65,20 @@ export default function Dashboard(props) {
           </Stack>
         </Box>
       </Box>
+          <Container size="lg" py="xl">
+            <Title order={1} mb="lg">Golf Performance Analytics</Title>
+            <RadarChart
+              h={400}
+              data={data}
+              dataKey="product"
+              withPolarRadiusAxis
+              series={[
+                { name: 'Current Skills', color: 'blue.6' },
+                { name: 'Target Skills', color: 'teal.6' },
+              ]}
+            />
+          </Container>
     </AppTheme>
+    
   );
 }
