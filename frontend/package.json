@@ -12,6 +12,10 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@mantine/charts": "^7.17.4",
+    "@mantine/core": "^7.17.4",
+    "@mantine/hooks": "^7.17.4",
+    "@mantine/nprogress": "^7.17.3",
     "@mui/icons-material": "^6.4.8",
     "@mui/material": "^6.4.8",
     "@mui/styled-engine-sc": "^6.4.6",
@@ -20,9 +24,17 @@
     "@mui/x-date-pickers": "^7.28.0",
     "@mui/x-tree-view": "^7.28.1",
     "@react-spring/web": "^9.7.5",
+    "@tiptap/extension-link": "^2.11.7",
+    "@tiptap/pm": "^2.11.7",
+    "@tiptap/react": "^2.11.7",
+    "@tiptap/starter-kit": "^2.11.7",
     "dayjs": "^1.11.13",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "embla-carousel-react": "^7.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^7.5.0",
+    "react-router-dom": "^7.5.0",
+    "recharts": "^2.15.2",
     "styled-components": "^6.1.16"
   },
   "devDependencies": {
@@ -34,6 +46,9 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
+    "postcss": "^8.5.3",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
     "vite": "^6.2.3"
   }
 }
