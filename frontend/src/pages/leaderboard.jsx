@@ -1,30 +1,21 @@
 import * as React from 'react';
-
-// Material UI core
 import { alpha } from '@mui/material/styles';
-import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import Header from '../components/Header';
 
-// Local components
-import AppNavbar from '../layouts/components/AppNavbar';
-import Header from '../layouts/components/Header';
-import MainGrid from '../layouts/components/MainGrid';
-import SideMenu from '../layouts/components/SideMenu';
-import AppTheme from '../layouts/theme/AppTheme';
+import AppNavbar from '../components/AppNavbar'
 
-import { RadarChart } from '@mantine/charts';
-import { Container, Title } from '@mantine/core';
-import { data } from '../data';
-
-
-// Theme customizations
+import SideMenu from '../components/SideMenu';
+import AppTheme from '../theme/AppTheme';
 import {
   chartsCustomizations,
   dataGridCustomizations,
   datePickersCustomizations,
   treeViewCustomizations,
-} from '../layouts/theme/customizations';
+} from './theme/customizations';
+import LeaderBoardGrid from '../components/LeaderBoardGrid';
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -33,7 +24,7 @@ const xThemeComponents = {
   ...treeViewCustomizations,
 };
 
-export default function Dashboard(props) {
+export default function LeaderBoard(props) {
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
@@ -61,24 +52,10 @@ export default function Dashboard(props) {
             }}
           >
             <Header />
-            <MainGrid />
+            <LeaderBoardGrid />
           </Stack>
         </Box>
       </Box>
-          <Container size="lg" py="xl">
-            <Title order={1} mb="lg">Golf Performance Analytics</Title>
-            <RadarChart
-              h={400}
-              data={data}
-              dataKey="product"
-              withPolarRadiusAxis
-              series={[
-                { name: 'Current Skills', color: 'blue.6' },
-                { name: 'Target Skills', color: 'teal.6' },
-              ]}
-            />
-          </Container>
     </AppTheme>
-    
   );
 }
