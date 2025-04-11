@@ -353,7 +353,8 @@ class TeeHoleView(APIView):
 
 
 class ChatBotView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         prompt = request.data.get("message")

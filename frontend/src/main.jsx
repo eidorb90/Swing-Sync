@@ -8,6 +8,7 @@ import App from './App';
 import Account from "./pages/account";
 import SignIn from './pages/signin';
 import SignUp from './pages/signup';
+import ChatBot from './pages/chatBot';
 import '@mantine/core/styles.css';
 
 const theme = createTheme({
@@ -39,6 +40,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <SignUp />
         }>
         </Route>
+        <Route path="/chat" element={<ChatBot />} />
       </Routes>
     </BrowserRouter>  
     </StrictMode>

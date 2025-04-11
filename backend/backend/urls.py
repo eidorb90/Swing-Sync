@@ -41,5 +41,5 @@ urlpatterns = [
     path("api/rounds/<int:round_id>", RoundView.as_view(), name="round_detail"),
     path("api-auth", include("rest_framework.urls")),
     # custom ai chatbot section
-    path("api/chatbot/", ChatBotView.as_view(), name="chatbot"),
+    path("api/chat/", ChatBotView.as_view(), name="chatbot"),
 ]
