@@ -71,14 +71,16 @@ export default function Dashboard(props) {
               h={400}
               data={data}
               dataKey="product"
-              withPolarRadiusAxis
               series={[
                 { name: 'Current Skills', color: 'blue.6' },
                 { name: 'Target Skills', color: 'teal.6' },
               ]}
+              withPolarGrid
+              withPolarAngleAxis
+              withPolarRadiusAxis
             />
           </Container>
     </AppTheme>
     
   );
-}
+}x

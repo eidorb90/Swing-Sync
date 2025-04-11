@@ -9,6 +9,7 @@ from api.views import (
     UsersView,
     CourseTeeView,
     TeeHoleView,
+    ChatBotView,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -39,4 +40,6 @@ urlpatterns = [
     path("api/rounds/", RoundView.as_view(), name="round"),
     path("api/rounds/<int:round_id>", RoundView.as_view(), name="round_detail"),
     path("api-auth", include("rest_framework.urls")),
+    # custom ai chatbot section
+    path("api/chatbot/", ChatBotView.as_view(), name="chatbot"),
 ]

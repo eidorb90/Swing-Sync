@@ -15,6 +15,7 @@ import requests
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import transaction
+from .chat_bot import generate_text
 
 
 # Create your views here.
@@ -349,3 +350,22 @@ class TeeHoleView(APIView):
         holes = Hole.objects.filter(tee=tee)
         serializer = CourseSerializer(holes, many=True)
         return Response(serializer.data)
+
+
+class ChatBotView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        prompt = request.data.get("message")
+        if not prompt:
+            return Response(
+                {"error": "Prompt is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            response = generate_text(prompt)
+            return Response({"response": response}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
