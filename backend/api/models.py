@@ -78,6 +78,16 @@ class User(AbstractUser):
         status = "online" if self.is_online else "offline"
         return f"{self.username} ({status})"
 
+    def has_field_changed(self, field_name):
+        if not self.pk:
+            return True
+        old_value = User.objects.get(pk=self.pk).__dict__[field_name]
+        return old_value != self.__dict__[field_name]
+
+    def check_password(self, raw_password):
+        """Validate password against stored hash"""
+        return check_password(raw_password, self.password)
+
 
 class Course(models.Model):
     """
