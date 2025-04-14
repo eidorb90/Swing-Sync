@@ -149,6 +149,7 @@ const ChatBot = () => {
       const response = await axios.post('http://localhost:8000/api/chat/', {
         message: input
       });
+      console.log('Response:', response.data);
 
       // Add bot response
       const botMessage = {
@@ -170,6 +171,7 @@ const ChatBot = () => {
     } finally {
       setLoading(false);
     }
+    console.log('Messages:', messages);
   };
 
   const handleKeyPress = (e) => {
@@ -184,7 +186,7 @@ const ChatBot = () => {
       <div style={styles.chatContainer}>
         {/* Header */}
         <div style={styles.header}>
-          <h2 style={styles.title}>GolfSync Assistant</h2>
+          <h2 style={styles.title}>Woody.Ai</h2>
           <p style={styles.subtitle}>Ask me anything about your golf swing!</p>
         </div>
 
@@ -193,7 +195,7 @@ const ChatBot = () => {
           <div style={styles.messageList}>
             {messages.length === 0 ? (
               <div style={styles.emptyState}>
-                Start a conversation with the GolfSync Assistant!
+                Start a conversation with the Woody.Ai!
               </div>
             ) : (
               messages.map((message, index) => (

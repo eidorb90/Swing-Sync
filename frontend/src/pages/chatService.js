@@ -17,6 +17,7 @@ const chatService = {
   sendMessage: async (message) => {
     try {
       const response = await api.post('/chat/', { message });
+      console.log('Response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error sending message:', error);

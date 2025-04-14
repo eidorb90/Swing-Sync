@@ -40,7 +40,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <SignUp />
         }>
         </Route>
-        <Route path="/chat" element={<ChatBot />} />
+        <Route path="/Woody/chat" element={<ChatBot />} />
       </Routes>
     </BrowserRouter>  
     </StrictMode>

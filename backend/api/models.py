@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User as DjangoUser  # Add this import at the top
+from django.contrib.auth.models import User as DjangoUser
+from django.contrib.auth.hashers import make_password, check_password
 
 
 # Create your models here.
@@ -8,7 +9,7 @@ class User(models.Model):
     last_name = models.CharField(max_length=30)
     username = models.CharField(max_length=50)
     email = models.EmailField()
-    password = models.CharField(max_length=20)
+    password = models.CharField(max_length=128)
     phone_number = models.CharField(max_length=15)
     course_name = models.CharField(max_length=50)
 
@@ -16,7 +17,20 @@ class User(models.Model):
         return self.username
 
     def save(self, *args, **kwargs):
+        # Only hash if password changed or new user
+        if self._state.adding or self.has_field_changed("password"):
+            self.password = make_password(self.password)
         super().save(*args, **kwargs)
+
+    def has_field_changed(self, field_name):
+        if not self.pk:
+            return True
+        old_value = User.objects.get(pk=self.pk).__dict__[field_name]
+        return old_value != self.__dict__[field_name]
+
+    def check_password(self, raw_password):
+        """Validate password against stored hash"""
+        return check_password(raw_password, self.password)
 
 
 class Course(models.Model):
