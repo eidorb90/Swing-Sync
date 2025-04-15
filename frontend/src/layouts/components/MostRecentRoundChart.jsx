@@ -34,7 +34,7 @@ export default function SessionsChart() {
   const colorPalette = [
     theme.palette.primary.light,
     theme.palette.primary.main,
-    theme.palette.primary.dark,
+    theme.palette.error.main,
   ];
 
   const [chartData, setChartData] = useState({

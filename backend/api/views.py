@@ -353,18 +353,18 @@ class TeeHoleView(APIView):
 
 
 class ChatBotView(APIView):
-    # permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny]
 
     def post(self, request):
         prompt = request.data.get("message")
+        # last_5_rounds = Round.objects.filter(id=1).order_by("-date_played")[:5]
         if not prompt:
             return Response(
                 {"error": "Prompt is required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
-            response = generate_text(prompt)
+            response = generate_text(f"{prompt}")
             return Response({"response": response}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
@@ -434,6 +434,7 @@ class UserStats(APIView):
                     "date": round_obj.date_played,
                     "course": round_obj.course.course_name,
                     "scores": round_scores,
+                    "note": round_obj.notes,
                 }
             )
         # Return a single object, not a list of one object

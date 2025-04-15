@@ -79,7 +79,8 @@ export default function PageViewsBarChart() {
               // Update round info
               setRoundInfo({
                 date: mostRecentRound.date || 'Recent Round',
-                totalScore: totalScore
+                totalScore: totalScore,
+                note: mostRecentRound.note || 'No notes available'
               });
             }
           }
@@ -121,10 +122,10 @@ export default function PageViewsBarChart() {
             <Typography variant="h4" component="p">
               {roundInfo.totalScore}
             </Typography>
-            <Chip size="small" color="error" label="-8%" />
+            <Chip size="small" color="main" label={roundInfo.date} />
           </Stack>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Break Down of Last 9 holes
+            {roundInfo.note }
           </Typography>
         </Stack>
         <BarChart

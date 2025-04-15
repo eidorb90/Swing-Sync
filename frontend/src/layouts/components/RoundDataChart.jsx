@@ -35,7 +35,7 @@ export default function SessionsChart() {
   const colorPalette = [
     theme.palette.primary.light,
     theme.palette.primary.main,
-    theme.palette.primary.dark,
+    theme.palette.error.main,
   ];
 
   const [chartData, setChartData] = useState({
@@ -56,7 +56,6 @@ export default function SessionsChart() {
         
         if (response.ok) {
           const fetchedData = await response.json();
-          console.log('Fetched stats:', fetchedData);
           
           // Extract scores from the fetched data
           const scores_list = fetchedData.scores_list || [];
