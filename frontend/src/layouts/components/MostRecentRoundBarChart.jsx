@@ -1,47 +1,34 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { useTheme } from '@mui/material/styles';
+
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import { LineChart } from '@mui/x-charts/LineChart';
+import { BarChart } from '@mui/x-charts/BarChart';
+import { useTheme } from '@mui/material/styles';
 
-function AreaGradient({ color, id }) {
-  return (
-    <defs>
-      <linearGradient id={id} x1="50%" y1="0%" x2="50%" y2="100%">
-        <stop offset="0%" stopColor={color} stopOpacity={0.5} />
-        <stop offset="100%" stopColor={color} stopOpacity={0} />
-      </linearGradient>
-    </defs>
-  );
-}
-
-AreaGradient.propTypes = {
-  color: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
-};
-
-export default function SessionsChart() {
+export default function PageViewsBarChart() {
   const theme = useTheme();
-  
-  const defaultHoles = Array.from({ length: 18 }, (_, i) => `Hole ${i + 1}`);
-  const defaultData = Array(18).fill(4); // Par 4 as default
+
+  const defaultHoles = Array.from({ length: 9 }, (_, i) => `Hole ${i + 1}`);
+  const defaultData = Array(9).fill(4); // Par 4 as default
   
   const colorPalette = [
-    theme.palette.primary.light,
-    theme.palette.primary.main,
-    theme.palette.primary.dark,
+    (theme.vars || theme).palette.error.main,
+    (theme.vars || theme).palette.primary.main,
+    (theme.vars || theme).palette.primary.light,
   ];
 
   const [chartData, setChartData] = useState({
     strokes: defaultData,
     putts: defaultData.map(() => 2), 
-    par: defaultData // Par values
+    par: defaultData, // Par values
+    pen: defaultData.map(() => 0) // Adding penalties with default 0
   });
+
+  // Add holeLabels state
   const [holeLabels, setHoleLabels] = useState(defaultHoles);
   const [isLoading, setIsLoading] = useState(true);
   const [roundInfo, setRoundInfo] = useState({ date: 'Today', totalScore: 72 });
@@ -65,12 +52,15 @@ export default function SessionsChart() {
             const scores = mostRecentRound.scores || [];
             
             if (scores.length > 0) {
+              // Limit to front 9 holes
+              const frontNineScores = scores.slice(0, 9);
+              
               // Extract data for each hole
-              const strokeData = scores.map(score => score.strokes || 4);
-              const puttData = scores.map(score => score.putts || 2);
-              const parData = scores.map(score => score.par || 4);
-              const penData = scores.map(score => score.pen || 0);
-              const holes = scores.map(score => `Hole ${score.hole}`);
+              const strokeData = frontNineScores.map(score => score.strokes || 4);
+              const puttData = frontNineScores.map(score => score.putts || 2);
+              const parData = frontNineScores.map(score => score.par || 4);
+              const penData = frontNineScores.map(score => score.penalties || 0);
+              const holes = frontNineScores.map(score => `Hole ${score.hole}`);
               
               // Calculate total score
               const totalScore = strokeData.reduce((sum, val) => sum + val, 0);
@@ -79,7 +69,7 @@ export default function SessionsChart() {
               setChartData({
                 strokes: strokeData,
                 putts: puttData,
-                par: parData,
+                par: parData, 
                 pen: penData
               });
               
@@ -104,11 +94,20 @@ export default function SessionsChart() {
     fetchStats();
   }, []);
 
+  // Calculate other strokes for the stacked bar chart
+  const calculateOtherStrokes = () => {
+    return chartData.strokes.map((stroke, i) => {
+      const putt = chartData.putts[i] || 0;
+      const pen = chartData.pen[i] || 0;
+      return Math.max(0, stroke - putt - pen);
+    });
+  };
+
   return (
     <Card variant="outlined" sx={{ width: '100%' }}>
       <CardContent>
         <Typography component="h2" variant="subtitle2" gutterBottom>
-          Golf Round Performance
+          Last 9 holes
         </Typography>
         <Stack sx={{ justifyContent: 'space-between' }}>
           <Stack
@@ -120,55 +119,50 @@ export default function SessionsChart() {
             }}
           >
             <Typography variant="h4" component="p">
-              {isLoading ? '...' : roundInfo.totalScore}
+              {roundInfo.totalScore}
             </Typography>
-            <Chip size="small" color="success" label={roundInfo.date} />
+            <Chip size="small" color="error" label="-8%" />
           </Stack>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Score breakdown by hole
+            Break Down of Last 9 holes
           </Typography>
         </Stack>
-        <LineChart
+        <BarChart
+          borderRadius={8}
           colors={colorPalette}
           xAxis={[
             {
-              scaleType: 'point',
-              data: holeLabels,
-              tickInterval: (index, i) => (i + 1) % 3 === 0, // Show every 3rd hole number
+              scaleType: 'band',
+              categoryGapRatio: 0.5,
+              data: ['Hole 1', 'Hole 2', 'Hole 3', 'Hole 4', 'Hole 5', 'Hole 6', 'Hole 7', 'Hole 8', 'Hole 9'],
             },
           ]}
           series={[
             {
-              id: 'strokes',
-              label: 'Strokes',
-              showMark: true,
-              curve: 'linear',
-              area: false,
-              data: chartData.strokes,
+              id: 'penalties',
+              label: 'Penalties',
+              data: chartData.pen,
+              stack: 'A',
             },
             {
               id: 'putts',
               label: 'Putts',
-              showMark: true,
-              curve: 'linear',
-              area: false,
               data: chartData.putts,
+              stack: 'A',
             },
             {
-              id: 'par',
-              label: 'Par',
-              showMark: false,
-              curve: 'linear',
-              area: false,
-              data: chartData.par,
+              id: 'other-strokes',
+              label: 'Other Strokes',
+              data: calculateOtherStrokes(),
+              stack: 'A',
             },
           ]}
           height={250}
-          margin={{ left: 50, right: 20, top: 20, bottom: 20 }}
+          margin={{ left: 50, right: 0, top: 20, bottom: 20 }}
           grid={{ horizontal: true }}
           slotProps={{
             legend: {
-              hidden: false, // Show legend to identify the different lines
+              hidden: true,
             },
           }}
         />

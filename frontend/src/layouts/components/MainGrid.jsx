@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import ChartUserByCountry from './ChartUserByCountry';
 import CustomizedTreeView from './CustomizedTreeView';
 import CustomizedDataGrid from './CustomizedDataGrid';
-import PageViewsBarChart from './PageViewsBarChart';
+import PageViewsBarChart from './MostRecentRoundBarChart';
 import MostRecentRoundChart from './MostRecentRoundChart';
 import SessionsChart from "./RoundDataChart";
 
@@ -57,7 +57,6 @@ export default function MainGrid() {
         
         if (response.ok) {
           const fetchedData = await response.json();
-          console.log('Fetched stats:', fetchedData);
           
 // Transform the data into the format expected by RadarChart
         const formattedData = [
@@ -65,25 +64,25 @@ export default function MainGrid() {
             product: 'Putting',
             // For putting, lower is better, so invert on a 0-100 scale
             'Current Skills': Math.max(0, 100 - (fetchedData.avg_putts_per_round || 0) * 5),
-            'Target Skills': 75, // Target of ~1.5 putts per hole
+            'Target Skills': 100, // Target of ~1.5 putts per hole
           },
           {
             product: 'Scoring',
             // For scoring, lower is better, so invert on a 0-100 scale
             'Current Skills': Math.max(0, 100 - ((fetchedData.avg_score_per_round || 72) - 65)),
-            'Target Skills': 80, // Target of ~72 per round
+            'Target Skills': 120, // Target of ~72 per round
           },
           {
             product: 'Fairways',
             // For fairways, higher percentage is better, already on 0-100 scale
             'Current Skills': fetchedData.fairway_hit_percentage || 0,
-            'Target Skills': 75, // Professional level target
+            'Target Skills': 80, // Professional level target
           },
           {
             product: 'Greens',
             // For GIR, higher percentage is better, already on 0-100 scale
             'Current Skills': fetchedData.gir_percentage || 0,
-            'Target Skills': 70, // Professional level target
+            'Target Skills': 80, // Professional level target
           },
           {
             product: 'Penalties',
@@ -133,16 +132,15 @@ export default function MainGrid() {
         <Grid size={{ xs: 12, md: 6 }}>
           <Title order={1} mb="lg">Golf Performance Analytics</Title>
             <RadarChart
-              h={400}
+              h={300}
               data={statsData}
               dataKey="product"
               series={[
                 { name: 'Current Skills', color: 'blue.6' },
                 { name: 'Target Skills', color: 'teal.6' },
               ]}
-              withPolarGrid
-              withPolarAngleAxis
               withPolarRadiusAxis
+              withLegend
             />
         </Grid>
       </Grid>
