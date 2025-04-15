@@ -188,6 +188,7 @@ const ChatBot = () => {
         <div style={styles.header}>
           <h2 style={styles.title}>Woody.Ai</h2>
           <p style={styles.subtitle}>Ask me anything about your golf swing!</p>
+          <a href="/Account">Back to Account</a>
         </div>
 
         {/* Messages */}

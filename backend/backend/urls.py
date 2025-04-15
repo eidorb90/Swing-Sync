@@ -10,6 +10,7 @@ from api.views import (
     CourseTeeView,
     TeeHoleView,
     ChatBotView,
+    UserStats,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -24,6 +25,7 @@ urlpatterns = [
     path("api/user/login/", LoginUserView.as_view(), name="login"),
     path("api/user/", UsersView.as_view(), name="users"),
     path("api/user/<int:user_id>", UsersView.as_view(), name="user_detail"),
+    path("api/player/<int:user_id>/stats", UserStats.as_view(), name="player_stats"),
     # Token section
     path("api/token/", TokenObtainPairView.as_view(), name="get_token"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="refresh"),

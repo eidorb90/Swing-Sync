@@ -12,10 +12,10 @@ import Header from '../layouts/components/Header';
 import MainGrid from '../layouts/components/MainGrid';
 import SideMenu from '../layouts/components/SideMenu';
 import AppTheme from '../layouts/theme/AppTheme';
+import WoodyAiBanner from '../components/Woody-AiBanner';
 
-import { RadarChart } from '@mantine/charts';
 import { Container, Title } from '@mantine/core';
-import { data } from '../data';
+
 
 
 // Theme customizations
@@ -34,8 +34,11 @@ const xThemeComponents = {
 };
 
 export default function Dashboard(props) {
+
+
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
+      <WoodyAiBanner text="Welcome To Swing Sync Try out The New Woody.Ai" />
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu />
@@ -66,19 +69,7 @@ export default function Dashboard(props) {
         </Box>
       </Box>
           <Container size="lg" py="xl">
-            <Title order={1} mb="lg">Golf Performance Analytics</Title>
-            <RadarChart
-              h={400}
-              data={data}
-              dataKey="product"
-              series={[
-                { name: 'Current Skills', color: 'blue.6' },
-                { name: 'Target Skills', color: 'teal.6' },
-              ]}
-              withPolarGrid
-              withPolarAngleAxis
-              withPolarRadiusAxis
-            />
+
           </Container>
     </AppTheme>
     

@@ -370,3 +370,80 @@ class ChatBotView(APIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class UserStats(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, user_id):
+        user = User.objects.get(id=user_id)
+        rounds = Round.objects.filter(player=user).order_by("-date_played")[:10]
+        round_count = len(rounds)
+
+        if round_count == 0:
+            return Response(
+                {
+                    "avg_putts_per_round": 0,
+                    "avg_penalities_per_round": 0,
+                    "avg_score_per_round": 0,
+                    "fairway_hit_percentage": 0,
+                    "gir_percentage": 0,
+                    "scores_list": [],
+                }
+            )
+
+        # init counters
+        p = 0
+        pen = 0
+        s = 0
+        fir = 0
+        gir = 0
+
+        for round in rounds:
+            p += round.putt_total
+            pen += round.penalties_total
+            s += round.total_score
+            fir += round.fairways_hit_percent
+            gir += round.green_in_regulation
+
+        avg_p_pr = p / round_count
+        avg_pen_pr = pen / round_count
+        avg_s_pr = s / round_count
+
+        fhp = fir / round_count
+        girp = gir / round_count
+
+        scores_list = []
+        for round_obj in rounds:
+            round_scores = [
+                {
+                    "hole": score.hole.hole_number,
+                    "par": score.hole.par,
+                    "strokes": score.strokes,
+                    "putts": score.putts,
+                    "fairway_hit": score.fairway_hit,
+                    "green_in_regulation": score.green_in_regulation,
+                    "penalties": score.penalties,
+                    "date": round_obj.date_played,
+                }
+                for score in round_obj.hole_scores.all()
+            ]
+            scores_list.append(
+                {
+                    "round_id": round_obj.id,
+                    "date": round_obj.date_played,
+                    "course": round_obj.course.course_name,
+                    "scores": round_scores,
+                }
+            )
+        # Return a single object, not a list of one object
+        return Response(
+            {
+                "avg_putts_per_round": avg_p_pr,
+                "avg_penalities_per_round": avg_pen_pr,
+                "avg_score_per_round": avg_s_pr,  # Changed to match frontend
+                "fairway_hit_percentage": fhp,
+                "gir_percentage": girp,
+                "scores_list": scores_list,
+            }
+        )
