@@ -89,7 +89,8 @@ export default function SessionsChart() {
               // Update round info
               setRoundInfo({
                 date: mostRecentRound.date || 'Recent Round',
-                totalScore: totalScore
+                totalScore: totalScore,
+                courseName: mostRecentRound.course || 'Unknown Course'
               });
             }
           }
@@ -125,7 +126,7 @@ export default function SessionsChart() {
             <Chip size="small" color="success" label={roundInfo.date} />
           </Stack>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Score breakdown by hole
+            {roundInfo.courseName}
           </Typography>
         </Stack>
         <LineChart

@@ -448,3 +448,47 @@ class UserStats(APIView):
                 "scores_list": scores_list,
             }
         )
+
+
+class LeaderBoardView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        players = User.objects.all()[:50]
+        leader_board = []
+
+        for player in players:
+            player_rounds = Round.objects.filter(player=player).order_by(
+                "-date_played"
+            )[:20]
+
+            # Skip players with no rounds to avoid division by zero
+            round_count = len(player_rounds)
+            if round_count == 0:
+                continue
+
+            total = 0
+            for player_round in player_rounds:
+                total += player_round.total_score
+
+            # Calculate handicap (simplified method)
+            # This is just an example - you may want to use a more accurate formula
+            handicap = 0
+            if round_count >= 5:
+                handicap = round((total / round_count - 72) * 0.96, 1)
+                handicap = max(0, handicap)
+
+            leader_board.append(
+                {
+                    "username": player.username,
+                    "average_score": round(total / round_count, 1),
+                    "handicap": handicap,
+                    "total_rounds": round_count,
+                }
+            )
+
+        # Sort the leaderboard by average score (lower is better)
+        leader_board.sort(key=lambda x: x["average_score"])
+
+        # Return the sorted leaderboard
+        return Response(leader_board)

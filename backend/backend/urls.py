@@ -11,6 +11,7 @@ from api.views import (
     TeeHoleView,
     ChatBotView,
     UserStats,
+    LeaderBoardView,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -26,6 +27,7 @@ urlpatterns = [
     path("api/user/", UsersView.as_view(), name="users"),
     path("api/user/<int:user_id>", UsersView.as_view(), name="user_detail"),
     path("api/player/<int:user_id>/stats", UserStats.as_view(), name="player_stats"),
+    path("api/leaderboard/", LeaderBoardView.as_view(), name="leaderboard"),
     # Token section
     path("api/token/", TokenObtainPairView.as_view(), name="get_token"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="refresh"),
