@@ -15,6 +15,7 @@ import requests
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import transaction
+from .chat_bot import generate_text
 
 
 # Create your views here.
@@ -349,3 +350,145 @@ class TeeHoleView(APIView):
         holes = Hole.objects.filter(tee=tee)
         serializer = CourseSerializer(holes, many=True)
         return Response(serializer.data)
+
+
+class ChatBotView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        prompt = request.data.get("message")
+        # last_5_rounds = Round.objects.filter(id=1).order_by("-date_played")[:5]
+        if not prompt:
+            return Response(
+                {"error": "Prompt is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            response = generate_text(f"{prompt}")
+            return Response({"response": response}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class UserStats(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, user_id):
+        user = User.objects.get(id=user_id)
+        rounds = Round.objects.filter(player=user).order_by("-date_played")[:10]
+        round_count = len(rounds)
+
+        if round_count == 0:
+            return Response(
+                {
+                    "avg_putts_per_round": 0,
+                    "avg_penalities_per_round": 0,
+                    "avg_score_per_round": 0,
+                    "fairway_hit_percentage": 0,
+                    "gir_percentage": 0,
+                    "scores_list": [],
+                }
+            )
+
+        # init counters
+        p = 0
+        pen = 0
+        s = 0
+        fir = 0
+        gir = 0
+
+        for round in rounds:
+            p += round.putt_total
+            pen += round.penalties_total
+            s += round.total_score
+            fir += round.fairways_hit_percent
+            gir += round.green_in_regulation
+
+        avg_p_pr = p / round_count
+        avg_pen_pr = pen / round_count
+        avg_s_pr = s / round_count
+
+        fhp = fir / round_count
+        girp = gir / round_count
+
+        scores_list = []
+        for round_obj in rounds:
+            round_scores = [
+                {
+                    "hole": score.hole.hole_number,
+                    "par": score.hole.par,
+                    "strokes": score.strokes,
+                    "putts": score.putts,
+                    "fairway_hit": score.fairway_hit,
+                    "green_in_regulation": score.green_in_regulation,
+                    "penalties": score.penalties,
+                    "date": round_obj.date_played,
+                }
+                for score in round_obj.hole_scores.all()
+            ]
+            scores_list.append(
+                {
+                    "round_id": round_obj.id,
+                    "date": round_obj.date_played,
+                    "course": round_obj.course.course_name,
+                    "scores": round_scores,
+                    "note": round_obj.notes,
+                }
+            )
+        # Return a single object, not a list of one object
+        return Response(
+            {
+                "avg_putts_per_round": avg_p_pr,
+                "avg_penalities_per_round": avg_pen_pr,
+                "avg_score_per_round": avg_s_pr,  # Changed to match frontend
+                "fairway_hit_percentage": fhp,
+                "gir_percentage": girp,
+                "scores_list": scores_list,
+            }
+        )
+
+
+class LeaderBoardView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        players = User.objects.all()[:50]
+        leader_board = []
+
+        for player in players:
+            player_rounds = Round.objects.filter(player=player).order_by(
+                "-date_played"
+            )[:20]
+
+            # Skip players with no rounds to avoid division by zero
+            round_count = len(player_rounds)
+            if round_count == 0:
+                continue
+
+            total = 0
+            for player_round in player_rounds:
+                total += player_round.total_score
+
+            # Calculate handicap (simplified method)
+            # This is just an example - you may want to use a more accurate formula
+            handicap = 0
+            if round_count >= 5:
+                handicap = round((total / round_count - 72) * 0.96, 1)
+                handicap = max(0, handicap)
+
+            leader_board.append(
+                {
+                    "username": player.username,
+                    "average_score": round(total / round_count, 1),
+                    "handicap": handicap,
+                    "total_rounds": round_count,
+                }
+            )
+
+        # Sort the leaderboard by average score (lower is better)
+        leader_board.sort(key=lambda x: x["average_score"])
+
+        # Return the sorted leaderboard
+        return Response(leader_board)

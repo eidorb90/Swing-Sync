@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -12,8 +12,8 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
-import AppTheme from './theme/AppTheme';
-import ColorModeSelect from './theme/ColorModeSelect';
+import AppTheme from '../layouts/theme/AppTheme';
+import ColorModeSelect from '../layouts/theme/ColorModeSelect';
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
@@ -58,99 +58,50 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignUp(props) {
-    const [usernameError, setUsernameError] = React.useState(false);
-    const [usernameErrorMessage, setUsernameMessage] = React.useState('');
-    const [emailError, setEmailError] = React.useState(false);
-    const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-    const [passwordError, setPasswordError] = React.useState(false);
-    const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-    const [firstNameError, setFirstNameError] = React.useState(false);
-    const [firstNameErrorMessage, setFirstNameErrorMessage] = React.useState('');
-    const [lastNameError, setLastNameError] = React.useState(false);
-    const [lastNameErrorMessage, setLastNameErrorMessage] = React.useState('');
-    const [confirmpasswordError, setConfirmPasswordError] = React.useState(false);
-    const [confirmpasswordErrorMessage, setConfirmPasswordErrorMessage] = React.useState('');
+    const [errors, setErrors] = useState({});
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         document.body.style.justifyContent = 'center';
     }, []);
 
-    const validateInputs = () => {
-        const username = document.getElementById('username');
-        const email = document.getElementById('email');
-        const password = document.getElementById('password');
-        const confirmpassword = document.getElementById('confirmpassword');
-        const firstname = document.getElementById('firstname');
-        const lastName = document.getElementById('lastName');
-
-        let isValid = true;
-        if (!username.value || !/\S+@\S+\.\S+/.test(username.value)) {
-            setUsernameError(true);
-            setUsernameMessage('Username is already taken.');
-            isValid = false;
-        }
-        if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-            setEmailError(true);
-            setEmailErrorMessage('Please enter a valid email address.');
-            isValid = false;
-        } else {
-            setEmailError(false);
-            setEmailErrorMessage('');
-        }
-
-        if (!password.value || password.value.length < 6) {
-            setPasswordError(true);
-            setPasswordErrorMessage('Password must be at least 6 characters long.');
-            isValid = false;
-        } else {
-            setPasswordError(false);
-            setPasswordErrorMessage('');
-        }
-
-        if (!confirmpassword.value || confirmpassword.value !== password.value) {
-            setConfirmPasswordError(true);
-            setConfirmPasswordErrorMessage('Passwords do not match.');
-            isValid = false;
-        } else {
-            setConfirmPasswordError(false);
-            setConfirmPasswordErrorMessage('');
-        }
-
-        if (!firstname.value || firstname.value.length < 1) {
-            setFirstNameError(true);
-            setFirstNameErrorMessage('Name is required.');
-            isValid = false;
-        } else {
-            setFirstNameError(false);
-            setFirstNameErrorMessage('');
-        }
-
-        if (!lastName.value || lastName.value.length < 1) {
-            setLastNameError(true);
-            setLastNameErrorMessage('Last name is required.');
-            isValid = false;
-        } else {
-            setLastNameError(false);
-            setLastNameErrorMessage('');
-        }
-
-
-        return isValid;
-    };
-
-    const handleSubmit = (event) => {
-        if (firstNameError || lastNameError || emailError || confirmpasswordError || passwordError || usernameError) {
-            event.preventDefault();
-            return;
-        }
+    const handleSubmit = async (event) => {
+        event.preventDefault(); // Prevent default form submission behavior
         const data = new FormData(event.currentTarget);
-        console.log({
-            user: data.get('username'),
+
+        const formData = {
+            username: data.get('username'),
             firstname: data.get('firstname'),
             lastName: data.get('lastName'),
             email: data.get('email'),
             password: data.get('password'),
-        });
+            confirmPassword: data.get('confirmpassword'),
+        };
+
+        if (formData.password !== formData.confirmPassword) {
+            setErrors({ confirmpassword: "Passwords do not match." });
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:8000/api/signup/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                setMessage('Sign-up successful!');
+            } else {
+                setErrors(result.errors || { general: 'Sign-up failed.' });
+            }
+        } catch {
+            setErrors({ general: 'An error occurred.' });
+        }
     };
 
     return (
@@ -159,7 +110,6 @@ export default function SignUp(props) {
             <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
             <SignUpContainer direction="column" justifyContent="space-between">
                 <Card variant="outlined">
-
                     <Typography
                         component="h1"
                         variant="h4"
@@ -181,9 +131,8 @@ export default function SignUp(props) {
                                 fullWidth
                                 id="firstname"
                                 placeholder="Ian"
-                                error={firstNameError}
-                                helperText={firstNameErrorMessage}
-                                color={firstNameError ? 'error' : 'primary'}
+                                error={Boolean(errors.firstname)}
+                                helperText={errors.firstname}
                             />
                         </FormControl>
                         <FormControl>
@@ -195,9 +144,8 @@ export default function SignUp(props) {
                                 fullWidth
                                 id="lastName"
                                 placeholder="Kollipara"
-                                error={lastNameError}
-                                helperText={lastNameErrorMessage}
-                                color={lastNameError ? 'error' : 'primary'}
+                                error={Boolean(errors.lastName)}
+                                helperText={errors.lastName}
                             />
                         </FormControl>
                         <FormControl>
@@ -205,14 +153,12 @@ export default function SignUp(props) {
                             <TextField
                                 required
                                 fullWidth
-                                id='username'
-                                name='username'
-                                placeholder='Username'
-                                autoComplete='username'
-                                variant='outlined'
-                                error={usernameError}
-                                helperText={usernameErrorMessage}
-                                color={usernameError ? 'error' : 'primary'}
+                                id="username"
+                                name="username"
+                                placeholder="Username"
+                                autoComplete="username"
+                                error={Boolean(errors.username)}
+                                helperText={errors.username}
                             />
                         </FormControl>
                         <FormControl>
@@ -224,10 +170,8 @@ export default function SignUp(props) {
                                 placeholder="ian.kollipara@cune.edu"
                                 name="email"
                                 autoComplete="email"
-                                variant="outlined"
-                                error={emailError}
-                                helperText={emailErrorMessage}
-                                color={passwordError ? 'error' : 'primary'}
+                                error={Boolean(errors.email)}
+                                helperText={errors.email}
                             />
                         </FormControl>
                         <FormControl>
@@ -240,10 +184,8 @@ export default function SignUp(props) {
                                 type="password"
                                 id="password"
                                 autoComplete="new-password"
-                                variant="outlined"
-                                error={passwordError}
-                                helperText={passwordErrorMessage}
-                                color={passwordError ? 'error' : 'primary'}
+                                error={Boolean(errors.password)}
+                                helperText={errors.password}
                             />
                         </FormControl>
                         <FormControl>
@@ -251,24 +193,31 @@ export default function SignUp(props) {
                             <TextField
                                 required
                                 fullWidth
-                                name="confrimpassword"
+                                name="confirmpassword"
                                 placeholder="••••••"
-                                id="confrimpassword"
-                                variant="outlined"
-                                error={confirmpasswordError}
-                                helperText={confirmpasswordErrorMessage}
-                                color={confirmpasswordError ? 'error' : 'primary'}
+                                id="confirmpassword"
+                                error={Boolean(errors.confirmpassword)}
+                                helperText={errors.confirmpassword}
                             />
                         </FormControl>
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
-                            onClick={validateInputs}
                         >
                             Sign up
                         </Button>
                     </Box>
+                    {message && (
+                        <Typography sx={{ mt: 2, color: 'green', textAlign: 'center' }}>
+                            {message}
+                        </Typography>
+                    )}
+                    {errors.general && (
+                        <Typography sx={{ mt: 2, color: 'red', textAlign: 'center' }}>
+                            {errors.general}
+                        </Typography>
+                    )}
                     <Divider>
                         <Typography sx={{ color: 'text.secondary' }}>or</Typography>
                     </Divider>
@@ -276,7 +225,7 @@ export default function SignUp(props) {
                         <Typography sx={{ textAlign: 'center' }}>
                             Already have an account?{' '}
                             <Link
-                                href="/signin"
+                                href="/signin/"
                                 variant="body2"
                                 sx={{ alignSelf: 'center' }}
                             >

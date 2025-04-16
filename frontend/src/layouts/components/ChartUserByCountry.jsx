@@ -13,38 +13,43 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 
 
 const data = [
-  { label: 'India', value: 50000 },
-  { label: 'USA', value: 35000 },
-  { label: 'Brazil', value: 10000 },
-  { label: 'Other', value: 5000 },
+  { label: 'Putts', value: 20 },
+  { label: 'Penalities', value: 4 },
+  { label: 'Drives', value: 7 },
+  { label: 'Chips', value: 7 },
+  { label: 'Approach', value: 9 },
 ];
+const total = data.reduce((sum, item) => sum + item.value, 0);
 
 const countries = [
   {
-    name: 'India',
-    value: 50,
-    
-    color: 'hsl(220, 25%, 65%)',
+    name: 'Putts',
+    value: Math.round((data.find(item => item.label === 'Putts').value / total) * 100),
+    color: 'hsl(220, 78.20%, 65.90%)',
+  },
+  // Similarly for other categories
+  {
+    name: 'Penalties',
+    value: Math.round((data.find(item => item.label === 'Penalities').value / total) * 100),
+    color: 'hsl(0, 100.00%, 48.40%)',
   },
   {
-    name: 'USA',
-    value: 35,
-    
-    color: 'hsl(220, 25%, 45%)',
+    name: 'Drives',
+    value: Math.round((data.find(item => item.label === 'Drives').value / total) * 100),
+    color: 'hsl(268, 90.50%, 49.40%)',
   },
   {
-    name: 'Brazil',
-    value: 10,
-    
-    color: 'hsl(220, 25%, 30%)',
+    name: 'Chips',
+    value: Math.round((data.find(item => item.label === 'Chips').value / total) * 100),
+    color: 'hsl(123, 84.30%, 50.20%)',
   },
   {
-    name: 'Other',
-    value: 5,
-    
-    color: 'hsl(220, 25%, 20%)',
+    name: 'Approach',
+    value: Math.round((data.find(item => item.label === 'Approach').value / total) * 100),
+    color: 'hsl(69, 88.00%, 49.20%)',
   },
 ];
+
 
 const StyledText = styled('text', {
   shouldForwardProp: (prop) => prop !== 'variant',
@@ -107,22 +112,23 @@ PieCenterLabel.propTypes = {
 };
 
 const colors = [
-  'hsl(220, 20%, 65%)',
-  'hsl(220, 20%, 42%)',
-  'hsl(220, 20%, 35%)',
-  'hsl(220, 20%, 25%)',
+  'hsl(220, 78.20%, 65.90%)', // Putts - blue
+  'hsl(0, 100.00%, 48.40%)',  // Penalties - red
+  'hsl(268, 90.50%, 49.40%)', // Drives - purple
+  'hsl(123, 84.30%, 50.20%)', // Chips - green
+  'hsl(69, 88.00%, 49.20%)', // Approach - dark blue/gray
 ];
 
-export default function ChartUserByCountry() {
-  return (
+export default function ChartUserByCountry() {  return (
     <Card
       variant="outlined"
       sx={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1 }}
     >
       <CardContent>
         <Typography component="h2" variant="subtitle2">
-          Users by country
+          Last Round Breakdown
         </Typography>
+  
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <PieChart
             colors={colors}
@@ -147,7 +153,7 @@ export default function ChartUserByCountry() {
               legend: { hidden: true },
             }}
           >
-            <PieCenterLabel primaryText="98.5K" secondaryText="Total" />
+            <PieCenterLabel primaryText={`${total}`} secondaryText="Total" />
           </PieChart>
         </Box>
         {countries.map((country, index) => (

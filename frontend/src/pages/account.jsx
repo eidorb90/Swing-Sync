@@ -1,19 +1,32 @@
 import * as React from 'react';
+
+// Material UI core
 import { alpha } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
 import Stack from '@mui/material/Stack';
-import AppNavbar from './components/AppNavbar';
-import Header from './components/Header';
-import MainGrid from './components/MainGrid';
-import SideMenu from './components/SideMenu';
-import AppTheme from './theme/AppTheme';
+
+
+// Local components
+import AppNavbar from '../layouts/components/AppNavbar';
+import Header from '../layouts/components/Header';
+import MainGrid from '../layouts/components/MainGrid';
+import SideMenu from '../layouts/components/SideMenu';
+import AppTheme from '../layouts/theme/AppTheme';
+import WoodyAiBanner from '../components/Woody-AiBanner';
+
+
+import { Container, Title } from '@mantine/core';
+
+
+
+// Theme customizations
 import {
   chartsCustomizations,
   dataGridCustomizations,
   datePickersCustomizations,
   treeViewCustomizations,
-} from './theme/customizations';
+} from '../layouts/theme/customizations';
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -22,11 +35,14 @@ const xThemeComponents = {
   ...treeViewCustomizations,
 };
 
-export default function MainPage(props) {
+export default function Dashboard(props) {
+
+
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
-      <CssBaseline enableColorScheme/>
-      <Box sx={{ display: 'flex'}}>
+      <WoodyAiBanner text="Welcome To Swing Sync Try out The New Woody.Ai" />
+      <CssBaseline enableColorScheme />
+      <Box sx={{ display: 'flex' }}>
         <SideMenu />
         <AppNavbar />
         
@@ -54,6 +70,10 @@ export default function MainPage(props) {
           </Stack>
         </Box>
       </Box>
+          <Container size="lg" py="xl">
+
+          </Container>
     </AppTheme>
+    
   );
 }
