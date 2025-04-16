@@ -19,8 +19,6 @@ from .chat_bot import generate_text
 
 
 # Create your views here.
-
-
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -32,36 +30,43 @@ class LoginUserView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        username = request.data.get("username")
+        email = request.data.get("email")
         password = request.data.get("password")
 
-        user = authenticate(username=username, password=password)
+        if not email or not password:
+            return Response(
+                {"error": "Email and password are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        if user:
+        user = authenticate(email=email, password=password)
+
+        if user is None:
             refresh = RefreshToken.for_user(user)
             return Response(
                 {
                     "access": str(refresh.access_token),
                     "refresh": str(refresh),
-                    "user_id": user.pk,
+                    "user_id": user.id,
                     "username": user.username,
                 },
-                status=status.HTTP_200_OK,
+                status=status.HTTP_200_OK
             )
-
-        return Response(
-            {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
-        )
+        else:
+            return Response(
+                {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
+            )
 
 
 class UsersView(APIView):
     def get(self, request, user_id=None):
         if user_id:
-            return Response(
-                {"users": UserSerializer(User.objects.all(), many=True).data}
-            )
 
-        return Response({"users": UserSerializer(User.objects.get(pk=user_id)).data})
+            user = get_object_or_404(User, pk=user_id)
+            return Response({"user": UserSerializer(user).data})
+        else:
+            users = User.objects.all()
+            return Response({"users": UserSerializer(users, many=True).data})
 
 
 class CourseSearchAPIView(APIView):

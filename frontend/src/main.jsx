@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MantineProvider, createTheme } from '@mantine/core';
 import App from './App';
 import Account from "./pages/account";
-import SignIn from './pages/signin';
+import SignIn from './layouts/signin';
 import SignUp from './pages/signup';
 import ChatBot from './pages/chatBot';
 import '@mantine/core/styles.css';
@@ -16,17 +16,6 @@ const theme = createTheme({
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import {BrowserRouter, Routes, Route} from "react-router";
-import SignInContainer from './layouts/signin.jsx'
-import SignUpContainer from './layouts/signup.jsx'
-import MainPage from './layouts/account.jsx';
-import LeaderBoard from './layouts/LeaderBoard.jsx';
-import { MantineProvider } from '@mantine/core';
-
-createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>

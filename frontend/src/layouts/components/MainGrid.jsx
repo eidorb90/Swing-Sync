@@ -5,6 +5,8 @@ import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import ChartUserByCountry from './ChartUserByCountry';
+
 import CustomizedDataGrid from './CustomizedDataGrid';
 import PageViewsBarChart from './MostRecentRoundBarChart';
 import MostRecentRoundChart from './MostRecentRoundChart';
@@ -127,6 +129,12 @@ export default function MainGrid() {
         <Grid size={{ xs: 12, md: 6 }}>
           <Title order={1} mb="lg">Golf Performance Analytics</Title>
             <RadarChart
+              sx={{ 
+                width: "100%", 
+                height: "100%", 
+                minWidth: "300px",
+                minHeight: "300px" 
+              }}
               h={300}
               data={statsData}
               dataKey="product"
@@ -144,11 +152,10 @@ export default function MainGrid() {
       </Typography>
       <Grid container spacing={2} columns={12}>
         <Grid size={{ xs: 12, lg: 9 }}>
-          <Radarchart/>
+          <CustomizedDataGrid />
         </Grid>
         <Grid size={{ xs: 12, lg: 3 }}>
           <Stack gap={2} direction={{ xs: 'column', sm: 'row', lg: 'column' }}>
-            <CustomizedTreeView />
             <ChartUserByCountry />
           </Stack>
         </Grid>
