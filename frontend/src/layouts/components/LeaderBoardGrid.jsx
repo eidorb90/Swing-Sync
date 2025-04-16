@@ -7,13 +7,13 @@ import Typography from '@mui/material/Typography';
 
 import CustomizedDataGrid from './CustomizedDataGrid';
 
-import SessionsChart from './SessionsChart';
+
 
 
 export default function MainGrid() {
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
-      {/* cards */}
+      
       <Typography component="h2" variant="h6" sx={{ mb: 4 }}>
         Overview
       </Typography>

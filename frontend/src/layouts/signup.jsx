@@ -194,7 +194,7 @@ export default function SignUp(props) {
                                 required
                                 fullWidth
                                 id="lastName"
-                                placeholder="Smith"
+                                placeholder="Kollipara"
                                 error={lastNameError}
                                 helperText={lastNameErrorMessage}
                                 color={lastNameError ? 'error' : 'primary'}
@@ -221,7 +221,7 @@ export default function SignUp(props) {
                                 required
                                 fullWidth
                                 id="email"
-                                placeholder="your@email.com"
+                                placeholder="ian.kollipara@cune.edu"
                                 name="email"
                                 autoComplete="email"
                                 variant="outlined"
@@ -276,7 +276,7 @@ export default function SignUp(props) {
                         <Typography sx={{ textAlign: 'center' }}>
                             Already have an account?{' '}
                             <Link
-                                href="/sign-in/"
+                                href="/signin"
                                 variant="body2"
                                 sx={{ alignSelf: 'center' }}
                             >

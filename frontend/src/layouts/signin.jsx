@@ -17,7 +17,7 @@ import { styled } from '@mui/material/styles';
 import ForgotPassword from './components/ForgotPassword';
 import AppTheme from './theme/AppTheme';
 import ColorModeSelect from './theme/ColorModeSelect';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from './components/CustomIcons';
+
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
@@ -71,9 +71,7 @@ export default function SignIn(props) {
     useEffect(() => {
         document.body.style.justifyContent = 'center';
     }, []);
-    // const handleClickOpen = () => {
-    //     setOpen(true);
-    // };
+    
 
     const handleClose = () => {
         setOpen(false);
@@ -124,7 +122,7 @@ export default function SignIn(props) {
             <SignInContainer direction="column" justifyContent="space-between">
                 <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
                 <Card variant="outlined">
-                    <SitemarkIcon />
+                    
                     <Typography
                         component="h1"
                         variant="h4"
@@ -151,7 +149,7 @@ export default function SignIn(props) {
                                 id="email"
                                 type="email"
                                 name="email"
-                                placeholder="your@email.com"
+                                placeholder="ian.kollipara@cune.edu"
                                 autoComplete="email"
                                 autoFocus
                                 required
@@ -197,7 +195,7 @@ export default function SignIn(props) {
                         <Typography sx={{ textAlign: 'center' }}>
                             Don&apos;t have an account?{' '}
                             <Link
-                                href="/material-ui/getting-started/templates/sign-up/"
+                                href="/signup"
                                 variant="body2"
                                 sx={{ alignSelf: 'center' }}
                             >

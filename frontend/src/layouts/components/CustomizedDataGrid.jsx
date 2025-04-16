@@ -12,9 +12,9 @@ export default function CustomizedDataGrid() {
         params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
       }
       initialState={{
-        pagination: { paginationModel: { pageSize: 20 } },
+        pagination: { paginationModel: { pageSize: 40 } },
       }}
-      pageSizeOptions={[10, 20, 50]}
+      pageSizeOptions={[40]}
       disableColumnResize
       density="compact"
       slotProps={{

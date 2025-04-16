@@ -22,14 +22,14 @@ const xThemeComponents = {
   ...treeViewCustomizations,
 };
 
-export default function Dashboard(props) {
+export default function MainPage(props) {
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
-      <CssBaseline enableColorScheme />
-      <Box sx={{ display: 'flex' }}>
+      <CssBaseline enableColorScheme/>
+      <Box sx={{ display: 'flex'}}>
         <SideMenu />
         <AppNavbar />
-        {/* Main content */}
+        
         <Box
           component="main"
           sx={(theme) => ({
@@ -46,7 +46,7 @@ export default function Dashboard(props) {
               alignItems: 'center',
               mx: 3,
               pb: 5,
-              mt: { xs: 8, md: 0 },
+              mt: { xs: 8, md: 0 }
             }}
           >
             <Header />
