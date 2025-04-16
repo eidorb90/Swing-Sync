@@ -47,7 +47,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <SignUp />
         }>
         </Route>
-        <Route path="/Woody/chat" element={<ChatBot />} />
+        <Route path="/Woody/chat" element={
+          <MantineProvider theme={theme}>
+            <ChatBot />
+          </MantineProvider>
+        } />
       </Routes>
     </BrowserRouter>  
     </StrictMode>

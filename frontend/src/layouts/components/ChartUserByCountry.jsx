@@ -19,6 +19,8 @@ const data = [
   { label: 'Chips', value: 0 },
   { label: 'Approach', value: 0 },
 ];
+
+
 const total = data.reduce((sum, item) => sum + item.value, 0);
 
 const countries = [
