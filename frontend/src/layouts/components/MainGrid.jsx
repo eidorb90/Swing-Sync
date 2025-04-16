@@ -64,31 +64,31 @@ export default function MainGrid() {
             product: 'Putting',
             // For putting, lower is better, so invert on a 0-100 scale
             'Current Skills': Math.max(0, 100 - (fetchedData.avg_putts_per_round || 0) * 5),
-            'Target Skills': 100, // Target of ~1.5 putts per hole
+            'Target Skills': Math.max(0, 100 - (fetchedData.avg_putts_per_round || 0) * 5) + 40, // Target of ~1.5 putts per hole
           },
           {
             product: 'Scoring',
             // For scoring, lower is better, so invert on a 0-100 scale
             'Current Skills': Math.max(0, 100 - ((fetchedData.avg_score_per_round || 72) - 65)),
-            'Target Skills': 120, // Target of ~72 per round
+            'Target Skills': Math.max(0, 100 - ((fetchedData.avg_score_per_round || 72) - 65)) + 40, // Target of ~72 per round
           },
           {
             product: 'Fairways',
             // For fairways, higher percentage is better, already on 0-100 scale
             'Current Skills': fetchedData.fairway_hit_percentage || 0,
-            'Target Skills': 80, // Professional level target
+            'Target Skills': fetchedData.fairway_hit_percentage + 20, // Professional level target
           },
           {
             product: 'Greens',
             // For GIR, higher percentage is better, already on 0-100 scale
             'Current Skills': fetchedData.gir_percentage || 0,
-            'Target Skills': 80, // Professional level target
+            'Target Skills': fetchedData.gir_percentage + 20, // Professional level target
           },
           {
             product: 'Penalties',
             // For penalties, lower is better, so invert on a 0-100 scale
             'Current Skills': Math.max(0, 100 - (fetchedData.avg_penalities_per_round || 0) * 20),
-            'Target Skills': 90, // Target of ~0.5 penalties per round
+            'Target Skills': Math.max(0, 100 - (fetchedData.avg_penalities_per_round || 0) * 20) + 40, // Target of ~0.5 penalties per round
           },
         ];
           
