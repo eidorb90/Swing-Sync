@@ -47,7 +47,7 @@ const ChatBot = (props) => {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
-
+    
     try {
       const response = await fetch("http://localhost:8000/api/chat/", {
         method: "POST",
@@ -92,6 +92,7 @@ const ChatBot = (props) => {
         },
       ]);
     } finally {
+      setInput('');
       setLoading(false);
     }
   };
