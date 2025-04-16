@@ -77,15 +77,20 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           }
         />
 
-        <Route
-          path = "/search"
-          element={
-            <MantineProvider theme={theme}>
-              <SearchBarCourse />
-            </MantineProvider>
-          }
-        />
+        <Route path="/login" element={
+          <SignIn /> 
+        }>
+        </Route>
 
+        <Route path="/signup" element={
+          <SignUp />
+        }>
+        </Route>
+        <Route path="/Woody/chat" element={
+          <MantineProvider theme={theme}>
+            <ChatBot />
+          </MantineProvider>
+        } />
       </Routes>
     </BrowserRouter>
   </StrictMode>

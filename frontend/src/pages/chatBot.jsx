@@ -1,19 +1,20 @@
-import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
-import {
-  Box,
-  CssBaseline,
-  Stack,
-  TextField,
-  Button,
-  Typography,
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Container, 
+  Link, 
+  Paper, 
+  TextField, 
+  Button, 
   CircularProgress,
-} from "@mui/material";
-import { alpha } from "@mui/material/styles";
-import AppNavbar from "../layouts/components/AppNavbar";
-import Header from "../layouts/components/Header";
-import SideMenu from "../layouts/components/SideMenu";
-import AppTheme from "../layouts/theme/AppTheme";
+  Avatar,
+  Divider
+} from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import ReactMarkdown from 'react-markdown';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 const ChatBot = (props) => {
   const [messages, setMessages] = useState([]);
@@ -21,218 +22,191 @@ const ChatBot = (props) => {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // Initialize with welcome message
+  useEffect(() => {
+    setMessages([
+      { 
+        role: 'assistant', 
+        content: "Hi! I'm Woody.Ai, your golf assistant. Ask me anything about your golf swing or game!" 
+      }
+    ]);
+  }, []);
+
+  // Auto-scroll to bottom when messages update
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (input.trim() === "" || loading) return;
-
-    const userMessage = { text: input, sender: "user", timestamp: new Date() };
-    setMessages([...messages, userMessage]);
-    setInput("");
+  const handleSend = async () => {
+    if (!input.trim()) return;
+    
+    // Add user message
+    setMessages(prev => [...prev, { role: 'user', content: input }]);
     setLoading(true);
     
     try {
-      const response = await axios.post("http://localhost:8000/api/chat/", {
-        message: input,
+      // Send to backend
+      const response = await fetch('http://localhost:8000/api/chat/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: input }),
       });
-      const botMessage = {
-        text: response.data.response,
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      // Add assistant response
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: data.response || String(data)
+      }]);
     } catch (error) {
-      console.error("Error sending message:", error);
-      const errorMessage = {
-        text: "Sorry, I encountered an error. Please try again later.",
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      console.error('Error:', error);
+      // Add error message
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Sorry, there was an error processing your request.'
+      }]);
     } finally {
       setInput('');
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  // Custom renderer for markdown code blocks
+  const components = {
+    code({node, inline, className, children, ...props}) {
+      const match = /language-(\w+)/.exec(className || '');
+      return !inline && match ? (
+        <SyntaxHighlighter
+          style={docco}
+          language={match[1]}
+          PreTag="div"
+          {...props}
+        >
+          {String(children).replace(/\n$/, '')}
+        </SyntaxHighlighter>
+      ) : (
+        <code className={className} {...props}>
+          {children}
+        </code>
+      );
     }
   };
 
   return (
-    <AppTheme {...props}>
-      <CssBaseline enableColorScheme />
-      <Box sx={{ display: "flex" }}>
-        <SideMenu />
-        <AppNavbar />
-
-        <Box
-          component="main"
-          sx={(theme) => ({
-            flexGrow: 1,
-            backgroundColor: theme.vars
-              ? `rgba(${theme.vars.palette.background.defaultChannel} / 1)`
-              : alpha(theme.palette.background.default, 1),
-            overflow: "auto",
-          })}
-        >
-          <Stack
-            spacing={2}
-            sx={{
-              alignItems: "center",
-              mx: 3,
-              pb: 5,
-              mt: { xs: 8, md: 0 },
-            }}
-          >
-            <Header />
-
-            {/* Chat Container */}
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4, height: '90vh' }}>
+      <Paper elevation={3} sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Avatar sx={{ mr: 2, bgcolor: '#4caf50' }}>🏌️</Avatar>
+            <Typography variant="h4" component="h1">Woody.Ai</Typography>
+          </Box>
+          <Link href="/account" underline="hover">Back to Account</Link>
+        </Box>
+        
+        <Divider sx={{ mb: 2 }} />
+        
+        <Box sx={{ 
+          flexGrow: 1, 
+          overflow: 'auto', 
+          px: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          {messages.map((msg, index) => (
             <Box
+              key={index}
               sx={{
-                width: "100%",
-                maxWidth: "800px",
-                height: "80vh",
-                border: "1px solid",
-                borderColor: "divider",
+                p: 2,
                 borderRadius: 2,
-                display: "flex",
-                flexDirection: "column",
-                boxShadow: 3,
+                maxWidth: '80%',
+                bgcolor: msg.role === 'user' ? '#e3f2fd' : '#f5f5f5',
+                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                boxShadow: 1,
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  [msg.role === 'user' ? 'right' : 'left']: -10,
+                  borderWidth: '10px 10px 0',
+                  borderStyle: 'solid',
+                  borderColor: `${msg.role === 'user' ? '#e3f2fd' : '#f5f5f5'} transparent transparent`
+                }
               }}
             >
-              {/* Header */}
-              <Box
-                sx={{
-                  backgroundColor: "primary.main",
-                  color: "primary.contrastText",
-                  padding: "15px 20px",
-                  borderTopLeftRadius: 2,
-                  borderTopRightRadius: 2,
-                }}
-              >
-                <Typography variant="h6" sx={{ marginBottom: 1 }}>
-                  Woody.Ai
-                </Typography>
-                <Typography variant="body2">
-                  Ask me anything about your golf swing!
-                </Typography>
-              </Box>
-
-              {/* Messages */}
-              <Box
-                sx={{
-                  flex: 1,
-                  overflowY: "auto",
-                  padding: 2,
-                  backgroundColor: "background.default",
-                }}
-              >
-                <Stack spacing={2}>
-                  {messages.length === 0 ? (
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      textAlign="center"
-                      sx={{ marginTop: "50px" }}
-                    >
-                      Start a conversation with Woody.Ai!
-                    </Typography>
-                  ) : (
-                    messages.map((message, index) => (
-                      <Box
-                        key={index}
-                        sx={{
-                          alignSelf:
-                            message.sender === "user"
-                              ? "flex-end"
-                              : "flex-start",
-                          maxWidth: "80%",
-                          padding: "10px 15px",
-                          borderRadius: 2,
-                          backgroundColor:
-                            message.sender === "user"
-                              ? "primary.main"
-                              : "background.paper",
-                          color:
-                            message.sender === "user"
-                              ? "primary.contrastText"
-                              : "text.primary",
-                        }}
-                      >
-                        {message.text}
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            display: "block",
-                            textAlign: "right",
-                            marginTop: "5px",
-                            opacity: 0.6,
-                          }}
-                        >
-                          {new Date(message.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </Typography>
-                      </Box>
-                    ))
-                  )}
-
-                  {loading && (
-                    <Stack direction="row" spacing={1}>
-                      <CircularProgress size={20} />
-                      <Typography variant="body2">
-                        Woody.Ai is typing...
-                      </Typography>
-                    </Stack>
-                  )}
-
-                  <div ref={messagesEndRef} />
-                </Stack>
-              </Box>
-
-              {/* Input */}
-              <Box
-                sx={{
-                  display: "flex",
-                  padding: "15px",
-                  borderTop: "1px solid",
-                  borderColor: "divider",
-                  backgroundColor: "background.paper",
-                }}
-              >
-                <TextField
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Type your message..."
-                  variant="outlined"
-                  fullWidth
-                  sx={{ flex: 1 }}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={input.trim() === "" || loading}
-                  variant="contained"
-                  color="secondary"
-                  sx={{ marginLeft: 2 }}
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Avatar 
+                  sx={{ 
+                    width: 24, 
+                    height: 24, 
+                    mr: 1, 
+                    bgcolor: msg.role === 'user' ? '#1976d2' : '#4caf50',
+                    fontSize: '0.875rem'
+                  }}
                 >
-                  Send
-                </Button>
+                  {msg.role === 'user' ? '👤' : '🏌️'}
+                </Avatar>
+                <Typography variant="subtitle2">
+                  {msg.role === 'user' ? 'You' : 'Woody.Ai'}
+                </Typography>
+              </Box>
+              
+              <Box sx={{ pl: 4 }}>
+                <ReactMarkdown components={components}>
+                  {msg.content}
+                </ReactMarkdown>
               </Box>
             </Box>
-          </Stack>
+          ))}
+          
+          {loading && (
+            <Box sx={{ display: 'flex', alignItems: 'center', p: 2, maxWidth: '80%' }}>
+              <Avatar sx={{ width: 24, height: 24, mr: 1, bgcolor: '#4caf50', fontSize: '0.875rem' }}>
+                🏌️
+              </Avatar>
+              <Typography variant="subtitle2" sx={{ mr: 2 }}>Woody.Ai</Typography>
+              <CircularProgress size={20} />
+            </Box>
+          )}
+          
+          <div ref={messagesEndRef} />
         </Box>
-      </Box>
-    </AppTheme>
+        
+        <Divider sx={{ my: 2 }} />
+        
+        <Box sx={{ display: 'flex', px: 2 }}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Ask about your golf swing..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+            disabled={loading}
+            multiline
+            maxRows={3}
+            sx={{ mr: 1 }}
+          />
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={handleSend} 
+            disabled={loading || !input.trim()}
+            endIcon={<SendIcon />}
+            sx={{ minWidth: 100 }}
+          >
+            Send
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 

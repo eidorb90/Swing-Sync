@@ -11,7 +11,6 @@ import PageViewsBarChart from './MostRecentRoundBarChart';
 import MostRecentRoundChart from './MostRecentRoundChart';
 import SessionsChart from "./RoundDataChart";
 import { DataGrid } from '@mui/x-data-grid';
-import RadarChartComponent from '../../components/Radar';
 
 import { RadarChart } from '@mantine/charts';
 import { Container, Title } from '@mantine/core';
@@ -103,18 +102,37 @@ export default function MainGrid() {
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Title order={1} mb="lg">Skill Tree</Title>
-          <RadarChartComponent/>
-
+            <RadarChart
+              h={400}
+              data={statsData}
+              dataKey="product"
+              series={[
+                { name: 'Current Skills', color: 'blue.6' },
+                { name: 'Target Skills', color: 'teal.6' },
+              ]}
+              withPolarGrid
+              withPolarAngleAxis
+              withPolarRadiusAxis
+              withLegend
+            />
            
         </Grid>
 
       </Grid>
       <Grid container spacing={2} columns={12}>
       <Grid size={{ xs: 12, lg: 3 }}>
+      <Grid size={{ xs: 12, lg: 3 }}>
           <Stack gap={2} direction={{ xs: 'column', sm: 'row', lg: 'column' }}>
             <ChartUserByCountry />
           </Stack>
         </Grid>
+        <Grid size={{ xs: 12, lg: 9 }}>
+        <Typography component="h2" variant="h6" sx={{ mb:2 }}>
+        Leaderboard
+      </Typography>
+          <CustomizedDataGrid />
+        </Grid>
+
         <Grid size={{ xs: 12, lg: 9 }}>
         <Typography component="h2" variant="h6" sx={{ mb:2 }}>
         Leaderboard
