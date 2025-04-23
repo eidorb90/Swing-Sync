@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth import authenticate
 from .serializers import (
     UserSerializer,
@@ -15,8 +16,10 @@ import requests
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import transaction
-from .chat_bot import generate_text
-
+from .ollama_chat import ChatBot
+from .ollama_vision import ChatBot as VisionChatBot
+import os
+import tempfile
 
 # Create your views here.
 
@@ -364,8 +367,52 @@ class ChatBotView(APIView):
             )
 
         try:
-            response = generate_text(f"{prompt}")
+            bot = ChatBot()
+            response = bot.handle_conversation(prompt)
+            # response = generate_text(f"{prompt}")
             return Response({"response": response}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class VisionChatBotView(APIView):
+    permission_classes = [AllowAny]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def post(self, request):
+        message = request.data.get("message")
+        video_file = request.FILES.get("video")
+
+        if not message and not video_file:
+            return Response(
+                {"error": "Either message or video is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            bot = VisionChatBot()
+
+            if video_file:
+                with tempfile.NamedTemporaryFile(
+                    suffix=".mp4", delete=False
+                ) as temp_video:
+                    for chunk in video_file.chunks():
+                        temp_video.write(chunk)
+                    video_path = temp_video.name
+
+                try:
+                    response = bot.handle_video(video_path)
+                finally:
+                    if os.path.exists(video_path):
+                        os.unlink(video_path)
+
+                return Response({"response": response}, status=status.HTTP_200_OK)
+            else:
+                response = bot.answer_question(message)
+                return Response({"response": response}, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -10,6 +10,7 @@ from api.views import (
     CourseTeeView,
     TeeHoleView,
     ChatBotView,
+    VisionChatBotView,
     UserStats,
     LeaderBoardView,
 )
@@ -46,4 +47,5 @@ urlpatterns = [
     path("api-auth", include("rest_framework.urls")),
     # custom ai chatbot section
     path("api/chat/", ChatBotView.as_view(), name="chatbot"),
+    path("api/vision-chat/", VisionChatBotView.as_view(), name="vision_chatbot"),
 ]
