@@ -10,6 +10,7 @@ from api.views import (
     CourseTeeView,
     TeeHoleView,
     ChatBotView,
+    VisionChatBotView,
     UserStats,
     LeaderBoardView,
     VisionChatBotView,
