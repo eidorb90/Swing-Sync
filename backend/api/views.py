@@ -15,7 +15,7 @@ import requests
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import transaction
-from .chat_bot import generate_text
+# from .chat_bot import generate_text
 
 
 # Create your views here.
@@ -25,23 +25,28 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework import status, generics
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+from .serializers import LoginSerializer
+
 class LoginUserView(generics.GenericAPIView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get("email")
-        password = request.data.get("password")
+        # Debug: Print the incoming data
+        print("Incoming data:", request.data)
 
-        if not email or not password:
-            return Response(
-                {"error": "Email and password are required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        username = request.data.get("username")  # Extract email from request.data
+        password = request.data.get("password")  # Extract password from request.data
 
-        user = authenticate(email=email, password=password)
+        # Authenticate the user
+        user = authenticate(username=username, password=password)
 
-        if user is None:
+        if user is not None:  # If the user is authenticated
             refresh = RefreshToken.for_user(user)
             return Response(
                 {
@@ -52,11 +57,10 @@ class LoginUserView(generics.GenericAPIView):
                 },
                 status=status.HTTP_200_OK
             )
-        else:
+        else:  # If authentication fails
             return Response(
                 {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
             )
-
 
 class UsersView(APIView):
     def get(self, request, user_id=None):

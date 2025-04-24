@@ -29,7 +29,7 @@ export default function SessionsChart() {
   const theme = useTheme();
   
   const defaultHoles = Array.from({ length: 18 }, (_, i) => `Hole ${i + 1}`);
-  const defaultData = Array(18).fill(4); // Par 4 as default
+  const defaultData = Array(18).fill(0); // Par 4 as default
   
   const colorPalette = [
     theme.palette.primary.light,
@@ -38,13 +38,13 @@ export default function SessionsChart() {
   ];
 
   const [chartData, setChartData] = useState({
-    strokes: defaultData,
-    putts: defaultData.map(() => 2), 
-    par: defaultData // Par values
+    strokes: defaultData.map(() => 0), // Default strokes
+    putts: defaultData.map(() => 0), 
+    par: defaultData.map(() => 0)
   });
   const [holeLabels, setHoleLabels] = useState(defaultHoles);
   const [isLoading, setIsLoading] = useState(true);
-  const [roundInfo, setRoundInfo] = useState({ date: 'Today', totalScore: 72 });
+  const [roundInfo, setRoundInfo] = useState({ date: 'Today', totalScore: 0 });
   
   useEffect(() => {
     const fetchStats = async () => {
@@ -66,9 +66,9 @@ export default function SessionsChart() {
             
             if (scores.length > 0) {
               // Extract data for each hole
-              const strokeData = scores.map(score => score.strokes || 4);
-              const puttData = scores.map(score => score.putts || 2);
-              const parData = scores.map(score => score.par || 4);
+              const strokeData = scores.map(score => score.strokes || 0);
+              const puttData = scores.map(score => score.putts || 0);
+              const parData = scores.map(score => score.par || 0);
               const penData = scores.map(score => score.pen || 0);
               const holes = scores.map(score => `Hole ${score.hole}`);
               
@@ -169,7 +169,7 @@ export default function SessionsChart() {
           grid={{ horizontal: true }}
           slotProps={{
             legend: {
-              hidden: false, // Show legend to identify the different lines
+              hidden: true, 
             },
           }}
         />

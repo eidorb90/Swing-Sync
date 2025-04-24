@@ -22,16 +22,16 @@ export default function PageViewsBarChart() {
   ];
 
   const [chartData, setChartData] = useState({
-    strokes: defaultData,
-    putts: defaultData.map(() => 2), 
-    par: defaultData, // Par values
+    strokes: defaultData.map(() => 0), // Default strokes
+    putts: defaultData.map(() => 0), 
+    par: defaultData.map(() => 0), // Par values
     pen: defaultData.map(() => 0) // Adding penalties with default 0
   });
 
   // Add holeLabels state
   const [holeLabels, setHoleLabels] = useState(defaultHoles);
   const [isLoading, setIsLoading] = useState(true);
-  const [roundInfo, setRoundInfo] = useState({ date: 'Today', totalScore: 72 });
+  const [roundInfo, setRoundInfo] = useState({ date: 'Today', totalScore: 0 });
   
   useEffect(() => {
     const fetchStats = async () => {
@@ -56,9 +56,9 @@ export default function PageViewsBarChart() {
               const frontNineScores = scores.slice(0, 9);
               
               // Extract data for each hole
-              const strokeData = frontNineScores.map(score => score.strokes || 4);
-              const puttData = frontNineScores.map(score => score.putts || 2);
-              const parData = frontNineScores.map(score => score.par || 4);
+              const strokeData = frontNineScores.map(score => score.strokes || 0);
+              const puttData = frontNineScores.map(score => score.putts || 0);
+              const parData = frontNineScores.map(score => score.par || 0);
               const penData = frontNineScores.map(score => score.penalties || 0);
               const holes = frontNineScores.map(score => `Hole ${score.hole}`);
               

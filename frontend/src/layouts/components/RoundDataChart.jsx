@@ -39,9 +39,9 @@ export default function SessionsChart() {
   ];
 
   const [chartData, setChartData] = useState({
-    totalScores: defaultScores,
-    avgPutts: Array(10).fill(30), // Default average putts
-    parTotal: defaultScores // Par values
+    totalScores: defaultScores.map(() => 0), // Default total scores
+    avgPutts: Array(10).fill(0), // Default average putts
+    parTotal: defaultScores.map(() => 0), // Default par for each round
   });
   const [roundLabels, setRoundLabels] = useState(defaultRounds);
   const [isLoading, setIsLoading] = useState(true);
@@ -196,7 +196,7 @@ export default function SessionsChart() {
           grid={{ horizontal: true }}
           slotProps={{
             legend: {
-              hidden: false,
+              hidden: true,
             },
           }}
         />

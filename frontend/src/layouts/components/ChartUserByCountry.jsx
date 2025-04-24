@@ -13,11 +13,11 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 
 
 const data = [
-  { label: 'Putts', value: 20 },
-  { label: 'Penalities', value: 4 },
-  { label: 'Drives', value: 7 },
-  { label: 'Chips', value: 7 },
-  { label: 'Approach', value: 9 },
+  { label: 'Putts', value: 0 },
+  { label: 'Penalities', value: 0 },
+  { label: 'Drives', value: 0 },
+  { label: 'Chips', value: 0 },
+  { label: 'Approach', value: 0 },
 ];
 const total = data.reduce((sum, item) => sum + item.value, 0);
 
@@ -181,7 +181,6 @@ export default function ChartUserByCountry() {  return (
               </Stack>
               <LinearProgress
                 variant="determinate"
-                aria-label="Number of users by country"
                 value={country.value}
                 sx={{
                   [`& .${linearProgressClasses.bar}`]: {

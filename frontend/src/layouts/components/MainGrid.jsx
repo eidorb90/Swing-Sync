@@ -127,6 +127,7 @@ export default function MainGrid() {
           <SessionsChart />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
+        
           <Title order={1} mb="lg">Golf Performance Analytics</Title>
             <RadarChart
               sx={{ 
@@ -145,7 +146,9 @@ export default function MainGrid() {
               withPolarRadiusAxis
               withLegend
             />
+           
         </Grid>
+
       </Grid>
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
         Details

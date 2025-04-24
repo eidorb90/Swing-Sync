@@ -12,13 +12,13 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 
 const mainListItems = [
-  { text: 'Home', icon: <HomeRoundedIcon />, route: '/' },
+  { text: 'Home', icon: <HomeRoundedIcon />, route: '/account' },
   { text: 'LeaderBoard', icon: <LeaderboardIcon />, route: '/leaderboard' },
-  { text: 'Players', icon: <PeopleRoundedIcon />, route: '/players' },
+  { text: 'Players', icon: <PeopleRoundedIcon />, route: '/' },
 ];
 
 const secondaryListItems = [
-  { text: 'Settings', icon: <SettingsRoundedIcon />, route: '/settings' },
+  { text: 'Settings', icon: <SettingsRoundedIcon />, route: '/' },
 ];
 
 export default function MenuContent() {

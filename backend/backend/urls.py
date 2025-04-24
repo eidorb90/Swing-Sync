@@ -21,10 +21,9 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path("admin/", admin.site.urls),
     # API endpoints
-    path("api/login/", LoginUserView.as_view(), name="login"),
-    path('api/signup/', CreateUserView.as_view(), name='signup'),
+    
     # User section
-    path("api/user/register/", CreateUserView.as_view(), name="register"),
+    path("api/user/signup/", CreateUserView.as_view(), name="signup"),
     path("api/user/login/", LoginUserView.as_view(), name="login"),
     path("api/user/", UsersView.as_view(), name="users"),
     path("api/user/<int:user_id>", UsersView.as_view(), name="user_detail"),

@@ -17,7 +17,7 @@ import { styled } from '@mui/material/styles';
 import ForgotPassword from '../layouts/components/ForgotPassword';
 import AppTheme from '../layouts/theme/AppTheme';
 import ColorModeSelect from '../layouts/theme/ColorModeSelect';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../layouts/components/CustomIcons';
+import { useNavigate } from 'react-router-dom';
 
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
@@ -63,70 +63,26 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignIn(props) {
-    const [emailError, setEmailError] = useState(false);
-    const [emailErrorMessage, setEmailErrorMessage] = useState('');
+    const [usernameError, setUsernameError] = useState(false);
+    const [usernameErrorMessage, setUsernameErrorMessage] = useState('');
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
     const [generalError, setGeneralError] = useState('');
-    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        document.body.style.justifyContent = 'center';
-    }, []);
+    const navigate = useNavigate();
 
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const handleSubmit = async (event) => {
-        event.preventDefault(); // Prevent default form submission
-        const data = new FormData(event.currentTarget);
-
-        const credentials = {
-            email: data.get('email'),
-            password: data.get('password'),
-        };
-
-        if (!validateInputs(credentials)) {
-            return;
-        }
-
-        try {
-            const response = await fetch('http://localhost:8000/api/login/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(credentials),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                // Handle successful login
-                console.log('Login successful:', result);
-                setGeneralError('');
-                // Redirect to another page or update UI as needed
-                window.location.href = '/dashboard';
-            } else {
-                // Handle login failure
-                setGeneralError(result.error || 'Invalid email or password.');
-            }
-        } catch (error) {
-            setGeneralError('An error occurred. Please try again.');
-        }
-    };
-
-    const validateInputs = ({ email, password }) => {
+    // Validation function to validate email and password
+    const validateInputs = ({ username, password }) => {
         let isValid = true;
 
-        if (!email || !/\S+@\S+\.\S+/.test(email)) {
-            setEmailError(true);
-            setEmailErrorMessage('Please enter a valid email address.');
+        if (!username || username.length < 1) {
+            setUsernameError(true);
+            setUsernameErrorMessage('Please enter a valid email address.');
             isValid = false;
         } else {
-            setEmailError(false);
-            setEmailErrorMessage('');
+            setUsernameError(false);
+            setUsernameErrorMessage('');
         }
 
         if (!password || password.length < 6) {
@@ -141,13 +97,54 @@ export default function SignIn(props) {
         return isValid;
     };
 
+    // Handle form submission
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setLoading(true); 
+    
+        const username = event.target.username.value; 
+        const password = event.target.password.value; 
+    
+        const credentials = { username, password };
+    
+        console.log('Submitting credentials:', credentials); // Debugging
+    
+        if (!validateInputs(credentials)) {
+            setLoading(false); 
+            return;
+        }
+    
+        try {
+            const response = await fetch('http://localhost:8000/api/user/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(credentials), // Send as JSON
+            });
+    
+            const result = await response.json();
+            console.log('API Response:', result); // Debugging API response
+    
+            if (response.ok) {
+                navigate('/account'); // Navigate to account page
+            } else {
+                setGeneralError(result.error || 'Invalid username or password.');
+            }
+        } catch (error) {
+            console.error('An error occurred:', error);
+            setGeneralError('An error occurred. Please try again.');
+        } finally {
+            setLoading(false); // Stop loading spinner
+        }
+    };
+
     return (
         <AppTheme {...props}>
             <CssBaseline enableColorScheme />
             <SignInContainer direction="column" justifyContent="space-between">
                 <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
                 <Card variant="outlined">
-                    <SitemarkIcon />
                     <Typography
                         component="h1"
                         variant="h4"
@@ -159,6 +156,7 @@ export default function SignIn(props) {
                         component="form"
                         onSubmit={handleSubmit}
                         noValidate
+                        method="POST" // Explicitly set method to POST
                         sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -167,20 +165,20 @@ export default function SignIn(props) {
                         }}
                     >
                         <FormControl>
-                            <FormLabel htmlFor="email">Email</FormLabel>
+                            <FormLabel htmlFor="username">Username</FormLabel>
                             <TextField
-                                error={emailError}
-                                helperText={emailErrorMessage}
-                                id="email"
-                                type="email"
-                                name="email"
-                                placeholder="your@email.com"
-                                autoComplete="email"
+                                error={usernameError}
+                                helperText={usernameErrorMessage}
+                                id="username"
+                                type="username"
+                                name="username"
+                                placeholder="Username"
+                                autoComplete="username"
                                 autoFocus
                                 required
                                 fullWidth
                                 variant="outlined"
-                                color={emailError ? 'error' : 'primary'}
+                                color={usernameError ? 'error' : 'primary'}
                             />
                         </FormControl>
                         <FormControl>
@@ -193,7 +191,6 @@ export default function SignIn(props) {
                                 type="password"
                                 id="password"
                                 autoComplete="current-password"
-                                autoFocus
                                 required
                                 fullWidth
                                 variant="outlined"
@@ -204,13 +201,14 @@ export default function SignIn(props) {
                             control={<Checkbox value="remember" color="primary" />}
                             label="Remember me"
                         />
-                        <ForgotPassword open={open} handleClose={handleClose} />
+                        <ForgotPassword open={false} handleClose={() => {}} />
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
+                            // disabled={loading} // Disable button when loading
                         >
-                            Sign in
+                            {loading ? 'Signing in...' : 'Sign in'}
                         </Button>
                         {generalError && (
                             <Typography sx={{ mt: 2, color: 'red', textAlign: 'center' }}>
