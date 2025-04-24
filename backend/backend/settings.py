@@ -30,6 +30,9 @@ SECRET_KEY = os.environ.get("SECRET_KEY", 'django-insecure-w^ll6ha)y18))u)9m$ure
 AUTH_USER_MODEL = "api.User"
 
 
+AUTH_USER_MODEL = "api.User"
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
