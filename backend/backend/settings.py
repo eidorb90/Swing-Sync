@@ -27,6 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Set a default secret key if not available in environment
 SECRET_KEY = os.environ.get("SECRET_KEY", 'django-insecure-w^ll6ha)y18))u)9m$ureh79w=01%l^aajj-dlpe-5uasfzd%)')
 
+AUTH_USER_MODEL = "api.User"
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
