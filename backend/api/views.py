@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User
+from .models import User, Course, Tee, Hole, Round, HoleScore
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -367,9 +367,16 @@ class ChatBotView(APIView):
             )
 
         try:
+            rounds = Round.objects.all().order_by("-date_played")[:5]
+
+            # Format the rounds as a string
+            rounds_text = "\n\nRecent rounds data:\n"
+            for round in rounds:
+                rounds_text += f"- Course: {round.course.course_name}, Date: {round.date_played.strftime('%Y-%m-%d')}, Score: {round.total_score}\n"
+
             bot = ChatBot()
-            response = bot.handle_conversation(prompt)
-            # response = generate_text(f"{prompt}")
+            response = bot.handle_conversation(prompt, rounds_text)
+
             return Response({"response": response}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
