@@ -19,6 +19,10 @@ class User(AbstractUser):
         verbose_name = _("user")
         verbose_name_plural = _("users")
 
+    def __str__(self):
+        information = f"{self.username} - {self.email} - {self.pk}"
+        return information
+
 
 class Course(models.Model):
     club_name = models.CharField(max_length=100)
