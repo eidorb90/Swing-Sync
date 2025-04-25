@@ -11,6 +11,7 @@ import SignUp from './pages/signup';
 import ChatBot from './pages/chatBot';
 import '@mantine/core/styles.css';
 import LeaderBoard from './layouts/LeaderBoard';
+import AddRounds from './pages/Add_rounds';
 
 const theme = createTheme({
   primaryColor: 'blue',
@@ -23,6 +24,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/" element={
           <MantineProvider theme={theme}>
           <App />
+          </MantineProvider>         
+        } />
+        <Route path="/addrounds" element={
+          <MantineProvider theme={theme}>
+          <AddRounds />
           </MantineProvider>         
         } />
 

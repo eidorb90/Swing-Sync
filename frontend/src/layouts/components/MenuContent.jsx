@@ -10,11 +10,13 @@ import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import AddIcon from '@mui/icons-material/Add';
 
 const mainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon />, route: '/account' },
   { text: 'LeaderBoard', icon: <LeaderboardIcon />, route: '/leaderboard' },
   { text: 'Players', icon: <PeopleRoundedIcon />, route: '/' },
+  { text: 'Add Rounds', icon: <AddIcon />, route: '/addrounds' },
 ];
 
 const secondaryListItems = [
