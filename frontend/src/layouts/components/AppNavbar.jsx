@@ -16,6 +16,7 @@ import GolfCourseIcon from '@mui/icons-material/GolfCourse';
 
 const Toolbar = styled(MuiToolbar)({
   width: '100%',
+  
   padding: '12px',
   display: 'flex',
   flexDirection: 'column',
