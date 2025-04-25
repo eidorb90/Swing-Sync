@@ -84,7 +84,7 @@ export default function SignUp(props) {
         }
 
         try {
-            const response = await fetch('http://localhost:8000/api/signup/', {
+            const response = await fetch('http://localhost:8000/api/user/signup/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -225,7 +225,7 @@ export default function SignUp(props) {
                         <Typography sx={{ textAlign: 'center' }}>
                             Already have an account?{' '}
                             <Link
-                                href="/signin/"
+                                href="/login/"
                                 variant="body2"
                                 sx={{ alignSelf: 'center' }}
                             >
