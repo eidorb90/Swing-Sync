@@ -22,7 +22,6 @@ from .serializers import (
 )
 from django.http import StreamingHttpResponse
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Course, Tee, Hole, Round, HoleScore
 import os
 import requests
 from rest_framework.views import APIView
