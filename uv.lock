@@ -411,7 +411,6 @@ dependencies = [
     { name = "psycopg2-binary" },
     { name = "pyjwt" },
     { name = "python-dotenv" },
-    { name = "pytz" },
     { name = "requests" },
     { name = "sqlparse" },
 ]
@@ -427,7 +426,6 @@ requires-dist = [
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
     { name = "pyjwt", specifier = ">=2.9.0" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "pytz", specifier = ">=2025.1" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "sqlparse", specifier = ">=0.5.3" },
 ]
