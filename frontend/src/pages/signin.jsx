@@ -128,6 +128,7 @@ export default function SignIn(props) {
     
             if (response.ok) {
                 navigate('/account'); // Navigate to account page
+                localStorage.setItem('userId', result.user_id); 
             } else {
                 setGeneralError(result.error || 'Invalid username or password.');
             }
