@@ -21,7 +21,7 @@
     "@mui/styled-engine-sc": "^6.4.6",
     "@mui/x-charts": "^7.28.0",
     "@mui/x-data-grid": "^7.28.3",
-    "@mui/x-date-pickers": "^7.28.0",
+    "@mui/x-date-pickers": "^7.29.1",
     "@mui/x-tree-view": "^7.28.1",
     "@react-spring/web": "^9.7.5",
     "axios": "^1.8.4",

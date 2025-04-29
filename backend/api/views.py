@@ -90,7 +90,7 @@ class CourseSearchAPIView(APIView):
         500: Internal server error
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         search_query = request.query_params.get("search", "")
