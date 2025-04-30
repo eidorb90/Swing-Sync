@@ -31,7 +31,7 @@ export default function CustomizedDataGrid() {
 
   async function fetchUserData() {
     try {
-      const user_id = localStorage.getItem('userId') || '1';
+      const user_id = localStorage.getItem('userId');
       // Add credentials and mode to the fetch request
       const response = await fetch(`http://localhost:8000/api/leaderboard/`);
       

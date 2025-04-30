@@ -52,7 +52,7 @@ export default function MainGrid() {
     const fetchStats = async () => {
       try {
         setIsLoading(true);
-        const user_id = localStorage.getItem('userId') || '1';
+        const user_id = localStorage.getItem('userId');
         const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`);
         
         if (response.ok) {
