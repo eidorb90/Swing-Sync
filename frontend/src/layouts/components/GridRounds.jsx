@@ -1,201 +1,305 @@
-import * as React from 'react';
-import { useState, useEffect } from "react";
-
-import Grid from '@mui/material/Grid2';
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import "../Styles/Inputstyle.css";
-
-const defaultStatsData = [
-    // ... (your default data here)
-];
+import React, { useState, useEffect } from 'react';
+import { Grid, Box, Stack, Typography, Autocomplete, TextField, MenuItem, Checkbox, FormControlLabel, Button } from '@mui/material';
+import '../Styles/Inputstyle.css';
 
 export default function GridRound() {
-    const [statsData, setStatsData] = useState(defaultStatsData);
-    const [isLoading, setIsLoading] = useState(true);
-    const [courses, setCourses] = useState([]);
-    const [selectedCourse, setSelectedCourse] = useState("");
-    const [selectedTee, setSelectedTee] = useState("");
-    const [searchValue, setSearchValue] = useState('');
-    const [currentStep, setCurrentStep] = useState(1); // Track which step the user is on
+  const [userId, setUserId] = useState(null);
+  const [courses, setCourses] = useState([]); 
+  const [selectedCourse, setSelectedCourse] = useState(null); 
+  const [searchValue, setSearchValue] = useState(''); 
+  const [selectedGender, setSelectedGender] = useState(''); 
+  const [teeOptions, setTeeOptions] = useState([]); 
+  const [selectedTee, setSelectedTee] = useState(''); 
+  const [holes, setHoles] = useState([]); 
+  const [scores, setScores] = useState([]); 
+  const [isSaving, setIsSaving] = useState(false); 
 
-    useEffect(() => {
-        const fetchCourses = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/api/course/search/');
-                if (response.ok) {
-                    const data = await response.json();
-                    setCourses(data);
-                }
-            } catch (error) {
-                console.error('Error fetching courses:', error);
-            }
-        };
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUserId) {
+      setUserId(storedUserId);
+    } else {
+      console.error('User ID not found in local storage.');
+      alert('User ID is missing. Please log in again.');
+    }
+  }, []);
 
-        fetchCourses();
-    }, []);
+  // Function to fetch courses from API
+  const fetchCourses = async (searchTerm) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/course/search/?search=${encodeURIComponent(searchTerm)}`
+      );
+      if (!response.ok) {
+        throw new Error(`Error fetching courses: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setCourses(data.courses || []); // Update courses state with fetched data
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      setCourses([]);
+    }
+  };
 
-    useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const user_id = localStorage.getItem('userId') || '1';
-                const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setStatsData((prevStats) => [...prevStats, ...data]);
-                    setIsLoading(false);
-                } else {
-                    console.error('Failed to fetch stats data.');
-                }
-            } catch (error) {
-                console.error('Error fetching stats data:', error);
-            }
-        };
+  // Handle typing in the search box
+  const handleSearchChange = (event, value) => {
+    setSearchValue(value);
+    if (value) {
+      fetchCourses(value); // Fetch courses dynamically as user types
+    } else {
+      setCourses([]); // Clear courses if search box is empty
+    }
+  };
 
-        fetchStats();
-    }, []);
+  // Handle course selection
+  const handleCourseSelection = (event, newValue) => {
+    setSelectedCourse(newValue); 
+    setSelectedGender(''); 
+    setTeeOptions([]); 
+    setSelectedTee(''); 
+    setHoles([]); 
+    setScores([]); 
+  };
 
-    const filteredCourses = courses.filter((course) =>
-        course.name.toLowerCase().includes(searchValue.toLowerCase())
-    );
+  // Handle gender selection
+  const handleGenderChange = (event) => {
+    const gender = event.target.value;
+    setSelectedGender(gender);
+    if (selectedCourse && selectedCourse.tees[gender]) {
+      setTeeOptions(selectedCourse.tees[gender]); 
+      setTeeOptions([]); 
+    }
+    setSelectedTee(''); 
+    setHoles([]); 
+    setScores([]);
+  };
 
-    const handleNextStep = () => {
-        setCurrentStep((prevStep) => prevStep + 1);
+  
+  const handleTeeSelection = (event) => {
+    const teeName = event.target.value;
+    setSelectedTee(teeName);
+
+    
+    const tee = teeOptions.find((t) => t.tee_name === teeName);
+    if (tee) {
+      setHoles(tee.holes); 
+      setScores(
+        tee.holes.map(() => ({
+          strokes: 0,
+          putts: 0,
+          fairwayHit: false,
+          greenInRegulation: false,
+          penalties: 0,
+        }))
+      ); 
+    } else {
+      setHoles([]);
+      setScores([]);
+    }
+  };
+
+  // Handle score updates for a specific hole
+  const handleScoreChange = (index, field, value) => {
+    const updatedScores = [...scores];
+    updatedScores[index][field] = value;
+    setScores(updatedScores);
+  };
+
+  // Save data to backend
+  const handleSave = async () => {
+    if (!userId) {
+      console.error('User ID is undefined. Cannot save data.');
+      alert('User ID is missing. Please try again.');
+      return;
+    }
+
+    setIsSaving(true);
+    const dataToSave = {
+      course: selectedCourse?.course_name || '',
+      gender: selectedGender,
+      tee: selectedTee,
+      scores,
     };
 
-    const handlePreviousStep = () => {
-        setCurrentStep((prevStep) => prevStep - 1);
-    };
+    try {
+      const response = await fetch(`http://localhost:8000/api/player/${userId}/stats`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSave),
+      });
 
-    return (
-        <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: 'none' } }} className="input-container">
-            <Grid container spacing={2}>
-                <Grid xs={12} md={6}>
-                    <Stack spacing={2} className="form-stack">
-                        <Typography variant="h6" className="form-title">Update Round Data</Typography>
-                        <form
-                            className="round-form"
-                            onSubmit={async (e) => {
-                                e.preventDefault();
+      if (!response.ok) {
+        throw new Error(`Error saving data: ${response.statusText}`);
+      }
 
-                                const formData = new FormData(e.target);
-                                const roundData = {
-                                    course: selectedCourse,
-                                    tee: selectedTee,
-                                    strokes: formData.get('strokes'),
-                                    fairwaysHit: formData.get('fairwaysHit'),
-                                    greensInRegulation: formData.get('greensInRegulation'),
-                                    putts: formData.get('putts'),
-                                    penalties: formData.get('penalties'),
-                                };
+      const result = await response.json();
+      console.log('Data saved successfully:', result);
+      alert('Data saved successfully!');
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Failed to save data. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-                                try {
-                                    const user_id = localStorage.getItem('userId') || '1';
-                                    const response = await fetch(`http://localhost:8000/api/player/${user_id}/round`, {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                        body: JSON.stringify(roundData),
-                                    });
+  return (
+    <Box sx={{ width: '100%' }} className="input-container">
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <Stack spacing={2} className="form-stack">
+            <Typography variant="h6" className="form-title">
+              Update Round Data
+            </Typography>
 
-                                    if (response.ok) {
-                                        alert('Round data updated successfully!');
-                                        const statsResponse = await fetch(`http://localhost:8000/api/player/${user_id}/stats`);
-                                        if (statsResponse.ok) {
-                                            const fetchedData = await statsResponse.json();
-                                            setStatsData((prevStats) => [...prevStats, ...fetchedData]);
-                                        }
-                                    } else {
-                                        alert('Failed to update round data.');
-                                    }
-                                } catch (error) {
-                                    console.error('Error updating round data:', error);
-                                    alert('An error occurred while updating round data.');
-                                }
-                            }}
-                        >
-                            <Stack spacing={2}>
-                                {currentStep === 1 && (
-                                    <div className="styled-input-container">
-                                        <input
-                                            type="text"
-                                            placeholder="Search or Select Course"
-                                            value={searchValue}
-                                            onChange={(e) => setSearchValue(e.target.value)}
-                                            className="styled-input"
-                                            list="courses-list"
-                                        />
-                                        <datalist id="courses-list">
-                                            {filteredCourses.map((course) => (
-                                                <option
-                                                    key={course.id}
-                                                    value={course.name}
-                                                    onClick={() => setSelectedCourse(course.name)}
-                                                />
-                                            ))}
-                                        </datalist>
-                                        <button
-                                            type="button"
-                                            onClick={handleNextStep}
-                                            disabled={!selectedCourse}
-                                            className="styled-input"
-                                        >
-                                            Next
-                                        </button>
-                                    </div>
-                                )}
+            {/* Course Search and Dropdown */}
+            <Autocomplete
+              freeSolo
+              options={courses}
+              getOptionLabel={(option) => option.course_name || ''}
+              onInputChange={handleSearchChange}
+              onChange={handleCourseSelection}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search or Select Course"
+                  variant="outlined"
+                  fullWidth
+                  value={searchValue}
+                />
+              )}
+            />
 
-                                {currentStep === 2 && (
-                                    <div>
-                                        <Typography variant="body1">Selected Course: {selectedCourse}</Typography>
-                                        <input
-                                            type="text"
-                                            placeholder="Select Tee"
-                                            value={selectedTee}
-                                            onChange={(e) => setSelectedTee(e.target.value)}
-                                            className="styled-input"
-                                        />
-                                        <Stack direction="row" spacing={2}>
-                                            <button type="button" onClick={handlePreviousStep} className="styled-input">
-                                                Back
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={handleNextStep}
-                                                disabled={!selectedTee}
-                                                className="styled-input"
-                                            >
-                                                Next
-                                            </button>
-                                        </Stack>
-                                    </div>
-                                )}
+            {/* Gender Selection */}
+            {selectedCourse && (
+              <TextField
+                select
+                label="Select Gender"
+                value={selectedGender}
+                onChange={handleGenderChange}
+                variant="outlined"
+                fullWidth
+              >
+                <MenuItem value="male">Male</MenuItem>
+                <MenuItem value="female">Female</MenuItem>
+              </TextField>
+            )}
 
-                                {currentStep === 3 && (
-                                    <div>
-                                        <Typography variant="body1">Selected Tee: {selectedTee}</Typography>
-                                        <input name="strokes" type="number" placeholder="Strokes" required className="styled-input" />
-                                        <input name="fairwaysHit" type="number" placeholder="Fairways Hit" required className="styled-input" />
-                                        <input name="greensInRegulation" type="number" placeholder="Greens in Regulation" required className="styled-input" />
-                                        <input name="putts" type="number" placeholder="Putts" required className="styled-input" />
-                                        <input name="penalties" type="number" placeholder="Penalties" required className="styled-input" />
-                                        <Stack direction="row" spacing={2}>
-                                            <button type="button" onClick={handlePreviousStep} className="styled-input">
-                                                Back
-                                            </button>
-                                            <button type="submit" className="styled-input">
-                                                Save Round
-                                            </button>
-                                        </Stack>
-                                    </div>
-                                )}
-                            </Stack>
-                        </form>
-                    </Stack>
-                </Grid>
-            </Grid>
-        </Box>
-    );
+            {/* Tee Selection */}
+            {selectedGender && teeOptions.length > 0 && (
+              <TextField
+                select
+                label="Select Tee"
+                value={selectedTee}
+                onChange={handleTeeSelection}
+                variant="outlined"
+                fullWidth
+              >
+                {teeOptions.map((tee, index) => (
+                  <MenuItem key={index} value={tee.tee_name}>
+                    {tee.tee_name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+
+            {/* Score Inputs */}
+            {holes.length > 0 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Enter Scores for {holes.length} Holes
+                </Typography>
+                {holes.map((hole, index) => (
+                  <Box key={index} sx={{ marginBottom: 2 }}>
+                    <Typography variant="subtitle1">Hole {index + 1}</Typography>
+                    <TextField
+                      type="number"
+                      label="Strokes"
+                      value={scores[index]?.strokes || ''}
+                      onChange={(e) =>
+                        handleScoreChange(index, 'strokes', parseInt(e.target.value, 10) || 0)
+                      }
+                      variant="outlined"
+                      fullWidth
+                      sx={{ marginBottom: 1 }}
+                    />
+                    <TextField
+                      select
+                      label="Putts"
+                      value={scores[index]?.putts || ''}
+                      onChange={(e) =>
+                        handleScoreChange(index, 'putts', parseInt(e.target.value, 10) || 0)
+                      }
+                      variant="outlined"
+                      fullWidth
+                      sx={{ marginBottom: 1 }}
+                    >
+                      {[0, 1, 2, 3, 4].map((putt) => (
+                        <MenuItem key={putt} value={putt}>
+                          {putt}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={scores[index]?.fairwayHit || false}
+                          onChange={(e) =>
+                            handleScoreChange(index, 'fairwayHit', e.target.checked)
+                          }
+                        />
+                      }
+                      label="Fairway Hit"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={scores[index]?.greenInRegulation || false}
+                          onChange={(e) =>
+                            handleScoreChange(index, 'greenInRegulation', e.target.checked)
+                          }
+                        />
+                      }
+                      label="Green in Regulation"
+                    />
+                    <TextField
+                      select
+                      label="Penalties"
+                      value={scores[index]?.penalties || ''}
+                      onChange={(e) =>
+                        handleScoreChange(index, 'penalties', parseInt(e.target.value, 10) || 0)
+                      }
+                      variant="outlined"
+                      fullWidth
+                      sx={{ marginBottom: 1 }}
+                    >
+                      {[0, 1, 2, 3, 4].map((penalty) => (
+                        <MenuItem key={penalty} value={penalty}>
+                          {penalty}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Box>
+                ))}
+              </Box>
+            )}
+
+            {/* Save Button */}
+            {holes.length > 0 && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? 'Saving...' : 'Save Round'}
+              </Button>
+            )}
+          </Stack>
+        </Grid>
+      </Grid>
+    </Box>
+  );
 }

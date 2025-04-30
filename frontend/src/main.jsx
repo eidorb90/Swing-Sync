@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { StrictMode } from 'react';
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MantineProvider, createTheme } from '@mantine/core';
 import App from './App';
@@ -29,7 +28,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/addrounds" element={
           <MantineProvider theme={theme}>
           <AddRounds />
-          </MantineProvider>         
+          </MantineProvider>
         } />
 
         <Route path="/leaderboard" element={

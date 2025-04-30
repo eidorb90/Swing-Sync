@@ -207,7 +207,7 @@ class CourseSearchAPIView(APIView):
 
 
 class SavedCourseView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         courses = Course.objects.prefetch_related("tees__holes").all()
@@ -216,7 +216,7 @@ class SavedCourseView(APIView):
 
 
 class RoundView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     @transaction.atomic
     def post(self, request, round_id=None):
@@ -337,7 +337,7 @@ class RoundView(APIView):
 
 
 class CourseTeeView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, course_id):
         course = get_object_or_404(Course, id=course_id)
@@ -347,7 +347,7 @@ class CourseTeeView(APIView):
 
 
 class TeeHoleView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, tee_id):
         tee = get_object_or_404(Tee, id=tee_id)
