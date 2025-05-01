@@ -1,0 +1,26 @@
+.input-container {
+    position: relative;
+    width: 300px;
+  }
+  
+  .styled-input {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    border: 2px solid #1f2732;
+    border-radius: 25px;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+    background-color: #05070a;
+  }
+  
+  .styled-input:focus {
+    border-color: #05070a;
+    box-shadow: 0 0 8px rgba(108, 99, 255, 0.5);
+    background-color: #05070a;
+  }
+  
+  .styled-input::placeholder {
+    color: #ffffff;
+    font-style: italic;
+  }

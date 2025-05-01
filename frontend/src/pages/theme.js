@@ -1,4 +1,3 @@
-import { MantineThemeOverride } from '@mantine/core';
 
 // Custom theme configuration for Mantine
 export const theme = {

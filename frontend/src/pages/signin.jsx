@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -129,6 +129,7 @@ export default function SignIn(props) {
             if (response.ok) {
                 navigate('/account'); // Navigate to account page
                 localStorage.setItem('userId', result.user_id); 
+                localStorage.setItem('token', result.access); 
             } else {
                 setGeneralError(result.error || 'Invalid username or password.');
             }
@@ -136,9 +137,12 @@ export default function SignIn(props) {
             console.error('An error occurred:', error);
             setGeneralError('An error occurred. Please try again.');
         } finally {
-            setLoading(false); // Stop loading spinner
+            setLoading(false);
         }
     };
+
+    
+    
 
     return (
         <AppTheme {...props}>

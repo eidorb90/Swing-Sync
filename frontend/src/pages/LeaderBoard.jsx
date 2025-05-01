@@ -3,36 +3,22 @@ import { alpha } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import AppNavbar from './components/AppNavbar';
-import Header from './components/Header';
-
-import SideMenu from './components/SideMenu';
-import AppTheme from './theme/AppTheme';
-import {
-  chartsCustomizations,
-  dataGridCustomizations,
-  datePickersCustomizations,
-  treeViewCustomizations,
-} from './theme/customizations';
-import LeaderBoardGrid from './components/LeaderBoardGrid';
-
-const xThemeComponents = {
-  ...chartsCustomizations,
-  ...dataGridCustomizations,
-  ...datePickersCustomizations,
-  ...treeViewCustomizations,
-};
+import AppNavbar from '../layouts/components/AppNavbar';
+import Header from '../layouts/components/Header';
+import LeaderBoardGrid from '../layouts/components/LeaderBoardGrid';
+import SideMenu from '../layouts/components/SideMenu';
+import AppTheme from '../layouts/theme/AppTheme';
 
 export default function LeaderBoard(props) {
   return (
-    <AppTheme {...props} themeComponents={xThemeComponents}>
+    <AppTheme {...props} >
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu />
         <AppNavbar />
         {/* Main content */}
         <Box
-          component="main"
+          component=""
           sx={(theme) => ({
             flexGrow: 1,
             backgroundColor: theme.vars

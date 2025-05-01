@@ -9,13 +9,13 @@ import Typography from '@mui/material/Typography';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
-
 import ColorModeIconDropdown from '../theme/customizations/ColorModeIconDropdown';
 import GolfCourseIcon from '@mui/icons-material/GolfCourse';
 
 
 const Toolbar = styled(MuiToolbar)({
   width: '100%',
+  
   padding: '12px',
   display: 'flex',
   flexDirection: 'column',

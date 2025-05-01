@@ -12,9 +12,9 @@ const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
   },
   [`& .${breadcrumbsClasses.ol}`]: {
     alignItems: 'center',
+    maxwidth: 'none',
   },
 }));
-
 export default function NavbarBreadcrumbs() {
   return (
     <StyledBreadcrumbs
