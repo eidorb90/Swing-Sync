@@ -107,7 +107,6 @@ export default function SignIn(props) {
     
         const credentials = { username, password };
     
-        console.log('Submitting credentials:', credentials); // Debugging
     
         if (!validateInputs(credentials)) {
             setLoading(false); 
@@ -124,7 +123,6 @@ export default function SignIn(props) {
             });
     
             const result = await response.json();
-            console.log('API Response:', result); // Debugging API response
     
             if (response.ok) {
                 navigate('/account'); // Navigate to account page
