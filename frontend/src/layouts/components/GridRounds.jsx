@@ -4,15 +4,15 @@ import '../Styles/Inputstyle.css';
 
 export default function GridRound() {
   const [userId, setUserId] = useState(null);
-  const [courses, setCourses] = useState([]); 
-  const [selectedCourse, setSelectedCourse] = useState(null); 
-  const [searchValue, setSearchValue] = useState(''); 
-  const [selectedGender, setSelectedGender] = useState(''); 
-  const [teeOptions, setTeeOptions] = useState([]); 
-  const [selectedTee, setSelectedTee] = useState(''); 
-  const [holes, setHoles] = useState([]); 
-  const [scores, setScores] = useState([]); 
-  const [isSaving, setIsSaving] = useState(false); 
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [searchValue, setSearchValue] = useState('');
+  const [selectedGender, setSelectedGender] = useState('');
+  const [teeOptions, setTeeOptions] = useState([]);
+  const [selectedTee, setSelectedTee] = useState('');
+  const [holes, setHoles] = useState([]);
+  const [scores, setScores] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
@@ -53,36 +53,37 @@ export default function GridRound() {
 
   // Handle course selection
   const handleCourseSelection = (event, newValue) => {
-    setSelectedCourse(newValue); 
-    setSelectedGender(''); 
-    setTeeOptions([]); 
-    setSelectedTee(''); 
-    setHoles([]); 
-    setScores([]); 
+    setSelectedCourse(newValue);
+    setSelectedGender('');
+    setTeeOptions([]);
+    setSelectedTee('');
+    setHoles([]);
+    setScores([]);
   };
 
   // Handle gender selection
   const handleGenderChange = (event) => {
     const gender = event.target.value;
     setSelectedGender(gender);
+
     if (selectedCourse && selectedCourse.tees[gender]) {
-      setTeeOptions(selectedCourse.tees[gender]); 
-      setTeeOptions([]); 
+      setTeeOptions(selectedCourse.tees[gender]); // Set tee options based on the selected gender
+    } else {
+      setTeeOptions([]); // Clear tee options if no tees are available
     }
-    setSelectedTee(''); 
-    setHoles([]); 
+
+    setSelectedTee('');
+    setHoles([]);
     setScores([]);
   };
 
-  
   const handleTeeSelection = (event) => {
     const teeName = event.target.value;
     setSelectedTee(teeName);
 
-    
     const tee = teeOptions.find((t) => t.tee_name === teeName);
     if (tee) {
-      setHoles(tee.holes); 
+      setHoles(tee.holes);
       setScores(
         tee.holes.map(() => ({
           strokes: 0,
@@ -91,7 +92,7 @@ export default function GridRound() {
           greenInRegulation: false,
           penalties: 0,
         }))
-      ); 
+      );
     } else {
       setHoles([]);
       setScores([]);

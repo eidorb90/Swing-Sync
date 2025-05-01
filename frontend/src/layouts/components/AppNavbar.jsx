@@ -9,7 +9,6 @@ import Typography from '@mui/material/Typography';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
-
 import ColorModeIconDropdown from '../theme/customizations/ColorModeIconDropdown';
 import GolfCourseIcon from '@mui/icons-material/GolfCourse';
 

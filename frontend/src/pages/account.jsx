@@ -5,16 +5,12 @@ import { alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Stack from '@mui/material/Stack';
-
-
-// Local components
 import AppNavbar from '../layouts/components/AppNavbar';
 import Header from '../layouts/components/Header';
 import MainGrid from '../layouts/components/MainGrid';
 import SideMenu from '../layouts/components/SideMenu';
 import AppTheme from '../layouts/theme/AppTheme';
 import WoodyAiBanner from '../components/Woody-AiBanner';
-
 
 import { Container, Title } from '@mantine/core';
 
