@@ -8,7 +8,6 @@ import Header from '../layouts/components/Header';
 import GridRound from '../layouts/components/GridRounds';
 import SideMenu from '../layouts/components/SideMenu';
 import AppTheme from '../layouts/theme/AppTheme';
-import WoodyAiBanner from '../components/Woody-AiBanner';
 import { Container, Title } from '@mantine/core';
 
 export default function AddRounds() {
@@ -16,7 +15,6 @@ export default function AddRounds() {
 
   return (
     <AppTheme>
-      <WoodyAiBanner text="Welcome To Swing Sync Try out The New Woody.Ai" />
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu />

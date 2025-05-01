@@ -1,6 +1,5 @@
 import * as React from "react";
 import { useLocation } from "react-router-dom";
-
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -13,13 +12,10 @@ import {
   ListItem,
   ListItemText,
 } from "@mui/material";
-
 import AppNavbar from "../layouts/components/AppNavbar";
 import Header from "../layouts/components/Header";
 import SideMenu from "../layouts/components/SideMenu";
 import AppTheme from "../layouts/theme/AppTheme";
-import WoodyAiBanner from "../components/Woody-AiBanner";
-
 import { Container, Title } from "@mantine/core";
 
 export default function CourseDetails(props) {
@@ -55,7 +51,6 @@ export default function CourseDetails(props) {
 
   return (
     <AppTheme {...props}>
-      <WoodyAiBanner text="Welcome To Swing Sync Try out The New Woody.Ai" />
       <CssBaseline enableColorScheme />
       <Box sx={{ display: "flex" }}>
         <SideMenu />
@@ -113,8 +108,8 @@ export default function CourseDetails(props) {
               {selectedGender && (
                 <Box mb={2}>
                   <Typography variant="h6" gutterBottom>
-                  Select Tee
-                </Typography>
+                    Select Tee
+                  </Typography>
                   <TextField
                     select
                     value={selectedTee}
