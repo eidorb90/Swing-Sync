@@ -16,13 +16,16 @@ import SideMenu from "../layouts/components/SideMenu";
 import AppTheme from "../layouts/theme/AppTheme";
 
 const ChatBot = (props) => {
+const ChatBot = (props) => {
   const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
@@ -34,6 +37,7 @@ const ChatBot = (props) => {
     setMessages([...messages, userMessage]);
     setInput("");
     setLoading(true);
+    
     
     try {
       const response = await axios.post("http://localhost:8000/api/chat/", {
@@ -54,6 +58,7 @@ const ChatBot = (props) => {
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
+      setInput('');
       setInput('');
       setLoading(false);
     }
@@ -237,3 +242,4 @@ const ChatBot = (props) => {
 };
 
 export default ChatBot;
+

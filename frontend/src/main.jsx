@@ -3,12 +3,13 @@ import ReactDOM from "react-dom/client";
 import { StrictMode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MantineProvider, createTheme } from "@mantine/core";
+import App from "./App";
 import Account from "./pages/account";
 import SignIn from "./pages/signin";
 import SignUp from "./pages/signup";
 import ChatBot from "./pages/chatBot";
 import "@mantine/core/styles.css";
-import LeaderBoard from "./pages/leaderboard";
+import LeaderBoard from "./layouts/LeaderBoard";
 import AddRounds from "./pages/Add_rounds";
 import ProtectedRoute from "./pages/Check";
 import CourseDetails from "./pages/CourseDetails";
@@ -49,6 +50,29 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               <ProtectedRoute>
                 <Account />
               </ProtectedRoute>
+            </MantineProvider>
+          }
+        />
+
+        <Route path="/signin" element={<SignIn />}></Route>
+
+        <Route path="/signup" element={<SignUp />}></Route>
+
+        <Route path="/Woody/chat" 
+        element={
+          <MantineProvider theme={theme}>
+            <ProtectedRoute>
+              <ChatBot />
+            </ProtectedRoute>
+          </MantineProvider>
+        } />
+        
+
+        <Route
+          path="/course-details"
+          element={
+            <MantineProvider theme={theme}>
+              <CourseDetails />
             </MantineProvider>
           }
         />
