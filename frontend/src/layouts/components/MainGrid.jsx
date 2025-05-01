@@ -129,7 +129,7 @@ export default function MainGrid() {
       </Typography>
           <CustomizedDataGrid />
         </Grid>
-
+        </Grid>
       </Grid>
     </Box>
   );
