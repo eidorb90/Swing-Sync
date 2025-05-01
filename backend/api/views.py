@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import User
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth import authenticate
 from .serializers import (
     UserSerializer,
@@ -16,6 +17,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import transaction
 from .chat_bot import ChatBot
+from .ollama_vision import ChatBot as VisionChatBot
+
+import tempfile
 
 
 # Create your views here.
@@ -57,6 +61,8 @@ class LoginUserView(generics.GenericAPIView):
 
 
 class UsersView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, user_id=None):
         if user_id:
             user = get_object_or_404(User, pk=user_id)
@@ -83,7 +89,7 @@ class CourseSearchAPIView(APIView):
         500: Internal server error
     """
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         search_query = request.query_params.get("search", "")
@@ -205,7 +211,7 @@ class CourseSearchAPIView(APIView):
 
 
 class SavedCourseView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         courses = Course.objects.prefetch_related("tees__holes").all()
@@ -214,7 +220,7 @@ class SavedCourseView(APIView):
 
 
 class RoundView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
     def post(self, request, round_id=None):
@@ -335,7 +341,7 @@ class RoundView(APIView):
 
 
 class CourseTeeView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, course_id):
         course = get_object_or_404(Course, id=course_id)
@@ -345,7 +351,7 @@ class CourseTeeView(APIView):
 
 
 class TeeHoleView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, tee_id):
         tee = get_object_or_404(Tee, id=tee_id)
@@ -355,7 +361,7 @@ class TeeHoleView(APIView):
 
 
 class ChatBotView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         prompt = request.data.get("message")
@@ -384,8 +390,51 @@ class ChatBotView(APIView):
             )
 
 
+class VisionChatBotView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def post(self, request):
+        message = request.data.get("message")
+        video_file = request.FILES.get("video")
+
+        if not message and not video_file:
+            return Response(
+                {"error": "Either message or video is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            bot = VisionChatBot()
+
+            if video_file:
+                with tempfile.NamedTemporaryFile(
+                    suffix=".mp4", delete=False
+                ) as temp_video:
+                    for chunk in video_file.chunks():
+                        temp_video.write(chunk)
+                    video_path = temp_video.name
+
+                try:
+                    response = bot.handle_video(video_path)
+                finally:
+                    if os.path.exists(video_path):
+                        os.unlink(video_path)
+
+                return Response({"response": response}, status=status.HTTP_200_OK)
+            else:
+                response = bot.answer_question(message)
+                return Response({"response": response}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
 class UserStats(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, user_id):
         user = User.objects.get(id=user_id)
@@ -463,7 +512,7 @@ class UserStats(APIView):
 
 
 class LeaderBoardView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         players = User.objects.all()[:50]
