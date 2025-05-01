@@ -1,17 +1,14 @@
 import * as React from 'react';
 import { useState, useEffect } from "react";
-
 import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import ChartUserByCountry from './ChartUserByCountry';
-
 import CustomizedDataGrid from './CustomizedDataGrid';
 import PageViewsBarChart from './MostRecentRoundBarChart';
 import MostRecentRoundChart from './MostRecentRoundChart';
 import SessionsChart from "./RoundDataChart";
-
 import { RadarChart } from '@mantine/charts';
 import { Container, Title } from '@mantine/core';
 
