@@ -1,36 +1,27 @@
 from django.db import models
-from django.contrib.auth.models import User as DjangoUser
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
+from django.core.validators import RegexValidator
 
 
-# Create your models here.
-class User(models.Model):
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    username = models.CharField(max_length=50)
-    email = models.EmailField()
-    password = models.CharField(max_length=128)
-    phone_number = models.CharField(max_length=15)
-    course_name = models.CharField(max_length=50)
+class User(AbstractUser):
+    phone_regex = RegexValidator(
+        regex=r"^\+?1?\d{9,15}$",
+        message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.",
+    )
+
+    phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True)
+    course_name = models.CharField(max_length=50, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("user")
+        verbose_name_plural = _("users")
 
     def __str__(self):
-        return self.username
-
-    def save(self, *args, **kwargs):
-        # Only hash if password changed or new user
-        if self._state.adding or self.has_field_changed("password"):
-            self.password = make_password(self.password)
-        super().save(*args, **kwargs)
-
-    def has_field_changed(self, field_name):
-        if not self.pk:
-            return True
-        old_value = User.objects.get(pk=self.pk).__dict__[field_name]
-        return old_value != self.__dict__[field_name]
-
-    def check_password(self, raw_password):
-        """Validate password against stored hash"""
-        return check_password(raw_password, self.password)
+        information = f"{self.username} - {self.email} - {self.pk}"
+        return information
 
 
 class Course(models.Model):
@@ -42,6 +33,8 @@ class Course(models.Model):
     country = models.CharField(max_length=50)
     latitude = models.FloatField()
     longitude = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.course_name
@@ -69,6 +62,8 @@ class Tee(models.Model):
     back_course_rating = models.FloatField()
     back_slope_rating = models.IntegerField()
     back_bogey_rating = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return (
@@ -82,6 +77,8 @@ class Hole(models.Model):
     par = models.IntegerField()
     yardage = models.IntegerField()
     handicap = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["hole_number"]
@@ -100,6 +97,8 @@ class HoleScore(models.Model):
     fairway_hit = models.BooleanField(default=False)
     green_in_regulation = models.BooleanField(default=False)
     penalties = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["hole__hole_number"]
@@ -110,11 +109,13 @@ class HoleScore(models.Model):
 
 class Round(models.Model):
     tee = models.ForeignKey(Tee, on_delete=models.CASCADE)
-    player = models.ForeignKey(DjangoUser, on_delete=models.CASCADE)
+    player = models.ForeignKey(User, on_delete=models.CASCADE)
     date_played = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     is_complete = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     @property
     def total_score(self):

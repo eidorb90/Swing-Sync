@@ -220,7 +220,7 @@ export default function SignUp(props) {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography sx={{ textAlign: "center" }}>
               Already have an account?{" "}
-              <Link href="/login/" variant="body2" sx={{ alignSelf: "center" }}>
+              <Link href="/signin/" variant="body2" sx={{ alignSelf: "center" }}>
                 Sign in
               </Link>
             </Typography>

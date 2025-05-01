@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User
+from .models import User
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
@@ -15,7 +15,7 @@ import requests
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import transaction
-# from .chat_bot import generate_text
+from .chat_bot import ChatBot
 
 
 # Create your views here.
@@ -24,13 +24,6 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from rest_framework import status, generics
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
-from .serializers import LoginSerializer
 
 class LoginUserView(generics.GenericAPIView):
     serializer_class = LoginSerializer
@@ -55,17 +48,17 @@ class LoginUserView(generics.GenericAPIView):
                     "user_id": user.id,
                     "username": user.username,
                 },
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
         else:  # If authentication fails
             return Response(
                 {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
             )
 
+
 class UsersView(APIView):
     def get(self, request, user_id=None):
         if user_id:
-
             user = get_object_or_404(User, pk=user_id)
             return Response({"user": UserSerializer(user).data})
         else:
@@ -373,8 +366,18 @@ class ChatBotView(APIView):
             )
 
         try:
-            response = generate_text(f"{prompt}")
+            rounds = Round.objects.all().order_by("-date_played")[:5]
+
+            # Format the rounds as a string
+            rounds_text = "\n\nRecent rounds data:\n"
+            for round in rounds:
+                rounds_text += f"- Course: {round.course.course_name}, Date: {round.date_played.strftime('%Y-%m-%d')}, Score: {round.total_score}\n"
+
+            bot = ChatBot()
+            response = bot.handle_conversation(prompt, rounds_text)
+
             return Response({"response": response}, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR

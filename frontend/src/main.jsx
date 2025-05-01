@@ -8,7 +8,7 @@ import SignIn from "./pages/signin";
 import SignUp from "./pages/signup";
 import ChatBot from "./pages/chatBot";
 import "@mantine/core/styles.css";
-import LeaderBoard from "./pages/leaderboard";
+import LeaderBoard from "./pages/LeaderBoard";
 import AddRounds from "./pages/Add_rounds";
 import ProtectedRoute from "./pages/Check";
 import CourseDetails from "./pages/CourseDetails";
