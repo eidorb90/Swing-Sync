@@ -8,7 +8,6 @@ import Header from "../layouts/components/Header";
 import MainGrid from "../layouts/components/MainGrid";
 import SideMenu from "../layouts/components/SideMenu";
 import AppTheme from "../layouts/theme/AppTheme";
-import WoodyAiBanner from "../components/Woody-AiBanner";
 import { Container, Title } from "@mantine/core";
 import {
   chartsCustomizations,
@@ -27,7 +26,6 @@ const xThemeComponents = {
 export default function Dashboard(props) {
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
-      <WoodyAiBanner text="Welcome To Swing Sync Try out The New Woody.Ai" />
       <CssBaseline enableColorScheme />
       <Box sx={{ display: "flex" }}>
         <SideMenu />
