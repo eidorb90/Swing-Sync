@@ -18,6 +18,7 @@ from django.db import transaction
 from .ollama_chat import ChatBot
 from .ollama_vision import ChatBot as VisionChatBot
 import tempfile
+import traceback
 
 
 # Create your views here.
@@ -379,8 +380,17 @@ class ChatBotView(APIView):
 
             return Response({"response": response}, status=status.HTTP_200_OK)
         except Exception as e:
+            error_details = {
+                "error_message": str(e),
+                "error_type": type(e).__name__,
+                "traceback": traceback.format_exc(),
+            }
+            print(
+                "Error details:", error_details
+            )  # Log the error details for debugging
             return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": "An error occurred", "details": error_details},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
