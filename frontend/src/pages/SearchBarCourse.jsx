@@ -1,21 +1,25 @@
 import * as React from 'react';
+
+// Material UI core
 import { alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Stack from '@mui/material/Stack';
 import AppNavbar from '../layouts/components/AppNavbar';
 import Header from '../layouts/components/Header';
-import GridRound from '../layouts/components/GridRounds';
 import SideMenu from '../layouts/components/SideMenu';
 import AppTheme from '../layouts/theme/AppTheme';
 import WoodyAiBanner from '../components/Woody-AiBanner';
+import Search from '../layouts/components/Search';
+
 import { Container, Title } from '@mantine/core';
 
-export default function AddRounds() {
+
+export default function SearchBarCourse(props) {
 
 
   return (
-    <AppTheme>
+    <AppTheme {...props} >
       <WoodyAiBanner text="Welcome To Swing Sync Try out The New Woody.Ai" />
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
@@ -31,7 +35,9 @@ export default function AddRounds() {
               : alpha(theme.palette.background.default, 1),
             overflow: 'auto',
           })}
+          
         >
+          
           <Stack
             spacing={2}
             sx={{
@@ -42,14 +48,32 @@ export default function AddRounds() {
             }}
           >
             <Header />
-            <GridRound />
+            
+          
           </Stack>
+          <Stack
+          component="main"
+          sx={(theme) => ({
+            flexGrow: 1,
+            backgroundColor: theme.vars
+              ? `rgba(${theme.vars.palette.background.defaultChannel} / 1)`
+              : alpha(theme.palette.background.default, 1),
+            overflow: 'auto',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          })}
+        >
+          <Search />
+        </Stack>
+          
+          
         </Box>
+        
       </Box>
-          <Container size="lg" py="xl">
+      <Container size="lg" py="xl">
 
-          </Container>
+      </Container>
     </AppTheme>
-    
   );
 }
