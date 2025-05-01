@@ -1,7 +1,7 @@
 import ollama
 import os
 
-ollama_host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+ollama_host = "http://127.0.0.1:11434/"
 ollama.host = ollama_host
 
 

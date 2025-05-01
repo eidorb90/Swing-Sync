@@ -27,14 +27,6 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from rest_framework import status, generics
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
-from .serializers import LoginSerializer
-
-
 class LoginUserView(generics.GenericAPIView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
