@@ -23,7 +23,7 @@ export default function MainGrid() {
         columns={12}
         sx={{ mb: (theme) => theme.spacing(100) }}
       >
-        <Grid container spacing={2} columns={12}>
+        <Grid container spacing={2} columns={1}>
         <Grid size={{ xs: 12, lg: 9 }}>
           <CustomizedDataGrid />
         </Grid>
@@ -32,9 +32,7 @@ export default function MainGrid() {
           
         </Grid>
       </Grid>
-      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-        Details
-      </Typography>
+    
       
         <Grid size={{ xs: 12, lg: 3 }}>
           <Stack gap={2} direction={{ xs: 'column', sm: 'row', lg: 'column' }}>

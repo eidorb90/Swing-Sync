@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { StrictMode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MantineProvider, createTheme } from "@mantine/core";
-import App from "./App";
+
 import Account from "./pages/account";
 import SignIn from "./pages/signin";
 import SignUp from "./pages/signup";
@@ -72,7 +72,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           path="/course-details"
           element={
             <MantineProvider theme={theme}>
-              <CourseDetails />
+              <ProtectedRoute>
+                <CourseDetails />
+              </ProtectedRoute>
             </MantineProvider>
           }
         />
