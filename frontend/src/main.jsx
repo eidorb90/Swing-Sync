@@ -58,11 +58,15 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
         <Route path="/signup" element={<SignUp />}></Route>
 
-        <Route path="/Woody/chat" element={
+        <Route path="/Woody/chat" 
+        element={
           <MantineProvider theme={theme}>
-            <ChatBot />
+            <ProtectedRoute>
+              <ChatBot />
+            </ProtectedRoute>
           </MantineProvider>
         } />
+        
 
         <Route
           path="/course-details"
