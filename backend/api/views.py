@@ -18,7 +18,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import transaction
 from .chat_bot import ChatBot
 from .ollama_vision import ChatBot as VisionChatBot
-
+from django.utils import timezone
 import tempfile
 import builtins
 
@@ -43,8 +43,10 @@ class LoginUserView(generics.GenericAPIView):
 
         # Authenticate the user
         user = authenticate(username=username, password=password)
-
+        user.save()
         if user is not None:  # If the user is authenticated
+            user.is_online = True
+            user.last_login = timezone.now()
             refresh = RefreshToken.for_user(user)
             return Response(
                 {
@@ -439,6 +441,7 @@ class UserStats(APIView):
 
     def get(self, request, user_id):
         user = User.objects.get(id=user_id)
+        user.save()
         rounds = Round.objects.filter(player=user).order_by("-date_played")[:10]
         round_count = len(rounds)
 
@@ -589,8 +592,14 @@ class LeaderBoardView(APIView):
                     (sum(best_differentials) / len(best_differentials)) * 0.96, 2
                 )
 
+            if player.is_online:
+                is_online = "Online"
+            else:
+                is_online = "Offline"
+
             leader_board.append(
                 {
+                    "is_online": is_online,
                     "id": player.id,
                     "user_id": player.id,
                     "username": player.username,

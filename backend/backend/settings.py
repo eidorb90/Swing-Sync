@@ -14,6 +14,8 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
+from celery.schedules import crontab
+
 
 load_dotenv()
 
@@ -33,6 +35,8 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = "api.User"
+
+USER_ONLINE_TIMEOUT = 15 * 60
 
 
 REST_FRAMEWORK = {
@@ -76,6 +80,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "api.middleware.UserOnlineStatusMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -157,3 +162,10 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 APPEND_SLASH = True
+
+CELERY_BEAT_SCHEDULE = {
+    "update-user-status": {
+        "task": "api.tasks.update_user_status",
+        "schedule": crontab(minute="*/15"),  # Run every 15 minutes
+    },
+}

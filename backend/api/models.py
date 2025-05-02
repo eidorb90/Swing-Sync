@@ -2,12 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
-
-
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy as _
-from django.core.validators import RegexValidator
+from django.utils.timezone import now
 
 
 class User(AbstractUser):
@@ -20,10 +15,30 @@ class User(AbstractUser):
     course_name = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    is_online = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        # Normalize username
+        self.username = self.username.lower()
+
+        # Track login duration (if applicable)
+        if self.last_login:
+            time_since_last_login = now() - self.last_login
+            if time_since_last_login.total_seconds() > 3600:
+                self.is_online = False
+            else:
+                self.is_online = True
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("user")
         verbose_name_plural = _("users")
+
+    def __str__(self):
+        status = "online" if self.is_online else "offline"
+        return f"{self.username} ({status})"
 
 
 class Course(models.Model):

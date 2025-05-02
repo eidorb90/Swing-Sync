@@ -49,10 +49,11 @@ export default function CustomizedDataGrid() {
       const usersWithStats = await Promise.all(userStatsPromises);
       
       // Format the data with the detailed handicap
+      
       const formattedData = usersWithStats.map((user, index) => ({
         id: (index + 2).toString(), // Start from id 2 since we already have id 1
         user: user.username || user.name || "Unknown User",
-        status: "Online", 
+        status: user.is_online, 
         handicap: user.detailedHandicap || 0,
         totalRounds: user.total_rounds || 0,
         averageScore: user.average_score || 0,

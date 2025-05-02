@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "asgiref>=3.8.1",
+    "celery>=5.5.2",
     "django>=5.1.7",
     "django-cors-headers>=4.7.0",
     "djangorestframework-simplejwt>=5.5.0",
