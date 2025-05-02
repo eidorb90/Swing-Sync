@@ -33,8 +33,6 @@ class LoginUserView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        print("Incoming data:", request.data)
-
         username = request.data.get("username")
         password = request.data.get("password")
 
@@ -471,7 +469,6 @@ class UserStats(APIView):
             fir += round.fairways_hit_percent
             gir += round.green_in_regulation
 
-            # Get number of holes in this round by counting hole scores
             num_holes = round.hole_scores.count()
 
             # Handicap calculation using USGA formula, adjusted for 9-hole rounds
