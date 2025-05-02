@@ -30,24 +30,30 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
-class LoginUserView(generics.GenericAPIView):
-    serializer_class = LoginSerializer
+# In api/views.py
+
+
+class LoginUserView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        # Debug: Print the incoming data
         print("Incoming data:", request.data)
 
-        username = request.data.get("username")  # Extract email from request.data
-        password = request.data.get("password")  # Extract password from request.data
+        username = request.data.get("username")
+        password = request.data.get("password")
 
         # Authenticate the user
         user = authenticate(username=username, password=password)
-        user.save()
-        if user is not None:  # If the user is authenticated
+
+        if user is not None:
+            # Update user status
             user.is_online = True
             user.last_login = timezone.now()
+            user.save()
+
+            # Generate token
             refresh = RefreshToken.for_user(user)
+
             return Response(
                 {
                     "access": str(refresh.access_token),
@@ -57,7 +63,7 @@ class LoginUserView(generics.GenericAPIView):
                 },
                 status=status.HTTP_200_OK,
             )
-        else:  # If authentication fails
+        else:
             return Response(
                 {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
             )

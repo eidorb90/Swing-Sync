@@ -21,9 +21,12 @@ class UserOnlineStatusMiddleware:
                 request.user.last_login = current_time
                 request.user.is_online = True
                 request.user.save(update_fields=["last_login", "is_online"])
-        print(
-            f"User {request.user.username} last login updated to {request.user.last_login}, {'Online' if request.user.is_online else 'Offline'}"
-        )
-        response = self.get_response(request)
 
+            # Only try to print if user is authenticated
+            print(
+                f"User {request.user.username} last login updated to {request.user.last_login}, "
+                f"{'Online' if request.user.is_online else 'Offline'}"
+            )
+
+        response = self.get_response(request)
         return response
