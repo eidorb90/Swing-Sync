@@ -9,6 +9,7 @@ from .serializers import (
     LoginSerializer,
     CourseSerializer,
 )
+from django.http import StreamingHttpResponse
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Course, Tee, Hole, Round, HoleScore
 import os
@@ -366,9 +367,15 @@ class TeeHoleView(APIView):
 class ChatBotView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def stream_response(self, prompt, rounds_text):
+        bot = ChatBot()
+        response_stream = bot.answer_question(prompt, rounds_text)
+
+        for chunk in response_stream:
+            yield chunk
+
     def post(self, request):
         prompt = request.data.get("message")
-        # last_5_rounds = Round.objects.filter(id=1).order_by("-date_played")[:5]
         if not prompt:
             return Response(
                 {"error": "Prompt is required"}, status=status.HTTP_400_BAD_REQUEST
@@ -376,16 +383,13 @@ class ChatBotView(APIView):
 
         try:
             rounds = Round.objects.all().order_by("-date_played")[:5]
-
-            # Format the rounds as a string
             rounds_text = "\n\nRecent rounds data:\n"
             for round in rounds:
                 rounds_text += f"- Course: {round.course.course_name}, Date: {round.date_played.strftime('%Y-%m-%d')}, Score: {round.total_score}\n"
 
-            bot = ChatBot()
-            response = bot.handle_conversation(prompt, rounds_text)
-
-            return Response({"response": response}, status=status.HTTP_200_OK)
+            return StreamingHttpResponse(
+                self.stream_response(prompt, rounds_text), content_type="text/plain"
+            )
 
         except Exception as e:
             return Response(

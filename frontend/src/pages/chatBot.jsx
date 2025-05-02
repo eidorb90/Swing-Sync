@@ -27,45 +27,62 @@ const ChatBot = (props) => {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
-
+  
   const handleSendMessage = async () => {
     if (input.trim() === "" || loading) return;
-
+  
     const userMessage = { text: input, sender: "user", timestamp: new Date() };
-    setMessages([...messages, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
-
+  
     try {
-      const response = await axios.post("http://localhost:8000/api/chat/", 
-        {
-          message: input
+      const response = await fetch("http://localhost:8000/api/chat/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token")
-          }
-        }
-      );
-      const botMessage = {
-        text: response.data.response,
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
+        body: JSON.stringify({ message: input }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to fetch response");
+  
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let botMessage = { text: "", sender: "bot", timestamp: new Date() };
+  
+      setMessages((prev) => [...prev, botMessage]); // Add an empty bot message first
+  
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+  
+        const chunk = decoder.decode(value, { stream: true });
+  
+        // Append new text to the latest bot message instead of replacing it
+        setMessages((prev) =>
+          prev.map((msg, index) =>
+            index === prev.length - 1 && msg.sender === "bot"
+              ? { ...msg, text: msg.text + chunk }
+              : msg
+          )
+        );
+      }
     } catch (error) {
       console.error("Error sending message:", error);
-      const errorMessage = {
-        text: "Sorry, I encountered an error. Please try again later.",
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          text: "Sorry, I encountered an error. Please try again later.",
+          sender: "bot",
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setLoading(false);
     }
   };
-
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();

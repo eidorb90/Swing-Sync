@@ -141,14 +141,18 @@ Remember: You're the golf buddy who knows their stuff - helpful but not afraid t
             res = ollama.chat(
                 model="gemma3",
                 messages=self.messages,
-                stream=False,
-                options={
-                    "temperature": 0.9,
-                },
+                stream=True,
+                options={"temperature": 0.9},
             )
 
-            self.messages.append(res["message"])
-            return res["message"]["content"]
+            response_content = ""
+
+            for chunk in res:
+                message_content = chunk["message"]["content"]
+                self.messages.append({"role": "assistant", "content": message_content})
+                yield message_content
+
+            return response_content
 
     def handle_conversation(self, user_input=None, last_rounds=None):
         if user_input:
