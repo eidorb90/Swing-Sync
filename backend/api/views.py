@@ -23,14 +23,10 @@ import tempfile
 import builtins
 
 
-# Create your views here.
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
-
-
-# In api/views.py
 
 
 class LoginUserView(APIView):
