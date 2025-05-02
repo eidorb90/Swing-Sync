@@ -7,6 +7,7 @@ import Account from "./pages/account";
 import SignIn from "./pages/signin";
 import SignUp from "./pages/signup";
 import ChatBot from "./pages/chatBot";
+import { SwingReview } from "./pages/vision_chatbot";
 import "@mantine/core/styles.css";
 import LeaderBoard from "./pages/LeaderBoard";
 import AddRounds from "./pages/Add_rounds";
@@ -62,6 +63,15 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <MantineProvider theme={theme}>
             <ProtectedRoute>
               <ChatBot />
+            </ProtectedRoute>
+          </MantineProvider>
+        } />
+
+        <Route path="/swing-review" 
+        element={
+          <MantineProvider theme={theme}>
+            <ProtectedRoute>
+              <SwingReview />
             </ProtectedRoute>
           </MantineProvider>
         } />

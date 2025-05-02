@@ -12,6 +12,7 @@ from api.views import (
     ChatBotView,
     UserStats,
     LeaderBoardView,
+    VisionChatBotView,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -21,7 +22,6 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path("admin/", admin.site.urls),
     # API endpoints
-    
     # User section
     path("api/user/signup/", CreateUserView.as_view(), name="signup"),
     path("api/user/login/", LoginUserView.as_view(), name="login"),
@@ -47,4 +47,5 @@ urlpatterns = [
     path("api-auth", include("rest_framework.urls")),
     # custom ai chatbot section
     path("api/chat/", ChatBotView.as_view(), name="chatbot"),
+    path("api/vision/", VisionChatBotView.as_view(), name="vision_chatbot"),
 ]
