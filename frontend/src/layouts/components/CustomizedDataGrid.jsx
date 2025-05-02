@@ -1,10 +1,8 @@
 import * as React from 'react';
-// Remove the separate import for useState since it's already in React
 import { DataGrid } from '@mui/x-data-grid';
 import { columns, rows } from './gridData';
 
 export default function CustomizedDataGrid() {
-  // Use React.useState instead of just useState
   const [gridRows, setGridRows] = React.useState(rows);
   const [loading, setLoading] = React.useState(true);
 
@@ -107,9 +105,9 @@ export default function CustomizedDataGrid() {
 
   return (
     <DataGrid
-      loading={loading} // Add the loading prop to show loading state
+      loading={loading} 
       checkboxSelection
-      rows={gridRows} // Use gridRows instead of rows
+      rows={gridRows} 
       columns={columns}
       getRowClassName={(params) =>
         params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'

@@ -102,7 +102,7 @@ export default function HandicapBreakdown() {
             ]}
             height={260}
             width={260}
-            slotProps={{ legend: { hidden: true } }} // Hide the legend
+            slotProps={{ legend: { hidden: true } }} 
           >
             <PieCenterLabel primaryText={`${total.toFixed(1)}`} secondaryText="Total Contribution" />
           </PieChart>
