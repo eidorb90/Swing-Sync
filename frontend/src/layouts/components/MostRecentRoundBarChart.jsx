@@ -37,9 +37,11 @@ export default function PageViewsBarChart() {
       try {
         setIsLoading(true);
         const user_id = localStorage.getItem("userId") || "1";
-        const response = await fetch(
-          `http://localhost:8000/api/player/${user_id}/stats`
-        );
+        const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`, {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });
 
         if (response.ok) {
           const fetchedData = await response.json();

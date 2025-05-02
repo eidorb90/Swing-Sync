@@ -14,6 +14,7 @@ import AppNavbar from "../layouts/components/AppNavbar";
 import Header from "../layouts/components/Header";
 import SideMenu from "../layouts/components/SideMenu";
 import AppTheme from "../layouts/theme/AppTheme";
+import ReactMarkdown from "react-markdown";
 
 const ChatBot = (props) => {
   const [messages, setMessages] = useState([]);
@@ -36,9 +37,16 @@ const ChatBot = (props) => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:8000/api/chat/", {
-        message: input,
-      });
+      const response = await axios.post("http://localhost:8000/api/chat/", 
+        {
+          message: input
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token")
+          }
+        }
+      );
       const botMessage = {
         text: response.data.response,
         sender: "bot",
@@ -71,6 +79,7 @@ const ChatBot = (props) => {
       <Box sx={{ display: "flex" }}>
         <SideMenu />
         <AppNavbar />
+        <SideMenu />
 
         <Box
           component="main"
@@ -166,7 +175,7 @@ const ChatBot = (props) => {
                               : "text.primary",
                         }}
                       >
-                        {message.text}
+                        <ReactMarkdown>{message.text}</ReactMarkdown>
                         <Typography
                           variant="caption"
                           sx={{

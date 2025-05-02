@@ -19,7 +19,8 @@ const mainListItems = [
   { text: "LeaderBoard", icon: <LeaderboardIcon />, route: "/leaderboard" },
   { text: "Players", icon: <PeopleRoundedIcon />, route: "/" },
   { text: "Search Courses", icon: <GolfCourseIcon />, route: "/search" },
-  { text: "Chat Bot", icon: <SmartToyIcon />, route: "/Woody/chat" },
+  { text: "Woody.Ai Chat", icon: <SmartToyIcon />, route: "/Woody/chat" },
+  { text: "Woody.Ai Swing Review", icon: <GolfCourseIcon />, route: "/swing-review" },
   { text: "Add Rounds", icon: <AddIcon />, route: "/addrounds" },
 ];
 

@@ -10,13 +10,50 @@ export default function CustomizedDataGrid() {
 
   async function fetchAndUpdateRows() {
     try {
+      // First, get the leaderboard data
       const leaderboardData = await fetchUserData();
-      // Assuming leaderboardData is an array of users
-      const formattedData = leaderboardData.map((user, index) => ({
+      
+      // Create an array of promises to fetch each user's stats
+      const userStatsPromises = leaderboardData.map(async (user) => {
+        try {
+          // Fetch the detailed stats for each user
+          const statsResponse = await fetch(`http://localhost:8000/api/player/${user.id || user.user_id}/stats`, {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          });
+          
+          if (!statsResponse.ok) {
+            console.warn(`Failed to fetch stats for user ${user.username}:`, statsResponse.status);
+            return {
+              ...user,
+              detailedHandicap: 0 // Default if fetch fails
+            };
+          }
+          
+          const statsData = await statsResponse.json();
+          return {
+            ...user,
+            detailedHandicap: statsData.handicap || 0
+          };
+        } catch (error) {
+          console.warn(`Error fetching stats for user ${user.username}:`, error);
+          return {
+            ...user,
+            detailedHandicap: 0 // Default if fetch fails
+          };
+        }
+      });
+      
+      // Wait for all stats requests to complete
+      const usersWithStats = await Promise.all(userStatsPromises);
+      
+      // Format the data with the detailed handicap
+      const formattedData = usersWithStats.map((user, index) => ({
         id: (index + 2).toString(), // Start from id 2 since we already have id 1
         user: user.username || user.name || "Unknown User",
-        status: 'Online', 
-        handicap: user.handicap || 0,
+        status: "Online", 
+        handicap: user.detailedHandicap || 0,
         totalRounds: user.total_rounds || 0,
         averageScore: user.average_score || 0,
       }));
@@ -33,8 +70,11 @@ export default function CustomizedDataGrid() {
     try {
       const user_id = localStorage.getItem('userId');
       // Add credentials and mode to the fetch request
-      const response = await fetch(`http://localhost:8000/api/leaderboard/`);
-      
+      const response = await fetch(`http://localhost:8000/api/leaderboard/`, {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      });
       if (!response.ok) {
         throw new Error(`Server responded with status: ${response.status}`);
       }

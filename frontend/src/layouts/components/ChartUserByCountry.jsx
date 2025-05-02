@@ -1,5 +1,5 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { useDrawingArea } from '@mui/x-charts/hooks';
 import { styled } from '@mui/material/styles';
@@ -10,83 +10,12 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 
-
-
-const data = [
-  { label: 'Putts', value: 0 },
-  { label: 'Penalities', value: 0 },
-  { label: 'Drives', value: 0 },
-  { label: 'Chips', value: 0 },
-  { label: 'Approach', value: 0 },
-];
-const total = data.reduce((sum, item) => sum + item.value, 0);
-
-const countries = [
-  {
-    name: 'Putts',
-    value: Math.round((data.find(item => item.label === 'Putts').value / total) * 100),
-    color: 'hsl(220, 78.20%, 65.90%)',
-  },
-  // Similarly for other categories
-  {
-    name: 'Penalties',
-    value: Math.round((data.find(item => item.label === 'Penalities').value / total) * 100),
-    color: 'hsl(0, 100.00%, 48.40%)',
-  },
-  {
-    name: 'Drives',
-    value: Math.round((data.find(item => item.label === 'Drives').value / total) * 100),
-    color: 'hsl(268, 90.50%, 49.40%)',
-  },
-  {
-    name: 'Chips',
-    value: Math.round((data.find(item => item.label === 'Chips').value / total) * 100),
-    color: 'hsl(123, 84.30%, 50.20%)',
-  },
-  {
-    name: 'Approach',
-    value: Math.round((data.find(item => item.label === 'Approach').value / total) * 100),
-    color: 'hsl(69, 88.00%, 49.20%)',
-  },
-];
-
-
-const StyledText = styled('text', {
-  shouldForwardProp: (prop) => prop !== 'variant',
-})(({ theme }) => ({
+const StyledText = styled('text')(({ theme }) => ({
   textAnchor: 'middle',
   dominantBaseline: 'central',
-  fill: (theme.vars || theme).palette.text.secondary,
-  variants: [
-    {
-      props: {
-        variant: 'primary',
-      },
-      style: {
-        fontSize: theme.typography.h5.fontSize,
-      },
-    },
-    {
-      props: ({ variant }) => variant !== 'primary',
-      style: {
-        fontSize: theme.typography.body2.fontSize,
-      },
-    },
-    {
-      props: {
-        variant: 'primary',
-      },
-      style: {
-        fontWeight: theme.typography.h5.fontWeight,
-      },
-    },
-    {
-      props: ({ variant }) => variant !== 'primary',
-      style: {
-        fontWeight: theme.typography.body2.fontWeight,
-      },
-    },
-  ],
+  fill: theme.palette.text.secondary,
+  fontSize: theme.typography.body2.fontSize,
+  fontWeight: theme.typography.body2.fontWeight,
 }));
 
 function PieCenterLabel({ primaryText, secondaryText }) {
@@ -95,96 +24,103 @@ function PieCenterLabel({ primaryText, secondaryText }) {
   const secondaryY = primaryY + 24;
 
   return (
-    <React.Fragment>
-      <StyledText variant="primary" x={left + width / 2} y={primaryY}>
-        {primaryText}
-      </StyledText>
-      <StyledText variant="secondary" x={left + width / 2} y={secondaryY}>
-        {secondaryText}
-      </StyledText>
-    </React.Fragment>
+    <>
+      <StyledText x={left + width / 2} y={primaryY}>{primaryText}</StyledText>
+      <StyledText x={left + width / 2} y={secondaryY}>{secondaryText}</StyledText>
+    </>
   );
 }
 
-PieCenterLabel.propTypes = {
-  primaryText: PropTypes.string.isRequired,
-  secondaryText: PropTypes.string.isRequired,
-};
+export default function HandicapBreakdown() {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-const colors = [
-  'hsl(220, 78.20%, 65.90%)', // Putts - blue
-  'hsl(0, 100.00%, 48.40%)',  // Penalties - red
-  'hsl(268, 90.50%, 49.40%)', // Drives - purple
-  'hsl(123, 84.30%, 50.20%)', // Chips - green
-  'hsl(69, 88.00%, 49.20%)', // Approach - dark blue/gray
-];
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const user_id = localStorage.getItem('userId');
+        const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`, {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error("Error fetching user stats:", error);
+        setStats(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStats();
+  }, []);
 
-export default function ChartUserByCountry() {  return (
-    <Card
-      variant="outlined"
-      sx={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1 }}
-    >
+  if (loading) {
+    return <Typography>Loading handicap data...</Typography>;
+  }
+
+  if (!stats) {
+    return <Typography>Error loading data</Typography>;
+  }
+
+  const data = [
+    { label: 'Putts', value: stats.avg_putts_per_round },
+    { label: 'Penalties', value: stats.avg_penalities_per_round },
+    { label: 'Score', value: stats.avg_score_per_round },
+    { label: 'Fairway Hit %', value: stats.fairway_hit_percentage },
+    { label: 'GIR %', value: stats.gir_percentage },
+  ];
+
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+
+  const colors = [
+    'hsl(220, 78.20%, 65.90%)', // Putts - blue
+    'hsl(0, 100.00%, 48.40%)',  // Penalties - red
+    'hsl(268, 90.50%, 49.40%)', // Score - purple
+    'hsl(123, 84.30%, 50.20%)', // Fairway Hit % - green
+    'hsl(69, 88.00%, 49.20%)', // GIR % - dark blue/gray
+  ];
+
+  return (
+    <Card variant="outlined" sx={{ width: "100%", border: "1px solid", borderColor: "divider", boxShadow: 3 }}>
       <CardContent>
-        <Typography component="h2" variant="subtitle2">
-          Last Round Breakdown
-        </Typography>
-  
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography component="h2" variant="subtitle2">Handicap Breakdown</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <PieChart
             colors={colors}
-            margin={{
-              left: 80,
-              right: 80,
-              top: 80,
-              bottom: 80,
-            }}
+            margin={{ left: 80, right: 80, top: 80, bottom: 80 }}
             series={[
               {
                 data,
                 innerRadius: 75,
                 outerRadius: 100,
-                paddingAngle: 0,
+                paddingAngle: 2,
                 highlightScope: { faded: 'global', highlighted: 'item' },
               },
             ]}
             height={260}
             width={260}
-            slotProps={{
-              legend: { hidden: true },
-            }}
+            slotProps={{ legend: { hidden: true } }} // Hide the legend
           >
-            <PieCenterLabel primaryText={`${total}`} secondaryText="Total" />
+            <PieCenterLabel primaryText={`${total.toFixed(1)}`} secondaryText="Total Contribution" />
           </PieChart>
         </Box>
-        {countries.map((country, index) => (
-          <Stack
-            key={index}
-            direction="row"
-            sx={{ alignItems: 'center', gap: 2, pb: 2 }}
-          >
-            {country.flag}
+
+        {data.map((item, index) => (
+          <Stack key={index} direction="row" sx={{ alignItems: 'center', gap: 2, pb: 2 }}>
             <Stack sx={{ gap: 1, flexGrow: 1 }}>
-              <Stack
-                direction="row"
-                sx={{
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 2,
-                }}
-              >
-                <Typography variant="body2" sx={{ fontWeight: '500' }}>
-                  {country.name}
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {country.value}%
-                </Typography>
+              <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+                <Typography variant="body2" sx={{ fontWeight: '500' }}>{item.label}</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>{item.value.toFixed(1)}</Typography>
               </Stack>
               <LinearProgress
                 variant="determinate"
-                value={country.value}
+                value={Math.min(item.value * 1.5, 100)} // Normalize values for display
                 sx={{
                   [`& .${linearProgressClasses.bar}`]: {
-                    backgroundColor: country.color,
+                    backgroundColor: colors[index],
                   },
                 }}
               />

@@ -9,7 +9,7 @@ import CustomizedDataGrid from './CustomizedDataGrid';
 import PageViewsBarChart from './MostRecentRoundBarChart';
 import MostRecentRoundChart from './MostRecentRoundChart';
 import SessionsChart from "./RoundDataChart";
-import { RadarChart } from '@mantine/charts';
+import RadarChartComponent from './Radar';
 import { Container, Title } from '@mantine/core';
 
 // Default data for the radar chart
@@ -50,8 +50,12 @@ export default function MainGrid() {
       try {
         setIsLoading(true);
         const user_id = localStorage.getItem('userId');
-        const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`);
-        
+        const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`, {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });        
+
         if (response.ok) {
           const fetchedData = await response.json();
           
@@ -124,27 +128,10 @@ export default function MainGrid() {
           <SessionsChart />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-        
-          <Title order={1} mb="lg">Golf Performance Analytics</Title>
-            <RadarChart
-              sx={{ 
-                width: "100%", 
-                height: "100%", 
-                minWidth: "300px",
-                minHeight: "300px" 
-              }}
-              h={300}
-              data={statsData}
-              dataKey="product"
-              series={[
-                { name: 'Current Skills', color: 'blue.6' },
-                { name: 'Target Skills', color: 'teal.6' },
-              ]}
-              withPolarRadiusAxis
-              withLegend
-            />
-           
+          <RadarChartComponent/>
         </Grid>
+
+
 
       </Grid>
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>

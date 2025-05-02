@@ -4,6 +4,12 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
 
 
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
+from django.core.validators import RegexValidator
+
+
 class User(AbstractUser):
     phone_regex = RegexValidator(
         regex=r"^\+?1?\d{9,15}$",
@@ -18,10 +24,6 @@ class User(AbstractUser):
     class Meta:
         verbose_name = _("user")
         verbose_name_plural = _("users")
-
-    def __str__(self):
-        information = f"{self.username} - {self.email} - {self.pk}"
-        return information
 
 
 class Course(models.Model):

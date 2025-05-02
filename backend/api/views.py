@@ -20,6 +20,7 @@ from .chat_bot import ChatBot
 from .ollama_vision import ChatBot as VisionChatBot
 
 import tempfile
+import builtins
 
 
 # Create your views here.
@@ -444,6 +445,7 @@ class UserStats(APIView):
         if round_count == 0:
             return Response(
                 {
+                    "handicap": None,
                     "avg_putts_per_round": 0,
                     "avg_penalities_per_round": 0,
                     "avg_score_per_round": 0,
@@ -453,12 +455,9 @@ class UserStats(APIView):
                 }
             )
 
-        # init counters
-        p = 0
-        pen = 0
-        s = 0
-        fir = 0
-        gir = 0
+        # Initialize counters
+        p, pen, s, fir, gir = 0, 0, 0, 0, 0
+        differentials = []
 
         for round in rounds:
             p += round.putt_total
@@ -467,43 +466,70 @@ class UserStats(APIView):
             fir += round.fairways_hit_percent
             gir += round.green_in_regulation
 
+            # Get number of holes in this round by counting hole scores
+            num_holes = round.hole_scores.count()
+
+            # Handicap calculation using USGA formula, adjusted for 9-hole rounds
+            course_rating = round.tee.course_rating
+            slope_rating = round.tee.slope_rating
+
+            if num_holes == 9:
+                # For 9-hole rounds, double the score and use full course rating
+                adjusted_score = round.total_score * 2
+                differential = (adjusted_score - course_rating) * 113 / slope_rating
+            elif num_holes == 18:
+                # Standard calculation for 18 holes
+                differential = (round.total_score - course_rating) * 113 / slope_rating
+            else:
+                continue
+
+            differentials.append(differential)
+
         avg_p_pr = p / round_count
         avg_pen_pr = pen / round_count
         avg_s_pr = s / round_count
-
         fhp = fir / round_count
         girp = gir / round_count
 
-        scores_list = []
-        for round_obj in rounds:
-            round_scores = [
-                {
-                    "hole": score.hole.hole_number,
-                    "par": score.hole.par,
-                    "strokes": score.strokes,
-                    "putts": score.putts,
-                    "fairway_hit": score.fairway_hit,
-                    "green_in_regulation": score.green_in_regulation,
-                    "penalties": score.penalties,
-                    "date": round_obj.date_played,
-                }
-                for score in round_obj.hole_scores.all()
-            ]
-            scores_list.append(
-                {
-                    "round_id": round_obj.id,
-                    "date": round_obj.date_played,
-                    "course": round_obj.course.course_name,
-                    "scores": round_scores,
-                    "note": round_obj.notes,
-                }
+        # Calculate handicap index (average of best differentials * 0.96)
+        best_differentials = sorted(differentials)[: max(1, round_count // 2)]
+        handicap = (
+            builtins.round(
+                (sum(best_differentials) / len(best_differentials)) * 0.96, 2
             )
-        # Return a single object, not a list of one object
+            if best_differentials
+            else None
+        )
+
+        scores_list = [
+            {
+                "round_id": round_obj.id,
+                "date": round_obj.date_played,
+                "course": round_obj.course.course_name,
+                "scores": [
+                    {
+                        "hole": score.hole.hole_number,
+                        "par": score.hole.par,
+                        "strokes": score.strokes,
+                        "putts": score.putts,
+                        "fairway_hit": score.fairway_hit,
+                        "green_in_regulation": score.green_in_regulation,
+                        "penalties": score.penalties,
+                        "date": round_obj.date_played,
+                    }
+                    for score in round_obj.hole_scores.all()
+                ],
+                "note": round_obj.notes,
+            }
+            for round_obj in rounds
+        ]
+
         return Response(
             {
+                "handicap": handicap,
                 "avg_putts_per_round": avg_p_pr,
                 "avg_penalities_per_round": avg_pen_pr,
-                "avg_score_per_round": avg_s_pr,  # Changed to match frontend
+                "avg_score_per_round": avg_s_pr,
                 "fairway_hit_percentage": fhp,
                 "gir_percentage": girp,
                 "scores_list": scores_list,
@@ -523,7 +549,6 @@ class LeaderBoardView(APIView):
                 "-date_played"
             )[:20]
 
-            # Skip players with no rounds to avoid division by zero
             round_count = len(player_rounds)
             if round_count == 0:
                 continue
@@ -532,23 +557,49 @@ class LeaderBoardView(APIView):
             for player_round in player_rounds:
                 total += player_round.total_score
 
-            # Calculate handicap (simplified method)
-            # This is just an example - you may want to use a more accurate formula
-            handicap = 0
-            if round_count >= 5:
-                handicap = round((total / round_count - 72) * 0.96, 1)
-                handicap = max(0, handicap)
+            # Calculate handicap using same logic as UserStats view
+            differentials = []
+            for player_round in player_rounds:
+                # Get number of holes in this round by counting hole scores
+                num_holes = player_round.hole_scores.count()
+
+                course_rating = player_round.tee.course_rating
+                slope_rating = player_round.tee.slope_rating
+
+                if num_holes == 9:
+                    # For 9-hole rounds, double the score and use full course rating
+                    adjusted_score = player_round.total_score * 2
+                    differential = (adjusted_score - course_rating) * 113 / slope_rating
+                elif num_holes == 18:
+                    # Standard calculation for 18 holes
+                    differential = (
+                        (player_round.total_score - course_rating) * 113 / slope_rating
+                    )
+                else:
+                    # Skip rounds that don't have exactly 9 or 18 holes
+                    continue
+
+                differentials.append(differential)
+
+            # Calculate handicap index
+            best_differentials = sorted(differentials)[: max(1, round_count // 2)]
+            handicap = None
+            if best_differentials:
+                handicap = builtins.round(
+                    (sum(best_differentials) / len(best_differentials)) * 0.96, 2
+                )
 
             leader_board.append(
                 {
+                    "id": player.id,
+                    "user_id": player.id,
                     "username": player.username,
-                    "average_score": round(total / round_count, 1),
+                    "average_score": builtins.round(total / round_count, 1),
                     "handicap": handicap,
                     "total_rounds": round_count,
                 }
             )
 
-        # Sort the leaderboard by average score (lower is better)
         leader_board.sort(key=lambda x: x["average_score"])
 
         # Return the sorted leaderboard
