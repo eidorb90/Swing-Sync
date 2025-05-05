@@ -133,91 +133,136 @@ class CourseSearchAPIView(APIView):
                 )
 
             response.raise_for_status()
-            self.save_course(response)
-            return Response(response.json())
+
+            data = response.json()
+
+            saved_courses = []
+            for course_data in data.get("courses", []):
+                try:
+                    saved_course = self.save_single_course(course_data)
+                    if saved_course:
+                        saved_courses.append(saved_course.id)
+                except Exception as e:
+                    print(
+                        f"Error saving course {course_data.get('course_name')}: {str(e)}"
+                    )
+                    import traceback
+
+                    traceback.print_exc()
+
+            print(f"Successfully saved {len(saved_courses)} courses: {saved_courses}")
+
+            return Response(data)
 
         except requests.RequestException as e:
             error_message = f"Golf API error: {str(e)}"
-            if (
-                hasattr(e, "response") and e.response is not None
-            ):  # Safe check for response
+            if hasattr(e, "response") and e.response is not None:
                 error_message += f" - {e.response.text}"
             return Response(
                 {"error": error_message},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    def save_course(self, response):
+    def save_single_course(self, course_data):
+        """Process and save a single course and its tees"""
         try:
-            data = response.json()
+            location = course_data.get("location", {})
+            course_id = course_data.get("id")
 
-            for course_data in data.get("courses", []):
-                # Get location data
-                location = course_data.get("location", {})
+            course, created = Course.objects.update_or_create(
+                id=course_id,
+                defaults={
+                    "club_name": course_data.get("club_name", ""),
+                    "course_name": course_data.get("course_name", ""),
+                    "address": location.get("address", ""),
+                    "city": location.get("city", ""),
+                    "state": location.get("state", ""),
+                    "country": location.get("country", ""),
+                    "latitude": location.get("latitude", 0.0),
+                    "longitude": location.get("longitude", 0.0),
+                },
+            )
 
-                # Create or update course
-                course, created = Course.objects.update_or_create(
-                    club_name=course_data.get("club_name"),
-                    course_name=course_data.get("course_name"),
-                    defaults={
-                        "address": location.get("address", ""),
-                        "city": location.get("city", ""),
-                        "state": location.get("state", ""),
-                        "country": location.get("country", ""),
-                        "latitude": location.get("latitude", 0.0),
-                        "longitude": location.get("longitude", 0.0),
-                    },
-                )
+            print(
+                f"Course saved: {course.id} - {course.course_name} (Created: {created})"
+            )
 
-                # Process tees by gender
-                tees_data = course_data.get("tees", {})
+            tees_data = course_data.get("tees", {})
 
-                # Female tees
-                for tee_data in tees_data.get("female", []):
-                    self._create_or_update_tee(course, tee_data, "F")
+            for tee_data in tees_data.get("female", []):
+                self._create_or_update_tee(course, tee_data, "F")
 
-                # Male tees
-                for tee_data in tees_data.get("male", []):
-                    self._create_or_update_tee(course, tee_data, "M")
+            for tee_data in tees_data.get("male", []):
+                self._create_or_update_tee(course, tee_data, "M")
+
+            saved_tees = Tee.objects.filter(course=course)
+            print(f"Total saved tees for {course.course_name}: {saved_tees.count()}")
+            for tee in saved_tees:
+                print(f"  - Tee ID {tee.id}: {tee.tee_name} ({tee.gender})")
+
+            return course
 
         except Exception as e:
-            print(f"Error saving course data: {str(e)}")
+            print(f"Error in save_single_course: {str(e)}")
+            import traceback
+
+            traceback.print_exc()
+            return None
 
     def _create_or_update_tee(self, course, tee_data, gender):
         """Helper method to create or update a tee and its holes"""
-        tee, created = Tee.objects.update_or_create(
-            course=course,
-            tee_name=tee_data.get("tee_name"),
-            defaults={
-                "gender": gender,
-                "course_rating": tee_data.get("course_rating", 0.0),
-                "slope_rating": tee_data.get("slope_rating", 0),
-                "bogey_rating": tee_data.get("bogey_rating", 0.0),
-                "total_yards": tee_data.get("total_yards", 0),
-                "total_meters": tee_data.get("total_meters", 0),
-                "number_of_holes": tee_data.get("number_of_holes", 18),
-                "par_total": tee_data.get("par_total", 72),
-                "front_course_rating": tee_data.get("front_course_rating", 0.0),
-                "front_slope_rating": tee_data.get("front_slope_rating", 0),
-                "front_bogey_rating": tee_data.get("front_bogey_rating", 0.0),
-                "back_course_rating": tee_data.get("back_course_rating", 0.0),
-                "back_slope_rating": tee_data.get("back_slope_rating", 0),
-                "back_bogey_rating": tee_data.get("back_bogey_rating", 0.0),
-            },
-        )
+        try:
+            tee_name = tee_data.get("tee_name", "").strip()
 
-        # Process holes
-        for i, hole_data in enumerate(tee_data.get("holes", []), 1):
-            Hole.objects.update_or_create(
-                tee=tee,
-                hole_number=i,
+            print(
+                f"Processing tee: {tee_name} ({gender}) for course {course.course_name}"
+            )
+
+            tee, created = Tee.objects.update_or_create(
+                course=course,
+                tee_name=tee_name,
+                gender=gender,
                 defaults={
-                    "par": hole_data.get("par", 4),
-                    "yardage": hole_data.get("yardage", 0),
-                    "handicap": hole_data.get("handicap", 0),
+                    "course_rating": tee_data.get("course_rating", 0.0),
+                    "slope_rating": tee_data.get("slope_rating", 0),
+                    "bogey_rating": tee_data.get("bogey_rating", 0.0),
+                    "total_yards": tee_data.get("total_yards", 0),
+                    "total_meters": tee_data.get("total_meters", 0),
+                    "number_of_holes": tee_data.get("number_of_holes", 18),
+                    "par_total": tee_data.get("par_total", 72),
+                    "front_course_rating": tee_data.get("front_course_rating", 0.0),
+                    "front_slope_rating": tee_data.get("front_slope_rating", 0),
+                    "front_bogey_rating": tee_data.get("front_bogey_rating", 0.0),
+                    "back_course_rating": tee_data.get("back_course_rating", 0.0),
+                    "back_slope_rating": tee_data.get("back_slope_rating", 0),
+                    "back_bogey_rating": tee_data.get("back_bogey_rating", 0.0),
                 },
             )
-        return tee
+
+            print(f"Tee saved: {tee.id} - {tee.tee_name} (Created: {created})")
+
+            for i, hole_data in enumerate(tee_data.get("holes", []), 1):
+                hole, hole_created = Hole.objects.update_or_create(
+                    tee=tee,
+                    hole_number=i,
+                    defaults={
+                        "par": hole_data.get("par", 4),
+                        "yardage": hole_data.get("yardage", 0),
+                        "handicap": hole_data.get("handicap", 0),
+                    },
+                )
+
+            print(
+                f"Created/updated {len(tee_data.get('holes', []))} holes for tee {tee.tee_name}"
+            )
+
+            return tee
+        except Exception as e:
+            print(f"Error creating tee {tee_data.get('tee_name')}: {str(e)}")
+            import traceback
+
+            traceback.print_exc()
+            return None
 
 
 class SavedCourseView(APIView):
@@ -236,53 +281,102 @@ class RoundView(APIView):
     def post(self, request, round_id=None):
         try:
             data = request.data.copy()
+            course_id = data.get("course_id")
+            tee_name = data.get("tee_name", "").strip()
+
+            if not course_id:
+                return Response(
+                    {"error": "course_id is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if not tee_name:
+                return Response(
+                    {"error": "tee_name is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            try:
+                course = Course.objects.get(id=course_id)
+                print(f"Looking for tee '{tee_name}' for course {course.course_name}")
+
+                # Get all tees for this course to debug
+                all_tees = Tee.objects.filter(course=course)
+                tee_names = [t.tee_name for t in all_tees]
+                print(f"Available tees: {', '.join(tee_names)}")
+
+                tee = Tee.objects.filter(
+                    course=course, tee_name__iexact=tee_name.strip()
+                ).first()
+
+                if not tee:
+                    return Response(
+                        {
+                            "error": f"Tee '{tee_name}' not found for this course. Available tees: {', '.join(tee_names)}",
+                            "course_id": course_id,
+                            "course_name": course.course_name,
+                        },
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+
+                data["tee_id"] = tee.id
+                print(f"Found tee with ID {tee.id}: {tee.tee_name}")
+            except Course.DoesNotExist:
+                return Response(
+                    {"error": f"Course with ID {course_id} not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
             if round_id is not None:
-                # Handle updating an existing round
                 round = get_object_or_404(Round, id=round_id, player=request.user)
-                round.tee_id = data.get("tee_id", round.tee_id)
-                round.gender = data.get("gender", round.gender)
+                round.tee_id = data["tee_id"]
                 round.date_played = data.get("date_played", round.date_played)
-                round.course_id = data.get("course_id", round.course_id)
+                round.course_id = course_id
+                round.notes = data.get("notes", round.notes)
                 round.save()
 
-                # Update hole scores
                 hole_scores = data.get("hole_scores", [])
                 for score_data in hole_scores:
-                    HoleScore.objects.update_or_create(
-                        round=round,
-                        hole_id=score_data["hole_id"],
-                        defaults={
-                            "strokes": score_data["strokes"],
-                            "putts": score_data.get("putts", 0),
-                            "fairway_hit": score_data.get("fairway_hit", False),
-                            "green_in_regulation": score_data.get(
-                                "green_in_regulation", False
-                            ),
-                            "penalties": score_data.get("penalties", 0),
-                        },
-                    )
+                    hole_id = score_data.get("hole_id")
+                    if hole_id:
+                        HoleScore.objects.update_or_create(
+                            round=round,
+                            hole_id=hole_id,
+                            defaults={
+                                "strokes": score_data["strokes"],
+                                "putts": score_data.get("putts", 0),
+                                "fairway_hit": score_data.get("fairway_hit", False),
+                                "green_in_regulation": score_data.get(
+                                    "green_in_regulation", False
+                                ),
+                                "penalties": score_data.get("penalties", 0),
+                            },
+                        )
             else:
                 # Create new round
                 round = Round.objects.create(
                     tee_id=data["tee_id"],
                     player=request.user,
-                    course_id=data["course_id"],
+                    course_id=course_id,
                     notes=data.get("notes", ""),
                 )
 
                 # Create hole scores
                 hole_scores = data.get("hole_scores", [])
                 for score_data in hole_scores:
-                    HoleScore.objects.create(
-                        round=round,
-                        strokes=score_data["strokes"],
-                        putts=score_data.get("putts", 0),
-                        fairway_hit=score_data.get("fairway_hit", False),
-                        green_in_regulation=score_data.get(
-                            "green_in_regulation", False
-                        ),
-                        penalties=score_data.get("penalties", 0),
-                    )
+                    hole_id = score_data.get("hole_id")
+                    if hole_id:
+                        HoleScore.objects.create(
+                            round=round,
+                            hole_id=hole_id,
+                            strokes=score_data["strokes"],
+                            putts=score_data.get("putts", 0),
+                            fairway_hit=score_data.get("fairway_hit", False),
+                            green_in_regulation=score_data.get(
+                                "green_in_regulation", False
+                            ),
+                            penalties=score_data.get("penalties", 0),
+                        )
 
             return Response(
                 {
@@ -298,55 +392,14 @@ class RoundView(APIView):
             )
 
         except Exception as e:
+            print(f"Error in RoundView.post: {str(e)}")
+            import traceback
+
+            traceback.print_exc()
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, round_id=None):
-        if round_id:
-            round = get_object_or_404(
-                Round.objects.prefetch_related("hole_scores"), id=round_id
-            )
-            return Response(
-                {
-                    "id": round.id,
-                    "player": round.player.username,
-                    "date_played": round.date_played,
-                    "course": round.course.course_name,
-                    "total_score": round.total_score,
-                    "front_nine": round.front_nine_score,
-                    "back_nine": round.back_nine_score,
-                    "green_in_regulation": round.green_in_regulation,
-                    "fairways_hit_percent": round.fairways_hit_percent,
-                    "putt_total": round.putt_total,
-                    "putt_per_hole": round.putt_per_hole,
-                    "penalties_total": round.penalties_total,
-                    "penalties_per_hole": round.penalties_per_hole,
-                    "hole_scores": [
-                        {
-                            "hole": score.hole.hole_number,
-                            "par": score.hole.par,
-                            "strokes": score.strokes,
-                            "putts": score.putts,
-                            "fairway_hit": score.fairway_hit,
-                            "green_in_regulation": score.green_in_regulation,
-                            "penalties": score.penalties,
-                        }
-                        for score in round.hole_scores.all()
-                    ],
-                }
-            )
-
-        rounds = Round.objects.filter(player=request.user).order_by("-date_played")
-        return Response(
-            [
-                {
-                    "id": round.id,
-                    "date_played": round.date_played,
-                    "course": round.course.course_name,
-                    "total_score": round.total_score,
-                }
-                for round in rounds
-            ]
-        )
+        pass
 
 
 class CourseTeeView(APIView):
@@ -621,3 +674,36 @@ class LeaderBoardView(APIView):
 
         # Return the sorted leaderboard
         return Response(leader_board)
+
+
+class CourseTeeDebugView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, course_id):
+        try:
+            course = Course.objects.get(id=course_id)
+            tees = Tee.objects.filter(course=course)
+
+            tee_details = [
+                {
+                    "id": tee.id,
+                    "name": tee.tee_name,
+                    "gender": tee.gender,
+                    "holes_count": tee.holes.count(),
+                }
+                for tee in tees
+            ]
+
+            return Response(
+                {
+                    "course_id": course.id,
+                    "course_name": course.course_name,
+                    "tees_count": len(tee_details),
+                    "tees": tee_details,
+                }
+            )
+        except Course.DoesNotExist:
+            return Response(
+                {"error": f"Course with ID {course_id} not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
