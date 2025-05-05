@@ -267,7 +267,7 @@ export default function GridRound() {
         penalties: score.penalties || 0,
       })),
     };
-
+  
     try {
       console.log("Sending data:", dataToSave);
       const response = await fetch(
@@ -512,7 +512,7 @@ export default function GridRound() {
                     fontWeight="bold" 
                     sx={{ mb: 1 }}
                   >
-                    Hole {hole.hole_number} ({index + 1})
+                    Hole {hole.hole_number}({index + 1})
                   </Typography>
                   <Box sx={{ display: "flex", mb: 1, alignItems: "center" }}>
                     <Typography variant="body2" sx={{ mr: 1 }}>
