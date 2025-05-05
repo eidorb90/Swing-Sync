@@ -16,9 +16,7 @@ import {
   Alert,
   Divider
 } from "@mui/material";
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
+
 
 export default function GridRound() {
   const [userId, setUserId] = useState(null);
@@ -32,7 +30,6 @@ export default function GridRound() {
   const [scores, setScores] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [dateSelected, setDateSelected] = useState(dayjs());
   const [notes, setNotes] = useState("");
   const [alertInfo, setAlertInfo] = useState({
     open: false,
@@ -270,7 +267,7 @@ export default function GridRound() {
         penalties: score.penalties || 0,
       })),
     };
-  
+
     try {
       console.log("Sending data:", dataToSave);
       const response = await fetch(

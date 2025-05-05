@@ -28,8 +28,7 @@ export default function PageViewsBarChart() {
   });
 
   // Add holeLabels state
-  const [holeLabels, setHoleLabels] = useState(defaultHoles);
-  const [isLoading, setIsLoading] = useState(true);
+  const [Loading, setIsLoading] = useState(true);
   const [roundInfo, setRoundInfo] = useState({date: "Today", totalScore: 0 });
 
   useEffect(() => {
@@ -83,8 +82,7 @@ export default function PageViewsBarChart() {
               });
 
               // Update hole labels
-              setHoleLabels(holes);
-
+              // Update hole labels (removed as it's unused)
               // Update round info
                 const formattedDate = new Date(mostRecentRound.date).toLocaleString("en-US", {
                 year: "numeric",
@@ -153,39 +151,32 @@ export default function PageViewsBarChart() {
             {
               scaleType: "band",
               categoryGapRatio: 0.5,
-              data: [
-                "Hole 1",
-                "Hole 2",
-                "Hole 3",
-                "Hole 4",
-                "Hole 5",
-                "Hole 6",
-                "Hole 7",
-                "Hole 8",
-                "Hole 9",
-              ],
+              data: chartData.strokes.map((_, i) => `Hole ${i + 1}`),
             },
           ]}
-          series={[
-            {
-              id: "penalties",
-              label: "Penalties",
-              data: chartData.pen,
-              stack: "A",
-            },
-            {
-              id: "putts",
-              label: "Putts",
-              data: chartData.putts,
-              stack: "A",
-            },
-            {
-              id: "other-strokes",
-              label: "Other Strokes",
-              data: calculateOtherStrokes(),
-              stack: "A",
-            },
-          ]}
+            series={[
+              {
+                id: "penalties",
+                label: "Penalties",
+                data: chartData.pen,
+                stack: "A",
+                color: colorPalette[0], // Assign a specific color
+              },
+              {
+                id: "putts",
+                label: "Putts",
+                data: chartData.putts,
+                stack: "A",
+                color: colorPalette[1], // Assign a specific color
+              },
+              {
+                id: "other-strokes",
+                label: "Other Strokes",
+                data: calculateOtherStrokes(),
+                stack: "A",
+                color: colorPalette[2], // Assign a specific color
+              },
+            ]}
           height={250}
           margin={{ left: 50, right: 0, top: 20, bottom: 20 }}
           grid={{ horizontal: true }}
