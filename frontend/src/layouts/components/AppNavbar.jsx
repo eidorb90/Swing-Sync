@@ -15,7 +15,6 @@ import GolfCourseIcon from '@mui/icons-material/GolfCourse';
 
 const Toolbar = styled(MuiToolbar)({
   width: '100%',
-  
   padding: '12px',
   display: 'flex',
   flexDirection: 'column',
@@ -47,7 +46,7 @@ export default function AppNavbar() {
         backgroundImage: 'none',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        top: 'var(--template-frame-height, 0px)',
+        top: 'var(--template-frame-height, 1px)',
       }}
     >
       <Toolbar variant="regular">

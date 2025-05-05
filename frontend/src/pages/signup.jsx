@@ -14,6 +14,7 @@ import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import AppTheme from "../layouts/theme/AppTheme";
 import ColorModeSelect from "../layouts/theme/ColorModeSelect";
+import { useNavigate } from 'react-router-dom';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -61,6 +62,8 @@ export default function SignUp(props) {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.body.style.justifyContent = "center";
   }, []);
@@ -71,8 +74,8 @@ export default function SignUp(props) {
 
     const formData = {
       username: data.get("username"),
-      firstname: data.get("firstname"),
-      lastName: data.get("lastName"),
+      first_name: data.get("firstname"),
+      last_name: data.get("lastname"),
       email: data.get("email"),
       password: data.get("password"),
       confirmPassword: data.get("confirmpassword"),
@@ -96,6 +99,7 @@ export default function SignUp(props) {
 
       if (response.ok) {
         setMessage("Sign-up successful!");
+        navigate("/signin");
       } else {
         setErrors(result.errors || { general: "Sign-up failed." });
       }
@@ -125,27 +129,25 @@ export default function SignUp(props) {
             <FormControl>
               <FormLabel htmlFor="firstname">First name</FormLabel>
               <TextField
-                autoComplete="firstname"
-                name="firstname"
                 required
+                name="firstname"
                 fullWidth
                 id="firstname"
                 placeholder="Ian"
-                error={Boolean(errors.firstname)}
-                helperText={errors.firstname}
+                error={Boolean(errors.first_name)}
+                helperText={errors.first_name}
               />
             </FormControl>
             <FormControl>
-              <FormLabel htmlFor="lastName">Last name</FormLabel>
+              <FormLabel htmlFor="lastname">Last name</FormLabel>
               <TextField
-                autoComplete="lastName"
-                name="lastName"
+                name="lastname"
                 required
                 fullWidth
-                id="lastName"
+                id="lastname"
                 placeholder="Kollipara"
-                error={Boolean(errors.lastName)}
-                helperText={errors.lastName}
+                error={Boolean(errors.last_name)}
+                helperText={errors.last_name}
               />
             </FormControl>
             <FormControl>

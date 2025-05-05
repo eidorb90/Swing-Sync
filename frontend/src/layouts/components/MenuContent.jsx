@@ -17,7 +17,6 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 const mainListItems = [
   { text: "Home", icon: <HomeRoundedIcon />, route: "/account" },
   { text: "LeaderBoard", icon: <LeaderboardIcon />, route: "/leaderboard" },
-  { text: "Players", icon: <PeopleRoundedIcon />, route: "/" },
   { text: "Search Courses", icon: <GolfCourseIcon />, route: "/search" },
   { text: "Woody.Ai Chat", icon: <SmartToyIcon />, route: "/Woody/chat" },
   { text: "Woody.Ai Swing Review", icon: <GolfCourseIcon />, route: "/swing-review" },

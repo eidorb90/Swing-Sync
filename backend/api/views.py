@@ -35,6 +35,9 @@ class LoginUserView(APIView):
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+        email = request.data.get("email")
 
         # Authenticate the user
         user = authenticate(username=username, password=password)
@@ -54,6 +57,9 @@ class LoginUserView(APIView):
                     "refresh": str(refresh),
                     "user_id": user.id,
                     "username": user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "email": user.email,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -233,9 +239,9 @@ class RoundView(APIView):
                 # Handle updating an existing round
                 round = get_object_or_404(Round, id=round_id, player=request.user)
                 round.tee_id = data.get("tee_id", round.tee_id)
+                round.gender = data.get("gender", round.gender)
                 round.date_played = data.get("date_played", round.date_played)
                 round.course_id = data.get("course_id", round.course_id)
-                round.notes = data.get("notes", round.notes)
                 round.save()
 
                 # Update hole scores
@@ -268,7 +274,6 @@ class RoundView(APIView):
                 for score_data in hole_scores:
                     HoleScore.objects.create(
                         round=round,
-                        hole_id=score_data["hole_id"],
                         strokes=score_data["strokes"],
                         putts=score_data.get("putts", 0),
                         fairway_hit=score_data.get("fairway_hit", False),

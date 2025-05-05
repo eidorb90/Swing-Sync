@@ -24,6 +24,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <Routes>
         <Route
+          path="/"
+          element={
+            <MantineProvider theme={theme}>
+                <SignUp />
+            </MantineProvider>
+          }
+        />
+        <Route
           path="/addrounds"
           element={
             <MantineProvider theme={theme}>
