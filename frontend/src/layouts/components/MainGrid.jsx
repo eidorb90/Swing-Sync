@@ -10,7 +10,6 @@ import PageViewsBarChart from './MostRecentRoundBarChart';
 import MostRecentRoundChart from './MostRecentRoundChart';
 import SessionsChart from "./RoundDataChart";
 import RadarChartComponent from './Radar';
-import { Container, Title } from '@mantine/core';
 
 // Default data for the radar chart
 const defaultStatsData = [
@@ -134,19 +133,12 @@ export default function MainGrid() {
 
 
       </Grid>
-      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-        Details
-      </Typography>
-      <Grid container spacing={2} columns={12}>
-        <Grid size={{ xs: 12, lg: 9 }}>
-          <CustomizedDataGrid />
-        </Grid>
+      
         <Grid size={{ xs: 12, lg: 3 }}>
           <Stack gap={2} direction={{ xs: 'column', sm: 'row', lg: 'column' }}>
             <ChartUserByCountry />
           </Stack>
         </Grid>
-      </Grid>
     </Box>
   );
 }
