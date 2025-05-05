@@ -515,7 +515,7 @@ export default function GridRound() {
                     fontWeight="bold" 
                     sx={{ mb: 1 }}
                   >
-                    Hole {hole.hole_number}
+                    Hole {hole.hole_number}({index + 1})
                   </Typography>
                   <Box sx={{ display: "flex", mb: 1, alignItems: "center" }}>
                     <Typography variant="body2" sx={{ mr: 1 }}>
