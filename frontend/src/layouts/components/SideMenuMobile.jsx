@@ -13,6 +13,9 @@ import MenuContent from './MenuContent';
 
 
 function SideMenuMobile({ open, toggleDrawer }) {
+  const Lastname = localStorage.getItem('lastname');
+  const Firstname = localStorage.getItem('firstname');
+  
   return (
     <Drawer
       anchor="right"
@@ -39,12 +42,12 @@ function SideMenuMobile({ open, toggleDrawer }) {
           >
             <Avatar
               sizes="small"
-              alt="Ian Kollipara"
+              alt={`${Firstname} ${Lastname}`}
               src="/static/images/avatar/7.jpg"
               sx={{ width: 24, height: 24 }}
             />
             <Typography component="p" variant="h6">
-            Ian Kollipara
+              {`${Firstname} ${Lastname}`}
             </Typography>
           </Stack>
           <MenuButton showBadge>

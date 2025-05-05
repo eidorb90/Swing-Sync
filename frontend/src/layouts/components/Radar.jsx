@@ -75,15 +75,15 @@ const RadarChartComponent = () => {
           Player Skill Progression
         </Typography>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <RadarChart cx={200} cy={180} outerRadius={140} width={500} height={340} data={statsData}>
+          <RadarChart cx={200} cy={180} outerRadius={140} width={500} height={308} data={statsData}>
             <PolarGrid />
             <PolarAngleAxis dataKey="product" />
             <PolarRadiusAxis />
             <Tooltip />
-            <Legend />
             <Radar name="Current Skills" dataKey="Current Skills" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
             <Radar name="Target Skills" dataKey="Target Skills" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
           </RadarChart>
+          
         </Box>
       </CardContent>
     </Card>

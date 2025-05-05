@@ -7,7 +7,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import AddIcon from "@mui/icons-material/Add";
@@ -17,10 +16,13 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 const mainListItems = [
   { text: "Home", icon: <HomeRoundedIcon />, route: "/account" },
   { text: "LeaderBoard", icon: <LeaderboardIcon />, route: "/leaderboard" },
-  { text: "Players", icon: <PeopleRoundedIcon />, route: "/" },
   { text: "Search Courses", icon: <GolfCourseIcon />, route: "/search" },
   { text: "Woody.Ai Chat", icon: <SmartToyIcon />, route: "/Woody/chat" },
-  { text: "Woody.Ai Swing Review", icon: <GolfCourseIcon />, route: "/swing-review" },
+  {
+    text: "Woody.Ai Swing Review",
+    icon: <GolfCourseIcon />,
+    route: "/swing-review",
+  },
   { text: "Add Rounds", icon: <AddIcon />, route: "/addrounds" },
 ];
 
@@ -30,6 +32,10 @@ const secondaryListItems = [
 
 export default function MenuContent() {
   const navigate = useNavigate();
+  const selected = (route) => {
+    const currentPath = window.location.pathname;
+    return currentPath === route;
+  };
 
   const handleNavigation = (route) => {
     navigate(route);
@@ -39,10 +45,14 @@ export default function MenuContent() {
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
       <List dense>
         {mainListItems.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: "block" }}>
+          <ListItem
+            key={index}
+            disablePadding
+            sx={{ padding: 0.3, display: "block" }}
+          >
             <ListItemButton
               onClick={() => handleNavigation(item.route)}
-              selected={index === 0}
+              selected={selected(item.route)}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
@@ -53,7 +63,10 @@ export default function MenuContent() {
       <List dense>
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton onClick={() => handleNavigation(item.route)}>
+            <ListItemButton
+              onClick={() => handleNavigation(item.route)}
+              selected={selected(item.route)}
+            >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>

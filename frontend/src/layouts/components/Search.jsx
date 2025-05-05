@@ -15,7 +15,14 @@ export default function SearchCourse() {
   const fetchCourses = async (searchTerm) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/api/course/search/?search=${encodeURIComponent(searchTerm)}`
+        `http://localhost:8000/api/course/search/?search=${encodeURIComponent(searchTerm)}`,
+        {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+      }
       );
       if (!response.ok) {
         throw new Error(`Error fetching courses: ${response.statusText}`);

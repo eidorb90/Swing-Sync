@@ -96,7 +96,7 @@ const ChatBot = (props) => {
       <Box sx={{ display: "flex" }}>
         <SideMenu />
         <AppNavbar />
-        <SideMenu />
+        
 
         <Box
           component="main"

@@ -1,26 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { Grid, Box, Stack, Typography, Autocomplete, TextField, MenuItem, Checkbox, FormControlLabel, Button } from '@mui/material';
-import '../Styles/Inputstyle.css';
+import React, { useState, useEffect } from "react";
+import {
+  Grid,
+  Box,
+  Stack,
+  Typography,
+  Autocomplete,
+  TextField,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
+  Button,
+} from "@mui/material";
+import "../Styles/Inputstyle.css";
 
 export default function GridRound() {
   const [userId, setUserId] = useState(null);
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [searchValue, setSearchValue] = useState('');
-  const [selectedGender, setSelectedGender] = useState('');
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedGender, setSelectedGender] = useState("");
   const [teeOptions, setTeeOptions] = useState([]);
-  const [selectedTee, setSelectedTee] = useState('');
+  const [selectedTee, setSelectedTee] = useState("");
   const [holes, setHoles] = useState([]);
   const [scores, setScores] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem('userId');
+    const storedUserId = localStorage.getItem("userId");
     if (storedUserId) {
       setUserId(storedUserId);
     } else {
-      console.error('User ID not found in local storage.');
-      alert('User ID is missing. Please log in again.');
+      console.error("User ID not found in local storage.");
+      alert("User ID is missing. Please log in again.");
     }
   }, []);
 
@@ -28,7 +39,15 @@ export default function GridRound() {
   const fetchCourses = async (searchTerm) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/api/course/search/?search=${encodeURIComponent(searchTerm)}`
+        `http://localhost:8000/api/course/search/?search=${encodeURIComponent(
+          searchTerm
+        )}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
       );
       if (!response.ok) {
         throw new Error(`Error fetching courses: ${response.statusText}`);
@@ -36,7 +55,7 @@ export default function GridRound() {
       const data = await response.json();
       setCourses(data.courses || []); // Update courses state with fetched data
     } catch (error) {
-      console.error('Error fetching courses:', error);
+      console.error("Error fetching courses:", error);
       setCourses([]);
     }
   };
@@ -54,9 +73,9 @@ export default function GridRound() {
   // Handle course selection
   const handleCourseSelection = (event, newValue) => {
     setSelectedCourse(newValue);
-    setSelectedGender('');
+    setSelectedGender("");
     setTeeOptions([]);
-    setSelectedTee('');
+    setSelectedTee("");
     setHoles([]);
     setScores([]);
   };
@@ -72,7 +91,7 @@ export default function GridRound() {
       setTeeOptions([]); // Clear tee options if no tees are available
     }
 
-    setSelectedTee('');
+    setSelectedTee("");
     setHoles([]);
     setScores([]);
   };
@@ -81,8 +100,8 @@ export default function GridRound() {
     const teeName = event.target.value;
     setSelectedTee(teeName);
 
-    const tee = teeOptions.find((t) => t.tee_name === teeName);
-    if (tee) {
+    const tee = teeOptions?.find((t) => t?.tee_name === teeName);
+    if (tee && tee.holes) {
       setHoles(tee.holes);
       setScores(
         tee.holes.map(() => ({
@@ -105,49 +124,63 @@ export default function GridRound() {
     updatedScores[index][field] = value;
     setScores(updatedScores);
   };
+  const tee = teeOptions?.find((t) => t?.tee_name === selectedTee);
 
+  
   // Save data to backend
   const handleSave = async () => {
     if (!userId) {
-      console.error('User ID is undefined. Cannot save data.');
-      alert('User ID is missing. Please try again.');
+      console.error("User ID is undefined. Cannot save data.");
+      alert("User ID is missing. Please try again.");
       return;
     }
 
     setIsSaving(true);
     const dataToSave = {
-      course: selectedCourse?.course_name || '',
-      gender: selectedGender,
-      tee: selectedTee,
-      scores,
+      tee_id: tee.id, // Backend expects tee_id, not tee_name
+      course_id: selectedCourse.id, // Backend expects course_id
+      notes: "", // Add notes if applicable, otherwise send an empty string
+      hole_scores: scores.map((score, index) => ({
+        hole_id: holes[index]?.id, // Backend expects hole_id
+        strokes: score.strokes, // Backend expects strokes
+        putts: score.putts || 0, // Default putts to 0 if not provided
+        fairway_hit: score.fairwayHit || false, // Default fairway_hit to false
+        green_in_regulation: score.greenInRegulation || false, // Default green_in_regulation to false
+        penalties: score.penalties || 0, // Default penalties to 0
+      })),
     };
+  
 
     try {
-      const response = await fetch(`http://localhost:8000/api/player/${userId}/stats`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dataToSave),
-      });
+      const response = await fetch(
+        `http://localhost:8000/api/rounds/`,
+        {
+          method: "POST", 
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+          body: JSON.stringify(dataToSave),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error saving data: ${response.statusText}`);
       }
 
       const result = await response.json();
-      console.log('Data saved successfully:', result);
-      alert('Data saved successfully!');
+      console.log("Data saved successfully:", result);
+      alert("Data saved successfully!");
     } catch (error) {
-      console.error('Error saving data:', error);
-      alert('Failed to save data. Please try again.');
+      console.error("Error saving data:", error);
+      alert("Failed to save data. Please try again.");
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <Box sx={{ width: '100%' }} className="input-container">
+    <Box sx={{ width: "100%" }} className="input-container">
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
           <Stack spacing={2} className="form-stack">
@@ -159,7 +192,7 @@ export default function GridRound() {
             <Autocomplete
               freeSolo
               options={courses}
-              getOptionLabel={(option) => option.course_name || ''}
+              getOptionLabel={(option) => option.course_name || ""}
               onInputChange={handleSearchChange}
               onChange={handleCourseSelection}
               renderInput={(params) => (
@@ -214,13 +247,19 @@ export default function GridRound() {
                 </Typography>
                 {holes.map((hole, index) => (
                   <Box key={index} sx={{ marginBottom: 2 }}>
-                    <Typography variant="subtitle1">Hole {index + 1}</Typography>
+                    <Typography variant="subtitle1">
+                      Hole {index + 1}
+                    </Typography>
                     <TextField
                       type="number"
                       label="Strokes"
-                      value={scores[index]?.strokes || ''}
+                      value={scores[index]?.strokes || ""}
                       onChange={(e) =>
-                        handleScoreChange(index, 'strokes', parseInt(e.target.value, 10) || 0)
+                        handleScoreChange(
+                          index,
+                          "strokes",
+                          parseInt(e.target.value, 10) || 0
+                        )
                       }
                       variant="outlined"
                       fullWidth
@@ -229,9 +268,13 @@ export default function GridRound() {
                     <TextField
                       select
                       label="Putts"
-                      value={scores[index]?.putts || ''}
+                      value={scores[index]?.putts || ""}
                       onChange={(e) =>
-                        handleScoreChange(index, 'putts', parseInt(e.target.value, 10) || 0)
+                        handleScoreChange(
+                          index,
+                          "putts",
+                          parseInt(e.target.value, 10) || 0
+                        )
                       }
                       variant="outlined"
                       fullWidth
@@ -248,7 +291,11 @@ export default function GridRound() {
                         <Checkbox
                           checked={scores[index]?.fairwayHit || false}
                           onChange={(e) =>
-                            handleScoreChange(index, 'fairwayHit', e.target.checked)
+                            handleScoreChange(
+                              index,
+                              "fairwayHit",
+                              e.target.checked
+                            )
                           }
                         />
                       }
@@ -259,7 +306,11 @@ export default function GridRound() {
                         <Checkbox
                           checked={scores[index]?.greenInRegulation || false}
                           onChange={(e) =>
-                            handleScoreChange(index, 'greenInRegulation', e.target.checked)
+                            handleScoreChange(
+                              index,
+                              "greenInRegulation",
+                              e.target.checked
+                            )
                           }
                         />
                       }
@@ -268,9 +319,13 @@ export default function GridRound() {
                     <TextField
                       select
                       label="Penalties"
-                      value={scores[index]?.penalties || ''}
+                      value={scores[index]?.penalties || ""}
                       onChange={(e) =>
-                        handleScoreChange(index, 'penalties', parseInt(e.target.value, 10) || 0)
+                        handleScoreChange(
+                          index,
+                          "penalties",
+                          parseInt(e.target.value, 10) || 0
+                        )
                       }
                       variant="outlined"
                       fullWidth
@@ -295,7 +350,7 @@ export default function GridRound() {
                 onClick={handleSave}
                 disabled={isSaving}
               >
-                {isSaving ? 'Saving...' : 'Save Round'}
+                {isSaving ? "Saving..." : "Save Round"}
               </Button>
             )}
           </Stack>

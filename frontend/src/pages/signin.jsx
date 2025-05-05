@@ -128,6 +128,9 @@ export default function SignIn(props) {
                 navigate('/account'); // Navigate to account page
                 localStorage.setItem('userId', result.user_id); 
                 localStorage.setItem('token', result.access); 
+                localStorage.setItem('firstname', result.first_name);
+                localStorage.setItem('lastname', result.last_name);
+                localStorage.setItem('email', result.email);
             } else {
                 setGeneralError(result.error || 'Invalid username or password.');
             }
