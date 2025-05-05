@@ -17,7 +17,7 @@ const mainListItems = [
   { text: "Home", icon: <HomeRoundedIcon />, route: "/account" },
   { text: "LeaderBoard", icon: <LeaderboardIcon />, route: "/leaderboard" },
   { text: "Search Courses", icon: <GolfCourseIcon />, route: "/search" },
-  { text: "Woody.Ai Chat", icon: <SmartToyIcon />, route: "/Woody/chat" },
+  { text: "Woody.Ai Chat", icon: <SmartToyIcon />, route: "/Woody-chat" },
   {
     text: "Woody.Ai Swing Review",
     icon: <GolfCourseIcon />,
@@ -64,7 +64,7 @@ export default function MenuContent() {
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <ListItemButton
-              onClick={() => handleNavigation(item.route)}
+              onClick={() => null}
               selected={selected(item.route)}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>

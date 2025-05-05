@@ -66,7 +66,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
         <Route path="/signup" element={<SignUp />}></Route>
 
-        <Route path="/Woody/chat" 
+        <Route path="/Woody-chat" 
         element={
           <MantineProvider theme={theme}>
             <ProtectedRoute>

@@ -41,7 +41,7 @@ export function SwingReview(props) {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/vision/chat",
+        "http://localhost:8000/api/chat",
         { question: input },
         {
           headers: { Authorization: "Bearer " + localStorage.getItem("token") },
@@ -100,6 +100,7 @@ export function SwingReview(props) {
       <CssBaseline enableColorScheme />
       <Box sx={{ display: "flex" }}>
         <SideMenu />
+        <AppNavbar />
         
         
 
@@ -158,6 +159,7 @@ export function SwingReview(props) {
                       marginBottom: 1,
                     }}
                   >
+
                     <Typography
                       variant="body2"
                       sx={{
@@ -169,7 +171,7 @@ export function SwingReview(props) {
                         color: message.sender === "user" ? "white" : "black",
                       }}
                     >
-                      {message.text}
+                      <ReactMarkdown>{message.text}</ReactMarkdown>
                     </Typography>
                   </Box>
                 ))}
