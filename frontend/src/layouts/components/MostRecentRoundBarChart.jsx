@@ -30,7 +30,7 @@ export default function PageViewsBarChart() {
   // Add holeLabels state
   const [holeLabels, setHoleLabels] = useState(defaultHoles);
   const [isLoading, setIsLoading] = useState(true);
-  const [roundInfo, setRoundInfo] = useState({ date: "Today", totalScore: 0 });
+  const [roundInfo, setRoundInfo] = useState({date: "Today", totalScore: 0 });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -86,11 +86,20 @@ export default function PageViewsBarChart() {
               setHoleLabels(holes);
 
               // Update round info
-              setRoundInfo({
-                date: mostRecentRound.date || "Recent Round",
+                const formattedDate = new Date(mostRecentRound.date).toLocaleString("en-US", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+                }).replace(",", "/").replace(" ", "");
+                
+                setRoundInfo({
+                date: formattedDate,
                 totalScore: totalScore,
                 note: mostRecentRound.note || "No notes available",
-              });
+                });
             }
           }
         }
