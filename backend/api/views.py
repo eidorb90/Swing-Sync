@@ -22,6 +22,10 @@ from .ollama_vision import ChatBot as VisionChatBot
 from django.utils import timezone
 import tempfile
 import builtins
+import logging
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -150,8 +154,6 @@ class CourseSearchAPIView(APIView):
 
                     traceback.print_exc()
 
-            print(f"Successfully saved {len(saved_courses)} courses: {saved_courses}")
-
             return Response(data)
 
         except requests.RequestException as e:
@@ -183,10 +185,6 @@ class CourseSearchAPIView(APIView):
                 },
             )
 
-            print(
-                f"Course saved: {course.id} - {course.course_name} (Created: {created})"
-            )
-
             tees_data = course_data.get("tees", {})
 
             for tee_data in tees_data.get("female", []):
@@ -194,11 +192,6 @@ class CourseSearchAPIView(APIView):
 
             for tee_data in tees_data.get("male", []):
                 self._create_or_update_tee(course, tee_data, "M")
-
-            saved_tees = Tee.objects.filter(course=course)
-            print(f"Total saved tees for {course.course_name}: {saved_tees.count()}")
-            for tee in saved_tees:
-                print(f"  - Tee ID {tee.id}: {tee.tee_name} ({tee.gender})")
 
             return course
 
@@ -239,8 +232,6 @@ class CourseSearchAPIView(APIView):
                 },
             )
 
-            print(f"Tee saved: {tee.id} - {tee.tee_name} (Created: {created})")
-
             for i, hole_data in enumerate(tee_data.get("holes", []), 1):
                 hole, hole_created = Hole.objects.update_or_create(
                     tee=tee,
@@ -251,10 +242,6 @@ class CourseSearchAPIView(APIView):
                         "handicap": hole_data.get("handicap", 0),
                     },
                 )
-
-            print(
-                f"Created/updated {len(tee_data.get('holes', []))} holes for tee {tee.tee_name}"
-            )
 
             return tee
         except Exception as e:
@@ -279,97 +266,150 @@ class RoundView(APIView):
 
     @transaction.atomic
     def post(self, request, round_id=None):
+        """
+        Create or update a round record with hole scores.
+
+        Parameters:
+        - course_id: ID of the course
+        - tee_name: Name of the tee (will be used to look up the tee_id)
+        - date_played: ISO format date (optional)
+        - notes: Additional notes about the round (optional)
+        - hole_scores: List of scores for each hole with structure:
+            {
+                hole_id: ID of the hole,
+                strokes: Number of strokes,
+                putts: Number of putts (optional),
+                fairway_hit: Boolean (optional),
+                green_in_regulation: Boolean (optional),
+                penalties: Number of penalties (optional)
+            }
+        """
         try:
             data = request.data.copy()
+            logger.info(f"Processing round data: {data}")
+
+            # Required fields validation
+            required_fields = ["course_id", "tee_name"]
+            for field in required_fields:
+                if field not in data:
+                    return Response(
+                        {"error": f"Missing required field: {field}"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
             course_id = data.get("course_id")
             tee_name = data.get("tee_name", "").strip()
 
-            if not course_id:
-                return Response(
-                    {"error": "course_id is required"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            if not tee_name:
-                return Response(
-                    {"error": "tee_name is required"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
             try:
+                # Get the course
                 course = Course.objects.get(id=course_id)
-                print(f"Looking for tee '{tee_name}' for course {course.course_name}")
+                logger.info(f"Found course: {course.course_name} (ID: {course.id})")
 
-                # Get all tees for this course to debug
-                all_tees = Tee.objects.filter(course=course)
-                tee_names = [t.tee_name for t in all_tees]
-                print(f"Available tees: {', '.join(tee_names)}")
-
+                # Find the tee by name
                 tee = Tee.objects.filter(
-                    course=course, tee_name__iexact=tee_name.strip()
+                    course=course, tee_name__iexact=tee_name
                 ).first()
 
                 if not tee:
+                    # Log available tees for debugging
+                    available_tees = Tee.objects.filter(course=course)
+                    tee_names = [t.tee_name for t in available_tees]
+                    logger.error(
+                        f"Tee '{tee_name}' not found. Available tees: {', '.join(tee_names)}"
+                    )
+
                     return Response(
                         {
-                            "error": f"Tee '{tee_name}' not found for this course. Available tees: {', '.join(tee_names)}",
-                            "course_id": course_id,
-                            "course_name": course.course_name,
+                            "error": f"Tee '{tee_name}' not found for this course",
+                            "available_tees": tee_names,
                         },
                         status=status.HTTP_404_NOT_FOUND,
                     )
 
+                logger.info(f"Found tee: {tee.tee_name} (ID: {tee.id})")
                 data["tee_id"] = tee.id
-                print(f"Found tee with ID {tee.id}: {tee.tee_name}")
+
             except Course.DoesNotExist:
                 return Response(
                     {"error": f"Course with ID {course_id} not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            if round_id is not None:
-                round = get_object_or_404(Round, id=round_id, player=request.user)
-                round.tee_id = data["tee_id"]
-                round.date_played = data.get("date_played", round.date_played)
-                round.course_id = course_id
-                round.notes = data.get("notes", round.notes)
-                round.save()
+            # Process hole scores
+            hole_scores_data = data.get("hole_scores", [])
+            if not hole_scores_data:
+                return Response(
+                    {"error": "No hole scores provided"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-                hole_scores = data.get("hole_scores", [])
-                for score_data in hole_scores:
+            # Update existing round
+            if round_id is not None:
+                round_obj = get_object_or_404(Round, id=round_id, player=request.user)
+                round_obj.tee = tee
+                round_obj.course = course
+
+                if "date_played" in data:
+                    round_obj.date_played = data["date_played"]
+
+                round_obj.notes = data.get("notes", round_obj.notes)
+                round_obj.save()
+
+                logger.info(f"Updated round: {round_obj.id}")
+
+                # Update hole scores
+                for score_data in hole_scores_data:
                     hole_id = score_data.get("hole_id")
-                    if hole_id:
-                        HoleScore.objects.update_or_create(
-                            round=round,
-                            hole_id=hole_id,
-                            defaults={
-                                "strokes": score_data["strokes"],
-                                "putts": score_data.get("putts", 0),
-                                "fairway_hit": score_data.get("fairway_hit", False),
-                                "green_in_regulation": score_data.get(
-                                    "green_in_regulation", False
-                                ),
-                                "penalties": score_data.get("penalties", 0),
-                            },
-                        )
+                    if not hole_id:
+                        continue
+
+                    hole = get_object_or_404(Hole, id=hole_id)
+
+                    HoleScore.objects.update_or_create(
+                        round=round_obj,
+                        hole=hole,
+                        defaults={
+                            "strokes": score_data.get("strokes", 0),
+                            "putts": score_data.get("putts", 0),
+                            "fairway_hit": score_data.get("fairway_hit", False),
+                            "green_in_regulation": score_data.get(
+                                "green_in_regulation", False
+                            ),
+                            "penalties": score_data.get("penalties", 0),
+                        },
+                    )
+
+                message = "Scorecard updated successfully"
+                status_code = status.HTTP_200_OK
+
+            # Create new round
             else:
-                # Create new round
-                round = Round.objects.create(
-                    tee_id=data["tee_id"],
+                round_obj = Round.objects.create(
+                    tee=tee,
                     player=request.user,
-                    course_id=course_id,
+                    course=course,
                     notes=data.get("notes", ""),
                 )
 
+                if "date_played" in data:
+                    round_obj.date_played = data["date_played"]
+                    round_obj.save()
+
+                logger.info(f"Created new round: {round_obj.id}")
+
                 # Create hole scores
-                hole_scores = data.get("hole_scores", [])
-                for score_data in hole_scores:
+                for score_data in hole_scores_data:
                     hole_id = score_data.get("hole_id")
-                    if hole_id:
+                    if not hole_id:
+                        continue
+
+                    try:
+                        hole = Hole.objects.get(id=hole_id)
+
                         HoleScore.objects.create(
-                            round=round,
-                            hole_id=hole_id,
-                            strokes=score_data["strokes"],
+                            round=round_obj,
+                            hole=hole,
+                            strokes=score_data.get("strokes", 0),
                             putts=score_data.get("putts", 0),
                             fairway_hit=score_data.get("fairway_hit", False),
                             green_in_regulation=score_data.get(
@@ -377,29 +417,112 @@ class RoundView(APIView):
                             ),
                             penalties=score_data.get("penalties", 0),
                         )
+                    except Hole.DoesNotExist:
+                        logger.warning(f"Hole with ID {hole_id} not found. Skipping.")
+                        continue
+
+                message = "Scorecard created successfully"
+                status_code = status.HTTP_201_CREATED
+
+            # Calculate total score
+            total_score = sum(score.strokes for score in round_obj.hole_scores.all())
 
             return Response(
                 {
-                    "id": round.id,
-                    "player": round.player.username,
-                    "date_played": round.date_played,
-                    "total_score": round.total_score,
-                    "message": "Scorecard updated successfully"
-                    if round_id
-                    else "Scorecard created successfully",
+                    "id": round_obj.id,
+                    "player": round_obj.player.username,
+                    "date_played": round_obj.date_played,
+                    "total_score": total_score,
+                    "message": message,
                 },
-                status=status.HTTP_200_OK if round_id else status.HTTP_201_CREATED,
+                status=status_code,
             )
 
         except Exception as e:
-            print(f"Error in RoundView.post: {str(e)}")
-            import traceback
-
-            traceback.print_exc()
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.exception(f"Error processing round: {str(e)}")
+            return Response(
+                {"error": f"Failed to process round: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def get(self, request, round_id=None):
-        pass
+        """
+        Get round details or list of rounds.
+
+        If round_id is provided, returns detailed information about that round.
+        Otherwise, returns a list of rounds for the current user.
+        """
+        if round_id:
+            try:
+                round_obj = Round.objects.prefetch_related("hole_scores__hole").get(
+                    id=round_id
+                )
+
+                # Check if user has permission to view this round
+                if round_obj.player != request.user:
+                    return Response(
+                        {"error": "You are not permitted to view this round"},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+
+                return Response(
+                    {
+                        "id": round_obj.id,
+                        "player": round_obj.player.username,
+                        "date_played": round_obj.date_played,
+                        "course": round_obj.course.course_name,
+                        "tee": round_obj.tee.tee_name,
+                        "total_score": round_obj.total_score,
+                        "front_nine": round_obj.front_nine_score,
+                        "back_nine": round_obj.back_nine_score,
+                        "green_in_regulation": round_obj.green_in_regulation,
+                        "fairways_hit_percent": round_obj.fairways_hit_percent,
+                        "putt_total": round_obj.putt_total,
+                        "putt_per_hole": round_obj.putt_per_hole,
+                        "penalties_total": round_obj.penalties_total,
+                        "penalties_per_hole": round_obj.penalties_per_hole,
+                        "notes": round_obj.notes,
+                        "hole_scores": [
+                            {
+                                "hole": score.hole.hole_number,
+                                "par": score.hole.par,
+                                "yardage": score.hole.yardage,
+                                "handicap": score.hole.handicap,
+                                "strokes": score.strokes,
+                                "putts": score.putts,
+                                "fairway_hit": score.fairway_hit,
+                                "green_in_regulation": score.green_in_regulation,
+                                "penalties": score.penalties,
+                            }
+                            for score in round_obj.hole_scores.all().order_by(
+                                "hole__hole_number"
+                            )
+                        ],
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            except Round.DoesNotExist:
+                return Response(
+                    {"error": f"Round with ID {round_id} not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+        else:
+            # Return list of rounds for current user
+            rounds = Round.objects.filter(player=request.user).order_by("-date_played")
+
+            return Response(
+                [
+                    {
+                        "id": round_obj.id,
+                        "date_played": round_obj.date_played,
+                        "course": round_obj.course.course_name,
+                        "tee": round_obj.tee.tee_name,
+                        "total_score": round_obj.total_score,
+                    }
+                    for round_obj in rounds
+                ],
+                status=status.HTTP_200_OK,
+            )
 
 
 class CourseTeeView(APIView):
