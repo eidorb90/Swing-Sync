@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import React from "react";
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, Legend } from "recharts";
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Tooltip,
+  Legend,
+} from "recharts";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 
 const defaultStatsData = [
@@ -20,24 +28,39 @@ const RadarChartComponent = () => {
       try {
         setIsLoading(true);
         const user_id = localStorage.getItem("userId") || "1";
-        const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`, {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        });
+        const response = await fetch(
+          `http://localhost:8000/api/player/${user_id}/stats`,
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
 
         if (response.ok) {
           const fetchedData = await response.json();
           const formattedData = [
             {
               product: "Putting",
-              "Current Skills": Math.max(0, 100 - (fetchedData.avg_putts_per_round || 0) * 5),
-              "Target Skills": Math.max(0, 100 - (fetchedData.avg_putts_per_round || 0) * 5) + 40,
+              "Current Skills": Math.max(
+                0,
+                100 - (fetchedData.avg_putts_per_round || 0) * 5
+              ),
+              "Target Skills":
+                Math.max(0, 100 - (fetchedData.avg_putts_per_round || 0) * 5) +
+                40,
             },
             {
               product: "Scoring",
-              "Current Skills": Math.max(0, 100 - ((fetchedData.avg_score_per_round || 72) - 65)),
-              "Target Skills": Math.max(0, 100 - ((fetchedData.avg_score_per_round || 72) - 65)) + 40,
+              "Current Skills": Math.max(
+                0,
+                100 - ((fetchedData.avg_score_per_round || 72) - 65)
+              ),
+              "Target Skills":
+                Math.max(
+                  0,
+                  100 - ((fetchedData.avg_score_per_round || 72) - 65)
+                ) + 40,
             },
             {
               product: "Fairways",
@@ -51,8 +74,15 @@ const RadarChartComponent = () => {
             },
             {
               product: "Penalties",
-              "Current Skills": Math.max(0, 100 - (fetchedData.avg_penalities_per_round || 0) * 20),
-              "Target Skills": Math.max(0, 100 - (fetchedData.avg_penalities_per_round || 0) * 20) + 40,
+              "Current Skills": Math.max(
+                0,
+                100 - (fetchedData.avg_penalities_per_round || 0) * 20
+              ),
+              "Target Skills":
+                Math.max(
+                  0,
+                  100 - (fetchedData.avg_penalities_per_round || 0) * 20
+                ) + 40,
             },
           ];
 
@@ -69,21 +99,39 @@ const RadarChartComponent = () => {
   }, []);
 
   return (
-    <Card variant="outlined" sx={{ width: '100%' }}>
+    <Card variant="outlined" sx={{ width: "100%" }}>
       <CardContent>
         <Typography component="h2" variant="subtitle2" gutterBottom>
           Player Skill Progression
         </Typography>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <RadarChart cx={200} cy={180} outerRadius={140} width={500} height={308} data={statsData}>
+          <RadarChart
+            cx={200}
+            cy={180}
+            outerRadius={140}
+            width={500}
+            height={308}
+            data={statsData}
+          >
             <PolarGrid />
             <PolarAngleAxis dataKey="product" />
             <PolarRadiusAxis />
             <Tooltip />
-            <Radar name="Current Skills" dataKey="Current Skills" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-            <Radar name="Target Skills" dataKey="Target Skills" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+            <Radar
+              name="Current Skills"
+              dataKey="Current Skills"
+              stroke="#8884d8"
+              fill="#8884d8"
+              fillOpacity={0.6}
+            />
+            <Radar
+              name="Target Skills"
+              dataKey="Target Skills"
+              stroke="#82ca9d"
+              fill="#82ca9d"
+              fillOpacity={0.6}
+            />
           </RadarChart>
-          
         </Box>
       </CardContent>
     </Card>

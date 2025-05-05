@@ -1,6 +1,6 @@
-import * as React from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import { columns, rows } from './gridData';
+import * as React from "react";
+import { DataGrid } from "@mui/x-data-grid";
+import { columns, rows } from "./gridData";
 
 export default function CustomizedDataGrid() {
   const [gridRows, setGridRows] = React.useState(rows);
@@ -10,53 +10,62 @@ export default function CustomizedDataGrid() {
     try {
       // First, get the leaderboard data
       const leaderboardData = await fetchUserData();
-      
+
       // Create an array of promises to fetch each user's stats
       const userStatsPromises = leaderboardData.map(async (user) => {
         try {
           // Fetch the detailed stats for each user
-          const statsResponse = await fetch(`http://localhost:8000/api/player/${user.id || user.user_id}/stats`, {
-            headers: {
-              Authorization: "Bearer " + localStorage.getItem("token"),
-            },
-          });
-          
+          const statsResponse = await fetch(
+            `http://localhost:8000/api/player/${user.id || user.user_id}/stats`,
+            {
+              headers: {
+                Authorization: "Bearer " + localStorage.getItem("token"),
+              },
+            }
+          );
+
           if (!statsResponse.ok) {
-            console.warn(`Failed to fetch stats for user ${user.username}:`, statsResponse.status);
+            console.warn(
+              `Failed to fetch stats for user ${user.username}:`,
+              statsResponse.status
+            );
             return {
               ...user,
-              detailedHandicap: 0 // Default if fetch fails
+              detailedHandicap: 0, // Default if fetch fails
             };
           }
-          
+
           const statsData = await statsResponse.json();
           return {
             ...user,
-            detailedHandicap: statsData.handicap || 0
+            detailedHandicap: statsData.handicap || 0,
           };
         } catch (error) {
-          console.warn(`Error fetching stats for user ${user.username}:`, error);
+          console.warn(
+            `Error fetching stats for user ${user.username}:`,
+            error
+          );
           return {
             ...user,
-            detailedHandicap: 0 // Default if fetch fails
+            detailedHandicap: 0, // Default if fetch fails
           };
         }
       });
-      
+
       // Wait for all stats requests to complete
       const usersWithStats = await Promise.all(userStatsPromises);
-      
+
       // Format the data with the detailed handicap
-      
+
       const formattedData = usersWithStats.map((user, index) => ({
         id: (index + 2).toString(), // Start from id 2 since we already have id 1
         user: user.username || user.name || "Unknown User",
-        status: user.is_online, 
+        status: user.is_online,
         handicap: user.detailedHandicap || 0,
         totalRounds: user.total_rounds || 0,
         averageScore: user.average_score || 0,
       }));
-      
+
       // Return the combined array with the static entry and the fetched data
       return [...rows, ...formattedData];
     } catch (error) {
@@ -67,7 +76,7 @@ export default function CustomizedDataGrid() {
 
   async function fetchUserData() {
     try {
-      const user_id = localStorage.getItem('userId');
+      const user_id = localStorage.getItem("userId");
       // Add credentials and mode to the fetch request
       const response = await fetch(`http://localhost:8000/api/leaderboard/`, {
         headers: {
@@ -77,7 +86,7 @@ export default function CustomizedDataGrid() {
       if (!response.ok) {
         throw new Error(`Server responded with status: ${response.status}`);
       }
-      
+
       return response.json();
     } catch (error) {
       console.error("Network request failed:", error.message);
@@ -105,12 +114,12 @@ export default function CustomizedDataGrid() {
 
   return (
     <DataGrid
-      loading={loading} 
+      loading={loading}
       checkboxSelection
-      rows={gridRows} 
+      rows={gridRows}
       columns={columns}
       getRowClassName={(params) =>
-        params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+        params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
       }
       initialState={{
         pagination: { paginationModel: { pageSize: 40 } },
@@ -122,23 +131,23 @@ export default function CustomizedDataGrid() {
         filterPanel: {
           filterFormProps: {
             logicOperatorInputProps: {
-              variant: 'outlined',
-              size: 'small',
+              variant: "outlined",
+              size: "small",
             },
             columnInputProps: {
-              variant: 'outlined',
-              size: 'small',
-              sx: { mt: 'auto' },
+              variant: "outlined",
+              size: "small",
+              sx: { mt: "auto" },
             },
             operatorInputProps: {
-              variant: 'outlined',
-              size: 'small',
-              sx: { mt: 'auto' },
+              variant: "outlined",
+              size: "small",
+              sx: { mt: "auto" },
             },
             valueInputProps: {
               InputComponentProps: {
-                variant: 'outlined',
-                size: 'small',
+                variant: "outlined",
+                size: "small",
               },
             },
           },

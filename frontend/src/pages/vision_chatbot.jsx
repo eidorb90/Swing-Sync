@@ -48,11 +48,9 @@ export function SwingReview(props) {
     setLoading(true);
 
     try {
-        const response = await axios.post(url, formData, {
-          headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-        });
-
-
+      const response = await axios.post(url, formData, {
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+      });
 
       const botMessage = {
         text: response.data.response,
@@ -60,7 +58,6 @@ export function SwingReview(props) {
         timestamp: new Date(),
       };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
-      
     } catch (error) {
       console.error("Error sending message:", error);
       const errorMessage = {
@@ -108,14 +105,14 @@ export function SwingReview(props) {
       <Box sx={{ display: "flex" }}>
         <SideMenu />
         <AppNavbar />
-        
-        
 
         <Box component="main" sx={{ flexGrow: 1, padding: 3 }}>
           <Stack spacing={2} sx={{ alignItems: "center" }}>
             <Header />
 
-            <Paper sx={{ maxWidth: 800, width: "100%", padding: 3, boxShadow: 3 }}>
+            <Paper
+              sx={{ maxWidth: 800, width: "100%", padding: 3, boxShadow: 3 }}
+            >
               <Typography variant="h6" gutterBottom>
                 Upload Swing Video
               </Typography>
@@ -130,13 +127,28 @@ export function SwingReview(props) {
                 }}
               />
 
-              <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 2 }}>
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                sx={{ mt: 2 }}
+              >
                 {loading && <CircularProgress size={24} />}
-                {selectedFile && <Typography>File: {selectedFile.name}</Typography>}
+                {selectedFile && (
+                  <Typography>File: {selectedFile.name}</Typography>
+                )}
               </Stack>
 
               {uploadResponse && (
-                <Box sx={{ mt: 2, padding: 2, borderRadius: 2, backgroundColor: "background.paper", boxShadow: 1 }}>
+                <Box
+                  sx={{
+                    mt: 2,
+                    padding: 2,
+                    borderRadius: 2,
+                    backgroundColor: "background.paper",
+                    boxShadow: 1,
+                  }}
+                >
                   <ReactMarkdown>{uploadResponse}</ReactMarkdown>
                 </Box>
               )}
@@ -152,7 +164,15 @@ export function SwingReview(props) {
               </Button>
             </Paper>
 
-            <Paper sx={{ maxWidth: 800, width: "100%", padding: 3, boxShadow: 3, mt: 3 }}>
+            <Paper
+              sx={{
+                maxWidth: 800,
+                width: "100%",
+                padding: 3,
+                boxShadow: 3,
+                mt: 3,
+              }}
+            >
               <Typography variant="h6" gutterBottom>
                 Chat About the Video
               </Typography>
@@ -166,7 +186,6 @@ export function SwingReview(props) {
                       marginBottom: 1,
                     }}
                   >
-
                     <Typography
                       variant="body2"
                       sx={{
@@ -174,7 +193,9 @@ export function SwingReview(props) {
                         padding: 1,
                         borderRadius: 1,
                         backgroundColor:
-                          message.sender === "user" ? "primary.light" : "grey.300",
+                          message.sender === "user"
+                            ? "primary.light"
+                            : "grey.300",
                         color: message.sender === "user" ? "white" : "black",
                       }}
                     >

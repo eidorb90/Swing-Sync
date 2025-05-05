@@ -14,7 +14,7 @@ import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import AppTheme from "../layouts/theme/AppTheme";
 import ColorModeSelect from "../layouts/theme/ColorModeSelect";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -222,7 +222,11 @@ export default function SignUp(props) {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography sx={{ textAlign: "center" }}>
               Already have an account?{" "}
-              <Link href="/signin/" variant="body2" sx={{ alignSelf: "center" }}>
+              <Link
+                href="/signin/"
+                variant="body2"
+                sx={{ alignSelf: "center" }}
+              >
                 Sign in
               </Link>
             </Typography>

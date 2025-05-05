@@ -29,18 +29,21 @@ export default function PageViewsBarChart() {
 
   // Add holeLabels state
   const [Loading, setIsLoading] = useState(true);
-  const [roundInfo, setRoundInfo] = useState({date: "Today", totalScore: 0 });
+  const [roundInfo, setRoundInfo] = useState({ date: "Today", totalScore: 0 });
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setIsLoading(true);
         const user_id = localStorage.getItem("userId") || "1";
-        const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`, {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        });
+        const response = await fetch(
+          `http://localhost:8000/api/player/${user_id}/stats`,
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
 
         if (response.ok) {
           const fetchedData = await response.json();
@@ -84,20 +87,23 @@ export default function PageViewsBarChart() {
               // Update hole labels
               // Update hole labels (removed as it's unused)
               // Update round info
-                const formattedDate = new Date(mostRecentRound.date).toLocaleString("en-US", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-                }).replace(",", "/").replace(" ", "");
-                
-                setRoundInfo({
+              const formattedDate = new Date(mostRecentRound.date)
+                .toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+                .replace(",", "/")
+                .replace(" ", "");
+
+              setRoundInfo({
                 date: formattedDate,
                 totalScore: totalScore,
                 note: mostRecentRound.note || "No notes available",
-                });
+              });
             }
           }
         }
@@ -154,29 +160,29 @@ export default function PageViewsBarChart() {
               data: chartData.strokes.map((_, i) => `Hole ${i + 1}`),
             },
           ]}
-            series={[
-              {
-                id: "penalties",
-                label: "Penalties",
-                data: chartData.pen,
-                stack: "A",
-                color: colorPalette[0], // Assign a specific color
-              },
-              {
-                id: "putts",
-                label: "Putts",
-                data: chartData.putts,
-                stack: "A",
-                color: colorPalette[1], // Assign a specific color
-              },
-              {
-                id: "other-strokes",
-                label: "Other Strokes",
-                data: calculateOtherStrokes(),
-                stack: "A",
-                color: colorPalette[2], // Assign a specific color
-              },
-            ]}
+          series={[
+            {
+              id: "penalties",
+              label: "Penalties",
+              data: chartData.pen,
+              stack: "A",
+              color: colorPalette[0], // Assign a specific color
+            },
+            {
+              id: "putts",
+              label: "Putts",
+              data: chartData.putts,
+              stack: "A",
+              color: colorPalette[1], // Assign a specific color
+            },
+            {
+              id: "other-strokes",
+              label: "Other Strokes",
+              data: calculateOtherStrokes(),
+              stack: "A",
+              color: colorPalette[2], // Assign a specific color
+            },
+          ]}
           height={250}
           margin={{ left: 50, right: 0, top: 20, bottom: 20 }}
           grid={{ horizontal: true }}

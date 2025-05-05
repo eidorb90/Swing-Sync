@@ -9,7 +9,7 @@ import Header from "../layouts/components/Header";
 import MainGrid from "../layouts/components/MainGrid";
 import SideMenu from "../layouts/components/SideMenu";
 import AppTheme from "../layouts/theme/AppTheme";
-import { Container, Title} from "@mantine/core";
+import { Container, Title } from "@mantine/core";
 import { Typography } from "@mui/material";
 import { Navigate } from "react-router-dom";
 import {
@@ -55,9 +55,13 @@ export default function Dashboard(props) {
           >
             <Header />
             <MainGrid />
-            <Typography >
+            <Typography>
               Want to add a Round?{" "}
-              <Link href="/addrounds" variant="body2" sx={{ alignSelf: "center", color: "primary.main" }}>
+              <Link
+                href="/addrounds"
+                variant="body2"
+                sx={{ alignSelf: "center", color: "primary.main" }}
+              >
                 Add Round
               </Link>
             </Typography>

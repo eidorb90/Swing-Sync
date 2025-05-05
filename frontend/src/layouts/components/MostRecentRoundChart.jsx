@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { useTheme } from '@mui/material/styles';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Chip from '@mui/material/Chip';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import { LineChart } from '@mui/x-charts/LineChart';
+import * as React from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { useTheme } from "@mui/material/styles";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import { LineChart } from "@mui/x-charts/LineChart";
 
 function AreaGradient({ color, id }) {
   return (
@@ -27,10 +27,10 @@ AreaGradient.propTypes = {
 
 export default function SessionsChart() {
   const theme = useTheme();
-  
+
   const defaultHoles = Array.from({ length: 18 }, (_, i) => `Hole ${i + 1}`);
   const defaultData = Array(18).fill(0); // Par 4 as default
-  
+
   const colorPalette = [
     theme.palette.primary.light,
     theme.palette.primary.main,
@@ -38,75 +38,81 @@ export default function SessionsChart() {
   ];
 
   const [chartData, setChartData] = useState({
-    strokes: defaultData.map(() => 0), 
-    putts: defaultData.map(() => 0), 
-    par: defaultData.map(() => 0)
+    strokes: defaultData.map(() => 0),
+    putts: defaultData.map(() => 0),
+    par: defaultData.map(() => 0),
   });
   const [holeLabels, setHoleLabels] = useState(defaultHoles);
   const [isLoading, setIsLoading] = useState(true);
-  const [roundInfo, setRoundInfo] = useState({ date: 'Today', totalScore: 0 });
-  
+  const [roundInfo, setRoundInfo] = useState({ date: "Today", totalScore: 0 });
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setIsLoading(true);
-        const user_id = localStorage.getItem('userId');
-        const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`, {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        });        
+        const user_id = localStorage.getItem("userId");
+        const response = await fetch(
+          `http://localhost:8000/api/player/${user_id}/stats`,
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
         if (response.ok) {
           const fetchedData = await response.json();
-          
+
           // Extract scores from the fetched data
           const scores_list = fetchedData.scores_list || [];
-          
+
           if (scores_list.length > 0) {
             // Get the most recent round
-            const mostRecentRound = scores_list[0]; 
+            const mostRecentRound = scores_list[0];
             const scores = mostRecentRound.scores || [];
-            
+
             if (scores.length > 0) {
               // Extract data for each hole
-              const strokeData = scores.map(score => score.strokes || 0);
-              const puttData = scores.map(score => score.putts || 0);
-              const parData = scores.map(score => score.par || 0);
-              const penData = scores.map(score => score.pen || 0);
-              const holes = scores.map(score => `Hole ${score.hole}`);
-              
+              const strokeData = scores.map((score) => score.strokes || 0);
+              const puttData = scores.map((score) => score.putts || 0);
+              const parData = scores.map((score) => score.par || 0);
+              const penData = scores.map((score) => score.pen || 0);
+              const holes = scores.map((score) => `Hole ${score.hole}`);
+
               // Calculate total score
               const totalScore = strokeData.reduce((sum, val) => sum + val, 0);
-              
+
               // Update the chart data
               setChartData({
                 strokes: strokeData,
                 putts: puttData,
                 par: parData,
-                pen: penData
+                pen: penData,
               });
-              
+
               // Update hole labels
               setHoleLabels(holes);
-              
-              const formattedDate = new Date(mostRecentRound.date).toLocaleString("en-US", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-                }).replace(",", "/").replace(" ", "");
+
+              const formattedDate = new Date(mostRecentRound.date)
+                .toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+                .replace(",", "/")
+                .replace(" ", "");
               setRoundInfo({
                 date: formattedDate,
                 totalScore: totalScore,
-                courseName: mostRecentRound.course || 'Unknown Course'
+                courseName: mostRecentRound.course || "Unknown Course",
               });
             }
           }
         }
       } catch (error) {
-        console.error('Error fetching stats:', error);
+        console.error("Error fetching stats:", error);
       } finally {
         setIsLoading(false);
       }
@@ -116,26 +122,26 @@ export default function SessionsChart() {
   }, []);
 
   return (
-    <Card variant="outlined" sx={{ width: '100%' }}>
+    <Card variant="outlined" sx={{ width: "100%" }}>
       <CardContent>
         <Typography component="h2" variant="subtitle2" gutterBottom>
           Golf Round Performance
         </Typography>
-        <Stack sx={{ justifyContent: 'space-between' }}>
+        <Stack sx={{ justifyContent: "space-between" }}>
           <Stack
             direction="row"
             sx={{
-              alignContent: { xs: 'center', sm: 'flex-start' },
-              alignItems: 'center',
+              alignContent: { xs: "center", sm: "flex-start" },
+              alignItems: "center",
               gap: 1,
             }}
           >
             <Typography variant="h4" component="p">
-              {isLoading ? '...' : roundInfo.totalScore}
+              {isLoading ? "..." : roundInfo.totalScore}
             </Typography>
             <Chip size="small" color="success" label={roundInfo.date} />
           </Stack>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
             {roundInfo.courseName}
           </Typography>
         </Stack>
@@ -143,33 +149,33 @@ export default function SessionsChart() {
           colors={colorPalette}
           xAxis={[
             {
-              scaleType: 'point',
+              scaleType: "point",
               data: holeLabels,
               tickInterval: (index, i) => (i + 1) % 3 === 0, // Show every 3rd hole number
             },
           ]}
           series={[
             {
-              id: 'strokes',
-              label: 'Strokes',
+              id: "strokes",
+              label: "Strokes",
               showMark: true,
-              curve: 'linear',
+              curve: "linear",
               area: false,
               data: chartData.strokes,
             },
             {
-              id: 'putts',
-              label: 'Putts',
+              id: "putts",
+              label: "Putts",
               showMark: true,
-              curve: 'linear',
+              curve: "linear",
               area: false,
               data: chartData.putts,
             },
             {
-              id: 'par',
-              label: 'Par',
+              id: "par",
+              label: "Par",
               showMark: false,
-              curve: 'linear',
+              curve: "linear",
               area: false,
               data: chartData.par,
             },
@@ -179,7 +185,7 @@ export default function SessionsChart() {
           grid={{ horizontal: true }}
           slotProps={{
             legend: {
-              hidden: true, 
+              hidden: true,
             },
           }}
         />

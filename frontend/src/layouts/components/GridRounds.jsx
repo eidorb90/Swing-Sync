@@ -14,9 +14,8 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-  Divider
+  Divider,
 } from "@mui/material";
-
 
 export default function GridRound() {
   const [userId, setUserId] = useState(null);
@@ -34,7 +33,7 @@ export default function GridRound() {
   const [alertInfo, setAlertInfo] = useState({
     open: false,
     message: "",
-    severity: "info"
+    severity: "info",
   });
 
   // Statistics for the round
@@ -43,7 +42,7 @@ export default function GridRound() {
     totalPutts: 0,
     fairwaysHit: 0,
     greensInRegulation: 0,
-    totalPenalties: 0
+    totalPenalties: 0,
   });
 
   useEffect(() => {
@@ -56,30 +55,41 @@ export default function GridRound() {
   // Update statistics whenever scores change
   useEffect(() => {
     if (scores.length > 0) {
-      const totalScore = scores.reduce((sum, score) => sum + (score.strokes || 0), 0);
-      const totalPutts = scores.reduce((sum, score) => sum + (score.putts || 0), 0);
-      const fairwaysHit = scores.filter(score => score.fairwayHit).length;
-      const greensInRegulation = scores.filter(score => score.greenInRegulation).length;
-      const totalPenalties = scores.reduce((sum, score) => sum + (score.penalties || 0), 0);
+      const totalScore = scores.reduce(
+        (sum, score) => sum + (score.strokes || 0),
+        0
+      );
+      const totalPutts = scores.reduce(
+        (sum, score) => sum + (score.putts || 0),
+        0
+      );
+      const fairwaysHit = scores.filter((score) => score.fairwayHit).length;
+      const greensInRegulation = scores.filter(
+        (score) => score.greenInRegulation
+      ).length;
+      const totalPenalties = scores.reduce(
+        (sum, score) => sum + (score.penalties || 0),
+        0
+      );
 
       setRoundStats({
         totalScore,
         totalPutts,
         fairwaysHit,
         greensInRegulation,
-        totalPenalties
+        totalPenalties,
       });
     }
   }, [scores]);
 
   const handleCloseAlert = () => {
-    setAlertInfo(prev => ({ ...prev, open: false }));
+    setAlertInfo((prev) => ({ ...prev, open: false }));
   };
 
   // Function to fetch courses from API
   const fetchCourses = async (searchTerm) => {
     if (!searchTerm || searchTerm.length < 3) return;
-    
+
     setIsSearching(true);
     try {
       const response = await fetch(
@@ -103,7 +113,7 @@ export default function GridRound() {
       setAlertInfo({
         open: true,
         message: `Failed to search courses: ${error.message}`,
-        severity: "error"
+        severity: "error",
       });
       setCourses([]);
     } finally {
@@ -152,45 +162,45 @@ export default function GridRound() {
   const handleTeeSelection = (event) => {
     const teeName = event.target.value;
     setSelectedTee(teeName);
-  
+
     if (!selectedCourse || !selectedGender) return;
-  
+
     // Store the full tee object instead of just the name
-    const tee = teeOptions.find(t => t.tee_name === teeName);
+    const tee = teeOptions.find((t) => t.tee_name === teeName);
     if (tee && tee.holes && tee.holes.length > 0) {
       // Assign IDs dynamically based on the number of holes
       const holesWithIds = tee.holes.map((hole, index) => ({
         ...hole,
         id: index + 1, // Assign IDs starting from 1
       }));
-  
+
       setHoles(holesWithIds);
       setScores(
-        holesWithIds.map(hole => ({
+        holesWithIds.map((hole) => ({
           hole_id: hole.id,
           strokes: "",
           putts: 0,
           fairwayHit: false,
           greenInRegulation: false,
-          penalties: 0
+          penalties: 0,
         }))
       );
     } else {
       setAlertInfo({
         open: true,
-        message: "No holes found for this tee. Please select a different tee or contact support.",
-        severity: "warning"
+        message:
+          "No holes found for this tee. Please select a different tee or contact support.",
+        severity: "warning",
       });
       setHoles([]);
       setScores([]);
     }
   };
-  
 
   // Handle score updates for a specific hole
   const handleScoreChange = (index, field, value) => {
     const updatedScores = [...scores];
-    
+
     // Validate strokes input - must be a positive number
     if (field === "strokes" && (value < 1 || isNaN(value))) {
       if (value === "") {
@@ -202,17 +212,17 @@ export default function GridRound() {
     } else {
       updatedScores[index][field] = value;
     }
-    
+
     setScores(updatedScores);
   };
-  
+
   // Validate form before submission
   const validateForm = () => {
     if (!selectedCourse) {
       setAlertInfo({
         open: true,
         message: "Please select a course",
-        severity: "error"
+        severity: "error",
       });
       return false;
     }
@@ -221,44 +231,48 @@ export default function GridRound() {
       setAlertInfo({
         open: true,
         message: "Please select a tee",
-        severity: "error"
+        severity: "error",
       });
       return false;
     }
 
-    const invalidScores = scores.some(score => 
-      score.strokes === "" || score.strokes < 1 || isNaN(score.strokes)
+    const invalidScores = scores.some(
+      (score) =>
+        score.strokes === "" || score.strokes < 1 || isNaN(score.strokes)
     );
 
     if (invalidScores) {
       setAlertInfo({
         open: true,
         message: "Please enter valid stroke counts for all holes",
-        severity: "error"
+        severity: "error",
       });
       return false;
     }
 
     return true;
   };
-  
+
   // Save data to backend
   const handleSave = async () => {
     if (!validateForm()) return;
-  
+
     setIsSaving(true);
-  
+
     // Find the tee object from the selected tee
-    const selectedTeeObj = teeOptions.find(t => t.tee_name === selectedTee);
-  
+    const selectedTeeObj = teeOptions.find((t) => t.tee_name === selectedTee);
+
     // Calculate total strokes
-    const totalStrokes = scores.reduce((sum, score) => sum + (Number(score.strokes) || 0), 0);
-  
+    const totalStrokes = scores.reduce(
+      (sum, score) => sum + (Number(score.strokes) || 0),
+      0
+    );
+
     const dataToSave = {
       course_id: selectedCourse.id,
       tee_name: selectedTee, // Add the tee_name field as required by the backend
       notes: notes,
-      hole_scores: scores.map(score => ({
+      hole_scores: scores.map((score) => ({
         hole_id: score.hole_id,
         strokes: parseInt(score.strokes, 10),
         putts: score.putts || 0,
@@ -270,32 +284,31 @@ export default function GridRound() {
 
     try {
       console.log("Sending data:", dataToSave);
-      const response = await fetch(
-        "http://localhost:8000/api/rounds/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-          body: JSON.stringify(dataToSave),
-        }
-      );
+      const response = await fetch("http://localhost:8000/api/rounds/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+        body: JSON.stringify(dataToSave),
+      });
       console.log("Response status:", dataToSave);
-  
+
       const result = await response.json();
-  
+
       if (!response.ok) {
-        throw new Error(result.error || `Error saving data: ${response.statusText}`);
+        throw new Error(
+          result.error || `Error saving data: ${response.statusText}`
+        );
       }
-  
+
       console.log("Data saved successfully:", result);
       setAlertInfo({
         open: true,
         message: "Round saved successfully!",
-        severity: "success"
+        severity: "success",
       });
-  
+
       // Reset form after successful save
       setSelectedCourse(null);
       setSelectedGender("");
@@ -309,7 +322,7 @@ export default function GridRound() {
       setAlertInfo({
         open: true,
         message: `Failed to save round: ${error.message}`,
-        severity: "error"
+        severity: "error",
       });
     } finally {
       setIsSaving(false);
@@ -318,11 +331,18 @@ export default function GridRound() {
 
   return (
     <Box sx={{ width: "100%", maxWidth: 1200, margin: "0 auto" }}>
-      <Paper elevation={3} sx={{ p: 3, mb: 3, backgroundColor: "background.paper" }}>
-        <Typography variant="h5" gutterBottom sx={{ mb: 3, fontWeight: "bold", color: "primary.main" }}>
+      <Paper
+        elevation={3}
+        sx={{ p: 3, mb: 3, backgroundColor: "background.paper" }}
+      >
+        <Typography
+          variant="h5"
+          gutterBottom
+          sx={{ mb: 3, fontWeight: "bold", color: "primary.main" }}
+        >
           Record a New Round
         </Typography>
-        
+
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <Stack spacing={3}>
@@ -346,7 +366,9 @@ export default function GridRound() {
                       ...params.InputProps,
                       endAdornment: (
                         <>
-                          {isSearching ? <CircularProgress color="inherit" size={20} /> : null}
+                          {isSearching ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : null}
                           {params.InputProps.endAdornment}
                         </>
                       ),
@@ -357,13 +379,18 @@ export default function GridRound() {
 
               {/* Selected Course Details */}
               {selectedCourse && (
-                <Paper variant="outlined" sx={{ p: 2, backgroundColor: "background.paper" }}>
+                <Paper
+                  variant="outlined"
+                  sx={{ p: 2, backgroundColor: "background.paper" }}
+                >
                   <Typography variant="subtitle1" fontWeight="bold">
                     {selectedCourse.course_name}
                   </Typography>
                   {selectedCourse.location && (
                     <Typography variant="body2" color="text.secondary">
-                      {selectedCourse.location.address}, {selectedCourse.location.city}, {selectedCourse.location.state}
+                      {selectedCourse.location.address},{" "}
+                      {selectedCourse.location.city},{" "}
+                      {selectedCourse.location.state}
                     </Typography>
                   )}
                 </Paper>
@@ -397,7 +424,8 @@ export default function GridRound() {
                   >
                     {teeOptions.map((tee, index) => (
                       <MenuItem key={index} value={tee.tee_name}>
-                        {tee.tee_name} (CR: {tee.course_rating}, SR: {tee.slope_rating})
+                        {tee.tee_name} (CR: {tee.course_rating}, SR:{" "}
+                        {tee.slope_rating})
                       </MenuItem>
                     ))}
                   </TextField>
@@ -406,7 +434,6 @@ export default function GridRound() {
 
               {/* Date and Notes */}
               <Grid container spacing={2}>
-                
                 <Grid item xs={12} sm={6}>
                   <TextField
                     label="Notes"
@@ -425,14 +452,14 @@ export default function GridRound() {
 
           {/* Round Stats Summary */}
           <Grid item xs={12} md={4}>
-            <Paper 
-              variant="outlined" 
-              sx={{ 
-                p: 2, 
-                height: "100%", 
-                display: "flex", 
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                height: "100%",
+                display: "flex",
                 flexDirection: "column",
-                backgroundColor: "background.paper"
+                backgroundColor: "background.paper",
               }}
             >
               <Typography variant="h6" gutterBottom>
@@ -447,27 +474,39 @@ export default function GridRound() {
                 </Box>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography variant="body2">Total Putts:</Typography>
-                  <Typography variant="body2">{roundStats.totalPutts || "-"}</Typography>
+                  <Typography variant="body2">
+                    {roundStats.totalPutts || "-"}
+                  </Typography>
                 </Box>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography variant="body2">Fairways Hit:</Typography>
                   <Typography variant="body2">
-                    {holes.length > 0 
-                      ? `${roundStats.fairwaysHit}/${holes.length} (${Math.round((roundStats.fairwaysHit / holes.length) * 100)}%)` 
+                    {holes.length > 0
+                      ? `${roundStats.fairwaysHit}/${
+                          holes.length
+                        } (${Math.round(
+                          (roundStats.fairwaysHit / holes.length) * 100
+                        )}%)`
                       : "-"}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography variant="body2">Greens in Regulation:</Typography>
                   <Typography variant="body2">
-                    {holes.length > 0 
-                      ? `${roundStats.greensInRegulation}/${holes.length} (${Math.round((roundStats.greensInRegulation / holes.length) * 100)}%)` 
+                    {holes.length > 0
+                      ? `${roundStats.greensInRegulation}/${
+                          holes.length
+                        } (${Math.round(
+                          (roundStats.greensInRegulation / holes.length) * 100
+                        )}%)`
                       : "-"}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography variant="body2">Total Penalties:</Typography>
-                  <Typography variant="body2">{roundStats.totalPenalties || "-"}</Typography>
+                  <Typography variant="body2">
+                    {roundStats.totalPenalties || "-"}
+                  </Typography>
                 </Box>
               </Stack>
               <Box sx={{ flexGrow: 1 }} />
@@ -493,23 +532,23 @@ export default function GridRound() {
             Enter Scores
           </Typography>
           <Divider sx={{ mb: 3 }} />
-          
+
           <Grid container spacing={2}>
             {holes.map((hole, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
-                <Paper 
-                  variant="outlined" 
-                  sx={{ 
-                    p: 2, 
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 2,
                     position: "relative",
                     backgroundColor: "background.paper",
-                    borderLeft: '4px solid',
-                    borderLeftColor: 'primary.main'
+                    borderLeft: "4px solid",
+                    borderLeftColor: "primary.main",
                   }}
                 >
-                  <Typography 
-                    variant="subtitle1" 
-                    fontWeight="bold" 
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
                     sx={{ mb: 1 }}
                   >
                     Hole {hole.hole_number} ({index + 1})
@@ -521,20 +560,20 @@ export default function GridRound() {
                     <Typography variant="body2" color="text.secondary">
                       {hole.yardage} yards
                     </Typography>
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        ml: 'auto', 
-                        backgroundColor: 'action.selected', 
-                        px: 1, 
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        ml: "auto",
+                        backgroundColor: "action.selected",
+                        px: 1,
                         py: 0.25,
-                        borderRadius: 1
+                        borderRadius: 1,
                       }}
                     >
                       Handicap {hole.handicap}
                     </Typography>
                   </Box>
-                  
+
                   <TextField
                     type="number"
                     label="Strokes"
@@ -543,7 +582,9 @@ export default function GridRound() {
                       handleScoreChange(
                         index,
                         "strokes",
-                        e.target.value === "" ? "" : parseInt(e.target.value, 10)
+                        e.target.value === ""
+                          ? ""
+                          : parseInt(e.target.value, 10)
                       )
                     }
                     variant="outlined"
@@ -551,9 +592,12 @@ export default function GridRound() {
                     fullWidth
                     required
                     sx={{ mb: 1 }}
-                    error={scores[index]?.strokes === "" || scores[index]?.strokes < 1}
+                    error={
+                      scores[index]?.strokes === "" ||
+                      scores[index]?.strokes < 1
+                    }
                   />
-                  
+
                   <Grid container spacing={1}>
                     <Grid item xs={6}>
                       <TextField
@@ -602,7 +646,7 @@ export default function GridRound() {
                       </TextField>
                     </Grid>
                   </Grid>
-                  
+
                   <Box sx={{ mt: 1 }}>
                     <FormControlLabel
                       control={
@@ -618,7 +662,9 @@ export default function GridRound() {
                           size="small"
                         />
                       }
-                      label={<Typography variant="body2">Fairway Hit</Typography>}
+                      label={
+                        <Typography variant="body2">Fairway Hit</Typography>
+                      }
                     />
                     <FormControlLabel
                       control={
@@ -644,13 +690,17 @@ export default function GridRound() {
         </Paper>
       )}
 
-      <Snackbar 
-        open={alertInfo.open} 
-        autoHideDuration={6000} 
+      <Snackbar
+        open={alertInfo.open}
+        autoHideDuration={6000}
         onClose={handleCloseAlert}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert onClose={handleCloseAlert} severity={alertInfo.severity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleCloseAlert}
+          severity={alertInfo.severity}
+          sx={{ width: "100%" }}
+        >
           {alertInfo.message}
         </Alert>
       </Snackbar>

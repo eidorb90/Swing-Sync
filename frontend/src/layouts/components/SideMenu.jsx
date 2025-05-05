@@ -23,7 +23,7 @@ const Drawer = styled(MuiDrawer)({
 });
 
 export default function SideMenu() {
-  const Lastname = localStorage.getItem("lastname"); 
+  const Lastname = localStorage.getItem("lastname");
   const Firstname = localStorage.getItem("firstname");
   const Email = localStorage.getItem("email");
 

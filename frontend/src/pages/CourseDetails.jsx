@@ -5,12 +5,7 @@ import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import Stack from "@mui/material/Stack";
 import { DataGrid } from "@mui/x-data-grid";
-import {
-  MenuItem,
-  TextField,
-  Typography,
-  Button,
-} from "@mui/material";
+import { MenuItem, TextField, Typography, Button } from "@mui/material";
 import AppNavbar from "../layouts/components/AppNavbar";
 import Header from "../layouts/components/Header";
 import SideMenu from "../layouts/components/SideMenu";
@@ -27,7 +22,7 @@ export default function CourseDetails(props) {
     { field: "hole", headerName: "Hole", width: 250 },
     { field: "par", headerName: "Par", width: 250 },
     { field: "yardage", headerName: "Yardage", width: 250 },
-    { field: "handicap", headerName: "Handicap", width: 250},
+    { field: "handicap", headerName: "Handicap", width: 250 },
   ];
   const rows = holes.map((hole, index) => ({
     id: index + 1,
@@ -45,10 +40,26 @@ export default function CourseDetails(props) {
     { field: "total_meters", headerName: "Total Meters", width: 150 },
     { field: "number_of_holes", headerName: "Number of Holes", width: 150 },
     { field: "par_total", headerName: "Par Total", width: 150 },
-    { field: "front_course_rating", headerName: "Front Course Rating", width: 200 },
-    { field: "front_slope_rating", headerName: "Front Slope Rating", width: 200 },
-    { field: "front_bogey_rating", headerName: "Front Bogey Rating", width: 200 },
-    { field: "back_course_rating", headerName: "Back Course Rating", width: 200 },
+    {
+      field: "front_course_rating",
+      headerName: "Front Course Rating",
+      width: 200,
+    },
+    {
+      field: "front_slope_rating",
+      headerName: "Front Slope Rating",
+      width: 200,
+    },
+    {
+      field: "front_bogey_rating",
+      headerName: "Front Bogey Rating",
+      width: 200,
+    },
+    {
+      field: "back_course_rating",
+      headerName: "Back Course Rating",
+      width: 200,
+    },
     { field: "back_slope_rating", headerName: "Back Slope Rating", width: 200 },
     { field: "back_bogey_rating", headerName: "Back Bogey Rating", width: 200 },
   ];
@@ -99,8 +110,6 @@ export default function CourseDetails(props) {
         },
       ]
     : [];
-  
-  
 
   const handleGenderChange = (event) => {
     const gender = event.target.value;

@@ -27,15 +27,15 @@ const ChatBot = (props) => {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
-  
+
   const handleSendMessage = async () => {
     if (input.trim() === "" || loading) return;
-  
+
     const userMessage = { text: input, sender: "user", timestamp: new Date() };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
-  
+
     try {
       const response = await fetch("http://localhost:8000/api/chat/", {
         method: "POST",
@@ -45,21 +45,21 @@ const ChatBot = (props) => {
         },
         body: JSON.stringify({ message: input }),
       });
-  
+
       if (!response.ok) throw new Error("Failed to fetch response");
-  
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let botMessage = { text: "", sender: "bot", timestamp: new Date() };
-  
+
       setMessages((prev) => [...prev, botMessage]); // Add an empty bot message first
-  
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-  
+
         const chunk = decoder.decode(value, { stream: true });
-  
+
         // Append new text to the latest bot message instead of replacing it
         setMessages((prev) =>
           prev.map((msg, index) =>
@@ -96,7 +96,6 @@ const ChatBot = (props) => {
       <Box sx={{ display: "flex" }}>
         <SideMenu />
         <AppNavbar />
-        
 
         <Box
           component="main"

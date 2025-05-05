@@ -27,7 +27,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           path="/"
           element={
             <MantineProvider theme={theme}>
-                <SignUp />
+              <SignUp />
             </MantineProvider>
           }
         />
@@ -66,24 +66,27 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
         <Route path="/signup" element={<SignUp />}></Route>
 
-        <Route path="/Woody-chat" 
-        element={
-          <MantineProvider theme={theme}>
-            <ProtectedRoute>
-              <ChatBot />
-            </ProtectedRoute>
-          </MantineProvider>
-        } />
+        <Route
+          path="/Woody-chat"
+          element={
+            <MantineProvider theme={theme}>
+              <ProtectedRoute>
+                <ChatBot />
+              </ProtectedRoute>
+            </MantineProvider>
+          }
+        />
 
-        <Route path="/swing-review" 
-        element={
-          <MantineProvider theme={theme}>
-            <ProtectedRoute>
-              <SwingReview />
-            </ProtectedRoute>
-          </MantineProvider>
-        } />
-        
+        <Route
+          path="/swing-review"
+          element={
+            <MantineProvider theme={theme}>
+              <ProtectedRoute>
+                <SwingReview />
+              </ProtectedRoute>
+            </MantineProvider>
+          }
+        />
 
         <Route
           path="/course-details"
@@ -97,14 +100,13 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         />
 
         <Route
-          path = "/search"
+          path="/search"
           element={
             <MantineProvider theme={theme}>
               <SearchBarCourse />
             </MantineProvider>
           }
         />
-
       </Routes>
     </BrowserRouter>
   </StrictMode>

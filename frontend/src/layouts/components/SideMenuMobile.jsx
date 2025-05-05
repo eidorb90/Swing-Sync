@@ -1,21 +1,20 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Drawer, { drawerClasses } from '@mui/material/Drawer';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import MenuButton from './MenuButton';
-import MenuContent from './MenuContent';
-
+import * as React from "react";
+import PropTypes from "prop-types";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import Drawer, { drawerClasses } from "@mui/material/Drawer";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
+import MenuButton from "./MenuButton";
+import MenuContent from "./MenuContent";
 
 function SideMenuMobile({ open, toggleDrawer }) {
-  const Lastname = localStorage.getItem('lastname');
-  const Firstname = localStorage.getItem('firstname');
-  
+  const Lastname = localStorage.getItem("lastname");
+  const Firstname = localStorage.getItem("firstname");
+
   return (
     <Drawer
       anchor="right"
@@ -24,21 +23,21 @@ function SideMenuMobile({ open, toggleDrawer }) {
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
         [`& .${drawerClasses.paper}`]: {
-          backgroundImage: 'none',
-          backgroundColor: 'background.paper',
+          backgroundImage: "none",
+          backgroundColor: "background.paper",
         },
       }}
     >
       <Stack
         sx={{
-          maxWidth: '70dvw',
-          height: '100%',
+          maxWidth: "70dvw",
+          height: "100%",
         }}
       >
         <Stack direction="row" sx={{ p: 2, pb: 0, gap: 1 }}>
           <Stack
             direction="row"
-            sx={{ gap: 1, alignItems: 'center', flexGrow: 1, p: 1 }}
+            sx={{ gap: 1, alignItems: "center", flexGrow: 1, p: 1 }}
           >
             <Avatar
               sizes="small"
@@ -59,9 +58,13 @@ function SideMenuMobile({ open, toggleDrawer }) {
           <MenuContent />
           <Divider />
         </Stack>
-        
+
         <Stack sx={{ p: 2 }}>
-          <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<LogoutRoundedIcon />}
+          >
             Logout
           </Button>
         </Stack>

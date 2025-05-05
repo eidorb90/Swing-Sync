@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { useTheme } from '@mui/material/styles';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Chip from '@mui/material/Chip';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import { LineChart } from '@mui/x-charts/LineChart';
+import * as React from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { useTheme } from "@mui/material/styles";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import { LineChart } from "@mui/x-charts/LineChart";
 
 function AreaGradient({ color, id }) {
   return (
@@ -27,11 +27,11 @@ AreaGradient.propTypes = {
 
 export default function SessionsChart() {
   const theme = useTheme();
-  
+
   // Default data for last 10 rounds
-  const defaultRounds = Array.from({ length: 10 }, (_, i) => `Round ${i+1}`);
+  const defaultRounds = Array.from({ length: 10 }, (_, i) => `Round ${i + 1}`);
   const defaultScores = Array(10).fill(72); // Default par 72
-  
+
   const colorPalette = [
     theme.palette.primary.light,
     theme.palette.primary.main,
@@ -45,80 +45,98 @@ export default function SessionsChart() {
   });
   const [roundLabels, setRoundLabels] = useState(defaultRounds);
   const [isLoading, setIsLoading] = useState(true);
-  const [improvement, setImprovement] = useState({ value: 0, percentage: '0%' });
-  
+  const [improvement, setImprovement] = useState({
+    value: 0,
+    percentage: "0%",
+  });
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setIsLoading(true);
-        const user_id = localStorage.getItem('userId') || '1';
-        const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`, {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        });        
+        const user_id = localStorage.getItem("userId") || "1";
+        const response = await fetch(
+          `http://localhost:8000/api/player/${user_id}/stats`,
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
         if (response.ok) {
           const fetchedData = await response.json();
-          
+
           // Extract scores from the fetched data
           const scores_list = fetchedData.scores_list || [];
-          
+
           if (scores_list.length > 0) {
             // Limit to 10 most recent rounds (or less if fewer are available)
             const recentRounds = scores_list.slice(0, 10).reverse();
-            
+
             // Calculate total scores and other stats for each round
-            const totalScores = recentRounds.map(round => {
+            const totalScores = recentRounds.map((round) => {
               const scores = round.scores || [];
-              return scores.reduce((total, score) => total + (score.strokes || 0), 0);
+              return scores.reduce(
+                (total, score) => total + (score.strokes || 0),
+                0
+              );
             });
-            
+
             // Calculate average putts per round
-            const avgPutts = recentRounds.map(round => {
+            const avgPutts = recentRounds.map((round) => {
               const scores = round.scores || [];
-              const totalPutts = scores.reduce((total, score) => total + (score.putts || 0), 0);
+              const totalPutts = scores.reduce(
+                (total, score) => total + (score.putts || 0),
+                0
+              );
               return totalPutts;
             });
-            
+
             // Calculate par totals for each round
-            const parTotals = recentRounds.map(round => {
+            const parTotals = recentRounds.map((round) => {
               const scores = round.scores || [];
-              return scores.reduce((total, score) => total + (score.par || 0), 0);
+              return scores.reduce(
+                (total, score) => total + (score.par || 0),
+                0
+              );
             });
-            
+
             // Generate round labels with dates
             const labels = recentRounds.map((round, index) => {
               const date = new Date(round.date);
-              const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              const formattedDate = date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              });
               return `R${index + 1}: ${formattedDate}`;
             });
-            
+
             // Calculate improvement (difference between first and last round)
             if (totalScores.length >= 2) {
               const firstScore = totalScores[0];
               const lastScore = totalScores[totalScores.length - 1];
               const diff = firstScore - lastScore;
               const percentChange = ((diff / firstScore) * 100).toFixed(1);
-              
+
               setImprovement({
                 value: diff,
-                percentage: `${diff >= 0 ? '+' : ''}${percentChange}%`
+                percentage: `${diff >= 0 ? "+" : ""}${percentChange}%`,
               });
             }
-            
+
             // Update the chart data
             setChartData({
               totalScores,
               avgPutts,
-              parTotal: parTotals
+              parTotal: parTotals,
             });
-            
+
             // Update round labels
             setRoundLabels(labels);
           }
         }
       } catch (error) {
-        console.error('Error fetching stats:', error);
+        console.error("Error fetching stats:", error);
       } finally {
         setIsLoading(false);
       }
@@ -128,34 +146,37 @@ export default function SessionsChart() {
   }, []);
 
   return (
-    <Card variant="outlined" sx={{ width: '100%' }}>
+    <Card variant="outlined" sx={{ width: "100%" }}>
       <CardContent>
         <Typography component="h2" variant="subtitle2" gutterBottom>
           Round Performance Trend
         </Typography>
-        <Stack sx={{ justifyContent: 'space-between' }}>
+        <Stack sx={{ justifyContent: "space-between" }}>
           <Stack
             direction="row"
             sx={{
-              alignContent: { xs: 'center', sm: 'flex-start' },
-              alignItems: 'center',
+              alignContent: { xs: "center", sm: "flex-start" },
+              alignItems: "center",
               gap: 1,
             }}
           >
             <Typography variant="h4" component="p">
-              {isLoading ? '...' : (
-                chartData.totalScores.length > 0 ? 
-                Math.round(chartData.totalScores.reduce((a, b) => a + b, 0) / chartData.totalScores.length) : 
-                '--'
-              )}
+              {isLoading
+                ? "..."
+                : chartData.totalScores.length > 0
+                ? Math.round(
+                    chartData.totalScores.reduce((a, b) => a + b, 0) /
+                      chartData.totalScores.length
+                  )
+                : "--"}
             </Typography>
-            <Chip 
-              size="small" 
-              color={improvement.value >= 0 ? "success" : "error"} 
-              label={improvement.percentage} 
+            <Chip
+              size="small"
+              color={improvement.value >= 0 ? "success" : "error"}
+              label={improvement.percentage}
             />
           </Stack>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
             Average score across recent rounds
           </Typography>
         </Stack>
@@ -163,33 +184,33 @@ export default function SessionsChart() {
           colors={colorPalette}
           xAxis={[
             {
-              scaleType: 'point',
+              scaleType: "point",
               data: roundLabels,
               tickInterval: (index) => index % 2 === 0, // Show every other round label
             },
           ]}
           series={[
             {
-              id: 'totalScore',
-              label: 'Total Score',
+              id: "totalScore",
+              label: "Total Score",
               showMark: true,
-              curve: 'linear',
+              curve: "linear",
               area: false,
               data: chartData.totalScores,
             },
             {
-              id: 'avgPutts',
-              label: 'Total Putts',
+              id: "avgPutts",
+              label: "Total Putts",
               showMark: true,
-              curve: 'linear',
+              curve: "linear",
               area: false,
               data: chartData.avgPutts,
             },
             {
-              id: 'parTotal',
-              label: 'Course Par',
+              id: "parTotal",
+              label: "Course Par",
               showMark: false,
-              curve: 'linear',
+              curve: "linear",
               area: false,
               data: chartData.parTotal,
             },
