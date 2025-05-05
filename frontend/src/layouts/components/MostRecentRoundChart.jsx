@@ -38,7 +38,7 @@ export default function SessionsChart() {
   ];
 
   const [chartData, setChartData] = useState({
-    strokes: defaultData.map(() => 0), // Default strokes
+    strokes: defaultData.map(() => 0), 
     putts: defaultData.map(() => 0), 
     par: defaultData.map(() => 0)
   });
@@ -50,7 +50,7 @@ export default function SessionsChart() {
     const fetchStats = async () => {
       try {
         setIsLoading(true);
-        const user_id = localStorage.getItem('userId') || '1';
+        const user_id = localStorage.getItem('userId');
         const response = await fetch(`http://localhost:8000/api/player/${user_id}/stats`, {
           headers: {
             Authorization: "Bearer " + localStorage.getItem("token"),
