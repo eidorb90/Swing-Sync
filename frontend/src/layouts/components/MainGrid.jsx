@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import ChartUserByCountry from './ChartUserByCountry';
-import CustomizedDataGrid from './CustomizedDataGrid';
 import PageViewsBarChart from './MostRecentRoundBarChart';
 import MostRecentRoundChart from './MostRecentRoundChart';
 import SessionsChart from "./RoundDataChart";

@@ -152,19 +152,24 @@ export default function GridRound() {
     setScores([]);
   };
 
-  // Handle tee selection
   const handleTeeSelection = (event) => {
     const teeName = event.target.value;
     setSelectedTee(teeName);
-
+  
     if (!selectedCourse || !selectedGender) return;
-
+  
     // Store the full tee object instead of just the name
     const tee = teeOptions.find(t => t.tee_name === teeName);
     if (tee && tee.holes && tee.holes.length > 0) {
-      setHoles(tee.holes);
+      // Assign IDs dynamically based on the number of holes
+      const holesWithIds = tee.holes.map((hole, index) => ({
+        ...hole,
+        id: index + 1, // Assign IDs starting from 1
+      }));
+  
+      setHoles(holesWithIds);
       setScores(
-        tee.holes.map(hole => ({
+        holesWithIds.map(hole => ({
           hole_id: hole.id,
           strokes: "",
           putts: 0,
@@ -183,6 +188,7 @@ export default function GridRound() {
       setScores([]);
     }
   };
+  
 
   // Handle score updates for a specific hole
   const handleScoreChange = (index, field, value) => {
@@ -255,8 +261,6 @@ export default function GridRound() {
       course_id: selectedCourse.id,
       tee_name: selectedTee, // Add the tee_name field as required by the backend
       notes: notes,
-      date_played: dateSelected.format("YYYY-MM-DD"),
-      total_score: roundStats.totalScore, // Use the calculated total score from roundStats
       hole_scores: scores.map(score => ({
         hole_id: score.hole_id,
         strokes: parseInt(score.strokes, 10),
@@ -280,6 +284,7 @@ export default function GridRound() {
           body: JSON.stringify(dataToSave),
         }
       );
+      console.log("Response status:", dataToSave);
   
       const result = await response.json();
   
@@ -404,17 +409,7 @@ export default function GridRound() {
 
               {/* Date and Notes */}
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Date Played"
-                      value={dateSelected}
-                      onChange={(newValue) => setDateSelected(newValue)}
-                      slotProps={{ textField: { fullWidth: true, variant: "outlined" } }}
-                      maxDate={dayjs()}
-                    />
-                  </LocalizationProvider>
-                </Grid>
+                
                 <Grid item xs={12} sm={6}>
                   <TextField
                     label="Notes"

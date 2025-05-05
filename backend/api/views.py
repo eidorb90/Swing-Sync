@@ -427,9 +427,6 @@ class RoundView(APIView):
             total_score = sum(
                 score_data.get("strokes", 0) for score_data in hole_scores_data
             )
-                
-
-            
             
 
             return Response(
