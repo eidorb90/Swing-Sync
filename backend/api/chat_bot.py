@@ -142,7 +142,7 @@ Remember: You're the golf buddy who knows their stuff - helpful but not afraid t
                 model="gemma3",
                 messages=self.messages,
                 stream=True,
-                options={"temperature": 0.9},
+                options={"temperature": 0},
             )
 
             response_content = ""
