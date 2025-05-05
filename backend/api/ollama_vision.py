@@ -53,7 +53,9 @@ Make sure to respond in a markdown format, using **bold** for key terms and emoj
             return self.handle_video()
         else:
             self.messages.append({"role": "user", "content": content})
-            res = ollama.chat(model="gemma3", messages=self.messages)
+            res = ollama.chat(
+                model="gemma3", options={"temperature": 0}, messages=self.messages
+            )
             self.messages.append(res["message"])
             return res["message"]["content"]
 
@@ -70,6 +72,7 @@ Make sure to respond in a markdown format, using **bold** for key terms and emoj
 
             res = ollama.chat(
                 model="gemma3",
+                options={"temperature": 0},
                 messages=[
                     {
                         "role": "user",
@@ -148,6 +151,7 @@ You are SwingCoach, an expert golf instructor specializing in swing analysis. Wh
 
             res = ollama.chat(
                 model="gemma3",
+                options={"temperature": 0},
                 messages=[
                     {
                         "role": "user",
