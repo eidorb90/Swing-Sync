@@ -156,6 +156,9 @@ class Round(models.Model):
 
     @property
     def green_in_regulation(self):
+        hole_scores = self.hole_scores.all()
+        if not hole_scores:
+            return 0.0
         return round(
             (
                 sum(score.green_in_regulation for score in self.hole_scores.all())
@@ -167,12 +170,11 @@ class Round(models.Model):
 
     @property
     def fairways_hit_percent(self):
+        hole_scores = self.hole_scores.all()
+        if not hole_scores:
+            return 0.0
         return round(
-            (
-                sum(score.fairway_hit for score in self.hole_scores.all())
-                / len(self.hole_scores.all())
-                * 100
-            ),
+            (sum(score.fairway_hit for score in hole_scores) / len(hole_scores) * 100),
             2,
         )
 
@@ -182,6 +184,9 @@ class Round(models.Model):
 
     @property
     def putt_per_hole(self):
+        hole_scores = self.hole_scores.all()
+        if not hole_scores:
+            return 0.0
         return round(self.putt_total / len(self.hole_scores.all()), 2)
 
     @property
@@ -190,6 +195,9 @@ class Round(models.Model):
 
     @property
     def penalties_per_hole(self):
+        hole_scores = self.hole_scores.all()
+        if not hole_scores:
+            return 0.0
         return round(self.penalties_total / len(self.hole_scores.all()), 2)
 
     def __str__(self):
