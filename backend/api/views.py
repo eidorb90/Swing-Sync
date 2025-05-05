@@ -286,7 +286,7 @@ class RoundView(APIView):
         """
         try:
             data = request.data.copy()
-            logger.info(f"Processing round data: {data}")
+            logger.info("Processing round data: %s", data)
 
             # Required fields validation
             required_fields = ["course_id", "tee_name"]
@@ -303,7 +303,7 @@ class RoundView(APIView):
             try:
                 # Get the course
                 course = Course.objects.get(id=course_id)
-                logger.info(f"Found course: {course.course_name} (ID: {course.id})")
+                logger.info("Found course: %s (ID: %d)", course.course_name, course.id)
 
                 # Find the tee by name
                 tee = Tee.objects.filter(
@@ -315,7 +315,7 @@ class RoundView(APIView):
                     available_tees = Tee.objects.filter(course=course)
                     tee_names = [t.tee_name for t in available_tees]
                     logger.error(
-                        f"Tee '{tee_name}' not found. Available tees: {', '.join(tee_names)}"
+                        "Tee '%s' not found. Available tees: %s", tee_name, ', '.join(tee_names)
                     )
 
                     return Response(
@@ -326,7 +326,7 @@ class RoundView(APIView):
                         status=status.HTTP_404_NOT_FOUND,
                     )
 
-                logger.info(f"Found tee: {tee.tee_name} (ID: {tee.id})")
+                logger.info("Found tee: %s (ID: %d)", tee.tee_name, tee.id)
                 data["tee_id"] = tee.id
 
             except Course.DoesNotExist:
@@ -355,7 +355,7 @@ class RoundView(APIView):
                 round_obj.notes = data.get("notes", round_obj.notes)
                 round_obj.save()
 
-                logger.info(f"Updated round: {round_obj.id}")
+                logger.info("Updated round: %d", round_obj.id)
 
                 # Update hole scores
                 for score_data in hole_scores_data:
@@ -395,7 +395,7 @@ class RoundView(APIView):
                     round_obj.date_played = data["date_played"]
                     round_obj.save()
 
-                logger.info(f"Created new round: {round_obj.id}")
+                logger.info("Created new round: %d", round_obj.id)
 
                 # Create hole scores
                 for score_data in hole_scores_data:
@@ -413,19 +413,24 @@ class RoundView(APIView):
                             putts=score_data.get("putts", 0),
                             fairway_hit=score_data.get("fairway_hit", False),
                             green_in_regulation=score_data.get(
-                                "green_in_regulation", False
-                            ),
+                                "green_in_regulation", False),
                             penalties=score_data.get("penalties", 0),
                         )
                     except Hole.DoesNotExist:
-                        logger.warning(f"Hole with ID {hole_id} not found. Skipping.")
+                        logger.warning("Hole with ID %d not found. Skipping.", hole_id)
                         continue
 
                 message = "Scorecard created successfully"
                 status_code = status.HTTP_201_CREATED
+                
+            # Calculate total score and other statistics
+            total_score = sum(
+                score_data.get("strokes", 0) for score_data in hole_scores_data
+            )
+                
 
-            # Calculate total score
-            total_score = sum(score.strokes for score in round_obj.hole_scores.all())
+            
+            
 
             return Response(
                 {
@@ -438,11 +443,17 @@ class RoundView(APIView):
                 status=status_code,
             )
 
-        except Exception as e:
-            logger.exception(f"Error processing round: {str(e)}")
+        except (Course.DoesNotExist, Tee.DoesNotExist, Hole.DoesNotExist) as e:
+            logger.exception("Error processing round: %s", str(e))
             return Response(
                 {"error": f"Failed to process round: {str(e)}"},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            logger.exception("Unexpected error: %s", str(e))
+            return Response(
+                {"error": "An unexpected error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
     def get(self, request, round_id=None):

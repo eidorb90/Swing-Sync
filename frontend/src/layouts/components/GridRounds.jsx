@@ -242,18 +242,21 @@ export default function GridRound() {
   // Save data to backend
   const handleSave = async () => {
     if (!validateForm()) return;
-    
+  
     setIsSaving(true);
-    
+  
     // Find the tee object from the selected tee
     const selectedTeeObj = teeOptions.find(t => t.tee_name === selectedTee);
-    
+  
+    // Calculate total strokes
+    const totalStrokes = scores.reduce((sum, score) => sum + (Number(score.strokes) || 0), 0);
+  
     const dataToSave = {
       course_id: selectedCourse.id,
-      tee_id: selectedTeeObj?.id,
       tee_name: selectedTee, // Add the tee_name field as required by the backend
       notes: notes,
       date_played: dateSelected.format("YYYY-MM-DD"),
+      total_score: roundStats.totalScore, // Use the calculated total score from roundStats
       hole_scores: scores.map(score => ({
         hole_id: score.hole_id,
         strokes: parseInt(score.strokes, 10),
@@ -263,13 +266,13 @@ export default function GridRound() {
         penalties: score.penalties || 0,
       })),
     };
-
+  
     try {
       console.log("Sending data:", dataToSave);
       const response = await fetch(
         "http://localhost:8000/api/rounds/",
         {
-          method: "POST", 
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer " + localStorage.getItem("token"),
@@ -277,20 +280,20 @@ export default function GridRound() {
           body: JSON.stringify(dataToSave),
         }
       );
-
+  
       const result = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(result.error || `Error saving data: ${response.statusText}`);
       }
-
+  
       console.log("Data saved successfully:", result);
       setAlertInfo({
         open: true,
         message: "Round saved successfully!",
         severity: "success"
       });
-      
+  
       // Reset form after successful save
       setSelectedCourse(null);
       setSelectedGender("");
