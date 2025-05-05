@@ -124,50 +124,50 @@ export default function GridRound() {
     updatedScores[index][field] = value;
     setScores(updatedScores);
   };
-  const tee = teeOptions?.find((t) => t?.tee_name === selectedTee);
 
   
   // Save data to backend
   const handleSave = async () => {
-    if (!userId) {
-      console.error("User ID is undefined. Cannot save data.");
-      alert("User ID is missing. Please try again.");
+    if (!userId || !selectedCourse || !selectedTee) {
+      console.error("Missing required fields for saving round data.");
+      alert("Please ensure all fields are filled out.");
       return;
     }
-
+  
     setIsSaving(true);
+  
+    const tee = teeOptions.find((t) => t.tee_name === selectedTee); // Get the selected tee object
+  
     const dataToSave = {
-      tee_id: tee.id, // Backend expects tee_id, not tee_name
       course_id: selectedCourse.id, // Backend expects course_id
-      notes: "", // Add notes if applicable, otherwise send an empty string
+      tee_id: tee?.id, // Add the tee_id from the selected tee
+      notes: "", // Add notes if applicable or default to an empty string
       hole_scores: scores.map((score, index) => ({
         hole_id: holes[index]?.id, // Backend expects hole_id
-        strokes: score.strokes, // Backend expects strokes
-        putts: score.putts || 0, // Default putts to 0 if not provided
-        fairway_hit: score.fairwayHit || false, // Default fairway_hit to false
-        green_in_regulation: score.greenInRegulation || false, // Default green_in_regulation to false
-        penalties: score.penalties || 0, // Default penalties to 0
+        strokes: score.strokes,
+        putts: score.putts || 0,
+        fairway_hit: score.fairwayHit || false,
+        green_in_regulation: score.greenInRegulation || false,
+        penalties: score.penalties || 0,
       })),
     };
   
-
+    console.log("Data being sent:", JSON.stringify(dataToSave, null, 2)); // Log the data payload for debugging
+  
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/rounds/`,
-        {
-          method: "POST", 
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-          body: JSON.stringify(dataToSave),
-        }
-      );
-
+      const response = await fetch(`http://localhost:8000/api/rounds/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+        body: JSON.stringify(dataToSave),
+      });
+  
       if (!response.ok) {
         throw new Error(`Error saving data: ${response.statusText}`);
       }
-
+  
       const result = await response.json();
       console.log("Data saved successfully:", result);
       alert("Data saved successfully!");

@@ -239,7 +239,6 @@ class RoundView(APIView):
             if round_id is not None:
                 # Handle updating an existing round
                 round = get_object_or_404(Round, id=round_id, player=request.user)
-                round.tee_id = data.get("tee_id", round.tee_id)
                 round.gender = data.get("gender", round.gender)
                 round.date_played = data.get("date_played", round.date_played)
                 round.course_id = data.get("course_id", round.course_id)
@@ -264,7 +263,6 @@ class RoundView(APIView):
             else:
                 # Create new round
                 round = Round.objects.create(
-                    tee_id=data["tee_id"],
                     player=request.user,
                     course_id=data["course_id"],
                     notes=data.get("notes", ""),
