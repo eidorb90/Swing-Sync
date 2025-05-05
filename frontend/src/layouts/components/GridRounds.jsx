@@ -321,7 +321,7 @@ export default function GridRound() {
 
   return (
     <Box sx={{ width: "100%", maxWidth: 1200, margin: "0 auto" }}>
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, mb: 3, backgroundColor: "background.paper" }}>
         <Typography variant="h5" gutterBottom sx={{ mb: 3, fontWeight: "bold", color: "primary.main" }}>
           Record a New Round
         </Typography>
@@ -515,7 +515,7 @@ export default function GridRound() {
                     fontWeight="bold" 
                     sx={{ mb: 1 }}
                   >
-                    Hole {hole.hole_number}
+                    Hole {hole.hole_number} ({index + 1})
                   </Typography>
                   <Box sx={{ display: "flex", mb: 1, alignItems: "center" }}>
                     <Typography variant="body2" sx={{ mr: 1 }}>
