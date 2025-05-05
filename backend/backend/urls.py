@@ -13,6 +13,7 @@ from api.views import (
     UserStats,
     LeaderBoardView,
     VisionChatBotView,
+    CourseTeeDebugView,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -48,4 +49,9 @@ urlpatterns = [
     # custom ai chatbot section
     path("api/chat/", ChatBotView.as_view(), name="chatbot"),
     path("api/vision/", VisionChatBotView.as_view(), name="vision_chatbot"),
+    path(
+        "api/courses/<int:course_id>/tees/debug/",
+        CourseTeeDebugView.as_view(),
+        name="course_tee_debug",
+    ),
 ]

@@ -35,18 +35,24 @@ export function SwingReview(props) {
     if (input.trim() === "" || loading) return;
 
     const userMessage = { text: input, sender: "user", timestamp: new Date() };
+
+    const url = "http://localhost:8000/api/vision/";
+    const formData = new FormData();
+
+    formData.append("message", userMessage.text);
+
+    setLoading(true);
+
     setMessages([...messages, userMessage]);
     setInput("");
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/chat",
-        { question: input },
-        {
+        const response = await axios.post(url, formData, {
           headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-        }
-      );
+        });
+
+
 
       const botMessage = {
         text: response.data.response,
@@ -54,6 +60,7 @@ export function SwingReview(props) {
         timestamp: new Date(),
       };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
+      
     } catch (error) {
       console.error("Error sending message:", error);
       const errorMessage = {
