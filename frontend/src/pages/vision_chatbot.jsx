@@ -1,3 +1,14 @@
+
+/**
+ * SwingReview Component
+ * 
+ * This component provides a user interface for uploading swing videos and interacting with a chatbot
+ * to analyze the uploaded video. It includes functionalities for file upload, displaying server responses,
+ * and a chat interface for user-bot communication.
+ * 
+ * 
+ * 
+ */
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";

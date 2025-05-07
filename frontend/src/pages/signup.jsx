@@ -1,3 +1,16 @@
+/**
+ * SignUp Component
+ *
+ * This component renders a sign-up form for user registration. It includes fields for
+ * first name, last name, username, email, password, and password confirmation. The form
+ * validates user input and sends a POST request to the server for user registration.
+ *
+ *
+ * Notes:
+ * - The form includes client-side validation for matching passwords.
+ * - Displays error messages for invalid input or server errors.
+ * - Redirects to the sign-in page upon successful registration.
+ */
 import { useState, useEffect } from "react";
 import * as React from "react";
 import Box from "@mui/material/Box";

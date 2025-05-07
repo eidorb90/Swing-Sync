@@ -1,3 +1,8 @@
+/**
+ * Component for displaying detailed information about a golf course, including
+ * gender-specific tee options, hole details, and tee information.
+ *
+ */
 import * as React from "react";
 import { useLocation } from "react-router-dom";
 import { alpha } from "@mui/material/styles";

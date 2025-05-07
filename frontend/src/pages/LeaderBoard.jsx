@@ -1,3 +1,9 @@
+/**
+ * LeaderBoard component renders the leaderboard page layout.
+ * It includes a side menu, navigation bar, header, and a leaderboard grid.
+ * The component is wrapped with a custom theme and applies global styles.
+ *
+ */
 import * as React from "react";
 import { alpha } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";

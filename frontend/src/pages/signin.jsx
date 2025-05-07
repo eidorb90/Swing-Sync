@@ -1,3 +1,15 @@
+/**
+ * SignIn component renders a sign-in page with a form for user authentication.
+ * It includes input validation, error handling, and integration with an API for login.
+ *
+ *
+ * @description
+ * - Validates user inputs (username and password).
+ * - Sends a POST request to the login API endpoint with user credentials.
+ * - Handles API responses and navigates to the account page on successful login.
+ * - Displays error messages for invalid inputs or failed login attempts.
+ *
+*/
 import { useState } from "react";
 import * as React from "react";
 import Box from "@mui/material/Box";

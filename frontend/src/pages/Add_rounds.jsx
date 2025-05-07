@@ -1,3 +1,17 @@
+/**
+ * AddRounds Component
+ *
+ * This component represents the "Add Rounds" page of the application. It is built using
+ * Material-UI and Mantine components to provide a responsive and visually appealing layout.
+ *
+ * @description
+ * - Wraps the content in a custom theme using the `AppTheme` component.
+ * - Includes a sidebar menu (`SideMenu`) and a top navigation bar (`AppNavbar`).
+ * - Displays a main content area with a header (`Header`) and a grid for displaying rounds (`GridRound`).
+ * - Ensures consistent styling and color scheme with `CssBaseline`.
+ * - Provides responsive design adjustments for different screen sizes.
+ *
+ */
 import * as React from "react";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
