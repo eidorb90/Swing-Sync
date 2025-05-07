@@ -11,34 +11,30 @@ import {
 } from "recharts";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 
-const defaultStatsData = [
-  { product: "Putting", "Current Skills": 50, "Target Skills": 75 },
-  { product: "Scoring", "Current Skills": 45, "Target Skills": 80 },
-  { product: "Fairways", "Current Skills": 40, "Target Skills": 75 },
-  { product: "Greens", "Current Skills": 35, "Target Skills": 70 },
-  { product: "Penalties", "Current Skills": 60, "Target Skills": 90 },
-];
+
 
 const RadarChartComponent = () => {
-  const [statsData, setStatsData] = useState(defaultStatsData);
-  const [isLoading, setIsLoading] = useState(true);
+  const [statsData, setStatsData] = useState(); // State to hold the radar chart data
+  const [isLoading, setIsLoading] = useState(true); // State to track loading status
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        setIsLoading(true);
-        const user_id = localStorage.getItem("userId") || "1";
+        setIsLoading(true); // Set loading to true before fetching data
+        const user_id = localStorage.getItem("userId") || "1"; // Get user ID from local storage or use default
         const response = await fetch(
           `http://localhost:8000/api/player/${user_id}/stats`,
           {
             headers: {
-              Authorization: "Bearer " + localStorage.getItem("token"),
+              Authorization: "Bearer " + localStorage.getItem("token"), // Include authorization token in headers
             },
           }
         );
 
         if (response.ok) {
           const fetchedData = await response.json();
+
+          // Format the fetched data to match the radar chart structure
           const formattedData = [
             {
               product: "Putting",
@@ -86,16 +82,16 @@ const RadarChartComponent = () => {
             },
           ];
 
-          setStatsData(formattedData);
+          setStatsData(formattedData); // Update the radar chart data
         }
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        console.error("Error fetching stats:", error); // Log any errors during the fetch
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Set loading to false after fetching data
       }
     };
 
-    fetchStats();
+    fetchStats(); // Fetch player stats when the component mounts
   }, []);
 
   return (
@@ -111,12 +107,12 @@ const RadarChartComponent = () => {
             outerRadius={140}
             width={500}
             height={308}
-            data={statsData}
+            data={statsData} // Pass the radar chart data
           >
-            <PolarGrid />
-            <PolarAngleAxis dataKey="product" />
-            <PolarRadiusAxis />
-            <Tooltip />
+            <PolarGrid /> {/* Grid lines for the radar chart */}
+            <PolarAngleAxis dataKey="product" /> {/* Axis for product names */}
+            <PolarRadiusAxis /> {/* Axis for radial values */}
+            <Tooltip /> {/* Tooltip to display data on hover */}
             <Radar
               name="Current Skills"
               dataKey="Current Skills"

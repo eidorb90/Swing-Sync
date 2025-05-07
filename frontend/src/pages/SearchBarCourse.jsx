@@ -12,10 +12,14 @@ import { Container, Title } from "@mantine/core";
 
 export default function SearchBarCourse(props) {
   return (
+    // Wrapping the entire component with a custom theme provider
     <AppTheme {...props}>
+      {/* Enables consistent color scheme across the app */}
       <CssBaseline enableColorScheme />
       <Box sx={{ display: "flex" }}>
+        {/* Sidebar menu for navigation */}
         <SideMenu />
+        {/* Top navigation bar */}
         <AppNavbar />
 
         <Box
@@ -28,6 +32,7 @@ export default function SearchBarCourse(props) {
             overflow: "auto",
           })}
         >
+          {/* Header section */}
           <Stack
             spacing={2}
             sx={{
@@ -39,6 +44,7 @@ export default function SearchBarCourse(props) {
           >
             <Header />
           </Stack>
+          {/* Main content area with the search bar */}
           <Stack
             component="main"
             sx={(theme) => ({
@@ -56,6 +62,7 @@ export default function SearchBarCourse(props) {
           </Stack>
         </Box>
       </Box>
+      {/* Container for additional content or spacing */}
       <Container size="lg" py="xl"></Container>
     </AppTheme>
   );

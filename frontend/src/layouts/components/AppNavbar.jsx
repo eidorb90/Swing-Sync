@@ -12,6 +12,7 @@ import MenuButton from "./MenuButton";
 import ColorModeIconDropdown from "../theme/customizations/ColorModeIconDropdown";
 import GolfCourseIcon from "@mui/icons-material/GolfCourse";
 
+// Custom styled Toolbar component with specific layout and spacing
 const Toolbar = styled(MuiToolbar)({
   width: "100%",
   padding: "12px",
@@ -29,8 +30,9 @@ const Toolbar = styled(MuiToolbar)({
 });
 
 export default function AppNavbar() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false); // State to manage the mobile side menu visibility
 
+  // Function to toggle the side menu drawer
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
@@ -39,13 +41,13 @@ export default function AppNavbar() {
     <AppBar
       position="fixed"
       sx={{
-        display: { xs: "auto", md: "none" },
+        display: { xs: "auto", md: "none" }, // Only show AppBar on smaller screens
         boxShadow: 0,
         bgcolor: "background.paper",
         backgroundImage: "none",
         borderBottom: "1px solid",
         borderColor: "divider",
-        top: "var(--template-frame-height, 1px)",
+        top: "var(--template-frame-height, 1px)", // Adjust position based on a custom CSS variable
       }}
     >
       <Toolbar variant="regular">
@@ -58,12 +60,13 @@ export default function AppNavbar() {
             gap: 1,
           }}
         >
+          {/* Left-aligned logo and title */}
           <Stack
             direction="row"
             spacing={1}
             sx={{ justifyContent: "center", mr: "auto" }}
           >
-            <CustomIcon />
+            <CustomIcon /> {/* Custom circular icon */}
             <Typography
               variant="h4"
               component="h1"
@@ -72,10 +75,13 @@ export default function AppNavbar() {
               Swing Sync
             </Typography>
           </Stack>
+          {/* Theme mode toggle dropdown */}
           <ColorModeIconDropdown />
+          {/* Menu button to open the side menu */}
           <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
             <MenuRoundedIcon />
           </MenuButton>
+          {/* Mobile side menu component */}
           <SideMenuMobile open={open} toggleDrawer={toggleDrawer} />
         </Stack>
       </Toolbar>
@@ -83,6 +89,7 @@ export default function AppNavbar() {
   );
 }
 
+// Custom circular icon with gradient background and shadow
 export function CustomIcon() {
   return (
     <Box

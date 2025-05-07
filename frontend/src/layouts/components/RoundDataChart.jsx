@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import { LineChart } from "@mui/x-charts/LineChart";
 
+// Component for defining a gradient for the chart area
 function AreaGradient({ color, id }) {
   return (
     <defs>
@@ -28,9 +29,9 @@ AreaGradient.propTypes = {
 export default function SessionsChart() {
   const theme = useTheme();
 
-  // Default data for last 10 rounds
+  // Default data for the last 10 rounds
   const defaultRounds = Array.from({ length: 10 }, (_, i) => `Round ${i + 1}`);
-  const defaultScores = Array(10).fill(72); // Default par 72
+  const defaultScores = Array(10).fill(72); // Default score of 72 for each round
 
   const colorPalette = [
     theme.palette.primary.light,
@@ -38,13 +39,14 @@ export default function SessionsChart() {
     theme.palette.error.main,
   ];
 
+  // State to hold chart data
   const [chartData, setChartData] = useState({
     totalScores: defaultScores.map(() => 0), // Default total scores
     avgPutts: Array(10).fill(0), // Default average putts
     parTotal: defaultScores.map(() => 0), // Default par for each round
   });
-  const [roundLabels, setRoundLabels] = useState(defaultRounds);
-  const [isLoading, setIsLoading] = useState(true);
+  const [roundLabels, setRoundLabels] = useState(defaultRounds); // Labels for rounds
+  const [isLoading, setIsLoading] = useState(true); // Loading state
   const [improvement, setImprovement] = useState({
     value: 0,
     percentage: "0%",
@@ -54,7 +56,7 @@ export default function SessionsChart() {
     const fetchStats = async () => {
       try {
         setIsLoading(true);
-        const user_id = localStorage.getItem("userId") || "1";
+        const user_id = localStorage.getItem("userId") || "1"; // Fallback to default user ID
         const response = await fetch(
           `http://localhost:8000/api/player/${user_id}/stats`,
           {
@@ -70,10 +72,10 @@ export default function SessionsChart() {
           const scores_list = fetchedData.scores_list || [];
 
           if (scores_list.length > 0) {
-            // Limit to 10 most recent rounds (or less if fewer are available)
+            // Limit to 10 most recent rounds (or fewer if less data is available)
             const recentRounds = scores_list.slice(0, 10).reverse();
 
-            // Calculate total scores and other stats for each round
+            // Calculate total scores for each round
             const totalScores = recentRounds.map((round) => {
               const scores = round.scores || [];
               return scores.reduce(
@@ -82,7 +84,7 @@ export default function SessionsChart() {
               );
             });
 
-            // Calculate average putts per round
+            // Calculate total putts for each round
             const avgPutts = recentRounds.map((round) => {
               const scores = round.scores || [];
               const totalPutts = scores.reduce(
@@ -101,7 +103,7 @@ export default function SessionsChart() {
               );
             });
 
-            // Generate round labels with dates
+            // Generate round labels with formatted dates
             const labels = recentRounds.map((round, index) => {
               const date = new Date(round.date);
               const formattedDate = date.toLocaleDateString("en-US", {
@@ -111,7 +113,7 @@ export default function SessionsChart() {
               return `R${index + 1}: ${formattedDate}`;
             });
 
-            // Calculate improvement (difference between first and last round)
+            // Calculate improvement (difference between first and last round scores)
             if (totalScores.length >= 2) {
               const firstScore = totalScores[0];
               const lastScore = totalScores[totalScores.length - 1];
@@ -138,7 +140,7 @@ export default function SessionsChart() {
       } catch (error) {
         console.error("Error fetching stats:", error);
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Ensure loading state is reset
       }
     };
 
@@ -162,17 +164,17 @@ export default function SessionsChart() {
           >
             <Typography variant="h4" component="p">
               {isLoading
-                ? "..."
+                ? "..." // Show loading indicator
                 : chartData.totalScores.length > 0
                 ? Math.round(
                     chartData.totalScores.reduce((a, b) => a + b, 0) /
                       chartData.totalScores.length
-                  )
+                  ) // Calculate average score
                 : "--"}
             </Typography>
             <Chip
               size="small"
-              color={improvement.value >= 0 ? "success" : "error"}
+              color={improvement.value >= 0 ? "success" : "error"} // Color based on improvement
               label={improvement.percentage}
             />
           </Stack>
@@ -181,12 +183,12 @@ export default function SessionsChart() {
           </Typography>
         </Stack>
         <LineChart
-          colors={colorPalette}
+          colors={colorPalette} // Chart colors
           xAxis={[
             {
               scaleType: "point",
-              data: roundLabels,
-              tickInterval: (index) => index % 2 === 0, // Show every other round label
+              data: roundLabels, // X-axis labels
+              tickInterval: (index) => index % 2 === 0, // Show every other label
             },
           ]}
           series={[
@@ -196,7 +198,7 @@ export default function SessionsChart() {
               showMark: true,
               curve: "linear",
               area: false,
-              data: chartData.totalScores,
+              data: chartData.totalScores, // Total scores data
             },
             {
               id: "avgPutts",
@@ -204,7 +206,7 @@ export default function SessionsChart() {
               showMark: true,
               curve: "linear",
               area: false,
-              data: chartData.avgPutts,
+              data: chartData.avgPutts, // Average putts data
             },
             {
               id: "parTotal",
@@ -212,15 +214,15 @@ export default function SessionsChart() {
               showMark: false,
               curve: "linear",
               area: false,
-              data: chartData.parTotal,
+              data: chartData.parTotal, // Par totals data
             },
           ]}
           height={250}
           margin={{ left: 50, right: 20, top: 20, bottom: 20 }}
-          grid={{ horizontal: true }}
+          grid={{ horizontal: true }} // Enable horizontal grid lines
           slotProps={{
             legend: {
-              hidden: true,
+              hidden: true, // Hide legend
             },
           }}
         />

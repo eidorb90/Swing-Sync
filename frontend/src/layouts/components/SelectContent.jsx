@@ -13,6 +13,7 @@ import DevicesRoundedIcon from "@mui/icons-material/DevicesRounded";
 import SmartphoneRoundedIcon from "@mui/icons-material/SmartphoneRounded";
 import ConstructionRoundedIcon from "@mui/icons-material/ConstructionRounded";
 
+// Styled Avatar component with custom dimensions and colors
 const Avatar = styled(MuiAvatar)(({ theme }) => ({
   width: 28,
   height: 28,
@@ -21,14 +22,17 @@ const Avatar = styled(MuiAvatar)(({ theme }) => ({
   border: `1px solid ${(theme.vars || theme).palette.divider}`,
 }));
 
+// Styled ListItemAvatar to adjust spacing
 const ListItemAvatar = styled(MuiListItemAvatar)({
   minWidth: 0,
   marginRight: 12,
 });
 
 export default function SelectContent() {
+  // State to track the selected company
   const [company, setCompany] = React.useState("");
 
+  // Handle change event for the select dropdown
   const handleChange = (event) => {
     setCompany(event.target.value);
   };
@@ -45,6 +49,7 @@ export default function SelectContent() {
       sx={{
         maxHeight: 56,
         width: 215,
+        // Custom styles for the dropdown
         "&.MuiList-root": {
           p: "8px",
         },
@@ -56,6 +61,7 @@ export default function SelectContent() {
         },
       }}
     >
+      {/* Subheader for Production section */}
       <ListSubheader sx={{ pt: 0 }}>Production</ListSubheader>
       <MenuItem value="">
         <ListItemAvatar>
@@ -81,6 +87,8 @@ export default function SelectContent() {
         </ListItemAvatar>
         <ListItemText primary="Sitemark-Store" secondary="Web app" />
       </MenuItem>
+
+      {/* Subheader for Development section */}
       <ListSubheader>Development</ListSubheader>
       <MenuItem value={30}>
         <ListItemAvatar>
@@ -90,7 +98,11 @@ export default function SelectContent() {
         </ListItemAvatar>
         <ListItemText primary="Sitemark-Admin" secondary="Web app" />
       </MenuItem>
+
+      {/* Divider for separating sections */}
       <Divider sx={{ mx: -1 }} />
+
+      {/* Option to add a new product */}
       <MenuItem value={40}>
         <ListItemIcon>
           <AddRoundedIcon />

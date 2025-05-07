@@ -12,28 +12,30 @@ import MenuButton from "./MenuButton";
 import MenuContent from "./MenuContent";
 
 function SideMenuMobile({ open, toggleDrawer }) {
+  // Retrieve user information from localStorage
   const Lastname = localStorage.getItem("lastname");
   const Firstname = localStorage.getItem("firstname");
 
   return (
     <Drawer
-      anchor="right"
-      open={open}
-      onClose={toggleDrawer(false)}
+      anchor="right" // Drawer slides in from the right
+      open={open} // Controls whether the drawer is open
+      onClose={toggleDrawer(false)} // Handles closing the drawer
       sx={{
-        zIndex: (theme) => theme.zIndex.drawer + 1,
+        zIndex: (theme) => theme.zIndex.drawer + 1, // Ensures the drawer appears above other elements
         [`& .${drawerClasses.paper}`]: {
-          backgroundImage: "none",
-          backgroundColor: "background.paper",
+          backgroundImage: "none", // Removes any default background image
+          backgroundColor: "background.paper", // Sets the background color
         },
       }}
     >
       <Stack
         sx={{
-          maxWidth: "70dvw",
-          height: "100%",
+          maxWidth: "70dvw", // Limits the drawer width to 70% of the viewport width
+          height: "100%", // Makes the drawer take up the full height
         }}
       >
+        {/* Header section with user avatar and notifications */}
         <Stack direction="row" sx={{ p: 2, pb: 0, gap: 1 }}>
           <Stack
             direction="row"
@@ -41,29 +43,33 @@ function SideMenuMobile({ open, toggleDrawer }) {
           >
             <Avatar
               sizes="small"
-              alt={`${Firstname} ${Lastname}`}
-              src="/static/images/avatar/7.jpg"
-              sx={{ width: 24, height: 24 }}
+              alt={`${Firstname} ${Lastname}`} // Displays user's full name as alt text
+              src="/static/images/avatar/7.jpg" // Placeholder avatar image
+              sx={{ width: 24, height: 24 }} // Small avatar size
             />
             <Typography component="p" variant="h6">
-              {`${Firstname} ${Lastname}`}
+              {`${Firstname} ${Lastname}`} {/* Displays user's full name */}
             </Typography>
           </Stack>
+          {/* Notifications button with badge */}
           <MenuButton showBadge>
             <NotificationsRoundedIcon />
           </MenuButton>
         </Stack>
-        <Divider />
+        <Divider /> {/* Divider between header and menu content */}
+        
+        {/* Main menu content */}
         <Stack sx={{ flexGrow: 1 }}>
-          <MenuContent />
-          <Divider />
+          <MenuContent /> {/* Renders the menu items */}
+          <Divider /> {/* Divider between menu content and footer */}
         </Stack>
 
+        {/* Footer section with logout button */}
         <Stack sx={{ p: 2 }}>
           <Button
             variant="outlined"
-            fullWidth
-            startIcon={<LogoutRoundedIcon />}
+            fullWidth // Makes the button span the full width
+            startIcon={<LogoutRoundedIcon />} // Adds a logout icon to the button
           >
             Logout
           </Button>
@@ -74,8 +80,8 @@ function SideMenuMobile({ open, toggleDrawer }) {
 }
 
 SideMenuMobile.propTypes = {
-  open: PropTypes.bool,
-  toggleDrawer: PropTypes.func.isRequired,
+  open: PropTypes.bool, // Indicates whether the drawer is open
+  toggleDrawer: PropTypes.func.isRequired, // Function to toggle the drawer state
 };
 
 export default SideMenuMobile;

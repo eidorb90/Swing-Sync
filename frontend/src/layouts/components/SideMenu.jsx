@@ -11,6 +11,7 @@ import OptionsMenu from "./OptionsMenu";
 
 const drawerWidth = 275;
 
+// Styled Drawer component with custom width and styles
 const Drawer = styled(MuiDrawer)({
   width: drawerWidth,
   flexShrink: 0,
@@ -23,6 +24,7 @@ const Drawer = styled(MuiDrawer)({
 });
 
 export default function SideMenu() {
+  // Retrieve user information from localStorage
   const Lastname = localStorage.getItem("lastname");
   const Firstname = localStorage.getItem("firstname");
   const Email = localStorage.getItem("email");
@@ -31,51 +33,51 @@ export default function SideMenu() {
     <Drawer
       variant="permanent"
       sx={{
-        display: { xs: "none", md: "block" },
+        display: { xs: "none", md: "block" }, // Hide drawer on small screens
         [`& .${drawerClasses.paper}`]: {
-          backgroundColor: "background.paper",
+          backgroundColor: "background.paper", // Set background color
         },
       }}
     >
       <Divider />
       <Box
         sx={{
-          overflow: "auto",
+          overflow: "auto", // Enable scrolling if content overflows
           height: "100%",
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "column", // Stack children vertically
         }}
       >
-        <MenuContent />
+        <MenuContent /> {/* Main menu content */}
       </Box>
       <Stack
         direction="row"
         sx={{
-          p: 2,
-          gap: 1,
-          alignItems: "center",
-          borderTop: "1px solid",
-          borderColor: "divider",
+          p: 2, // Padding
+          gap: 1, // Gap between items
+          alignItems: "center", // Align items vertically
+          borderTop: "1px solid", // Top border
+          borderColor: "divider", // Use theme divider color
         }}
       >
         <Avatar
           sizes="small"
-          alt={`${Firstname} ${Lastname}`}
-          src="/static/images/avatar/7.jpg"
-          sx={{ width: 36, height: 36 }}
+          alt={`${Firstname} ${Lastname}`} // Alt text for accessibility
+          src="/static/images/avatar/7.jpg" // Placeholder avatar image
+          sx={{ width: 36, height: 36 }} // Avatar size
         />
         <Box sx={{ mr: "auto" }}>
           <Typography
             variant="body2"
-            sx={{ fontWeight: 500, lineHeight: "16px" }}
+            sx={{ fontWeight: 500, lineHeight: "16px" }} // User's name styling
           >
             {`${Firstname} ${Lastname}`}
           </Typography>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            {`${Email}`}
+            {`${Email}`} {/* User's email */}
           </Typography>
         </Box>
-        <OptionsMenu />
+        <OptionsMenu /> {/* Options menu for additional actions */}
       </Stack>
     </Drawer>
   );

@@ -13,6 +13,7 @@ import AddIcon from "@mui/icons-material/Add";
 import GolfCourseIcon from "@mui/icons-material/GolfCourse";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 
+// Define the main menu items with their respective icons and routes
 const mainListItems = [
   { text: "Home", icon: <HomeRoundedIcon />, route: "/account" },
   { text: "LeaderBoard", icon: <LeaderboardIcon />, route: "/leaderboard" },
@@ -26,23 +27,28 @@ const mainListItems = [
   { text: "Add Rounds", icon: <AddIcon />, route: "/addrounds" },
 ];
 
+// Define the secondary menu items (e.g., settings)
 const secondaryListItems = [
   { text: "Settings", icon: <SettingsRoundedIcon />, route: "/" },
 ];
 
 export default function MenuContent() {
   const navigate = useNavigate();
+
+  // Function to check if the current route matches the given route
   const selected = (route) => {
     const currentPath = window.location.pathname;
     return currentPath === route;
   };
 
+  // Function to handle navigation to a specific route
   const handleNavigation = (route) => {
     navigate(route);
   };
 
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
+      {/* Render the main menu items */}
       <List dense>
         {mainListItems.map((item, index) => (
           <ListItem
@@ -52,7 +58,7 @@ export default function MenuContent() {
           >
             <ListItemButton
               onClick={() => handleNavigation(item.route)}
-              selected={selected(item.route)}
+              selected={selected(item.route)} // Highlight the selected item
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
@@ -60,12 +66,14 @@ export default function MenuContent() {
           </ListItem>
         ))}
       </List>
+
+      {/* Render the secondary menu items */}
       <List dense>
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <ListItemButton
-              onClick={() => null}
-              selected={selected(item.route)}
+              onClick={() => null} // Placeholder for navigation
+              selected={selected(item.route)} // Highlight the selected item
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />

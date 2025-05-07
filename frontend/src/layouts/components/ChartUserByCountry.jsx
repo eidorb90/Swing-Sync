@@ -12,6 +12,7 @@ import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";
 
+// Styled text component for the center label in the pie chart
 const StyledText = styled("text")(({ theme }) => ({
   textAnchor: "middle",
   dominantBaseline: "central",
@@ -20,10 +21,11 @@ const StyledText = styled("text")(({ theme }) => ({
   fontWeight: theme.typography.body2.fontWeight,
 }));
 
+// Component to render the center label inside the pie chart
 function PieCenterLabel({ primaryText, secondaryText }) {
   const { width, height, left, top } = useDrawingArea();
-  const primaryY = top + height / 2 - 10;
-  const secondaryY = primaryY + 24;
+  const primaryY = top + height / 2 - 10; // Position for primary text
+  const secondaryY = primaryY + 24; // Position for secondary text
 
   return (
     <>
@@ -38,42 +40,43 @@ function PieCenterLabel({ primaryText, secondaryText }) {
 }
 
 export default function HandicapBreakdown() {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null); // State to store fetched stats
+  const [loading, setLoading] = useState(true); // State to track loading status
 
   useEffect(() => {
     async function fetchStats() {
       try {
-        const user_id = localStorage.getItem("userId");
+        const user_id = localStorage.getItem("userId"); // Get user ID from local storage
         const response = await fetch(
           `http://localhost:8000/api/player/${user_id}/stats`,
           {
             headers: {
-              Authorization: "Bearer " + localStorage.getItem("token"),
+              Authorization: "Bearer " + localStorage.getItem("token"), // Include auth token
             },
           }
         );
         if (!response.ok) throw new Error(`Server error: ${response.status}`);
         const data = await response.json();
-        setStats(data);
+        setStats(data); // Update stats state with fetched data
       } catch (error) {
         console.error("Error fetching user stats:", error);
-        setStats(null);
+        setStats(null); // Handle error by setting stats to null
       } finally {
-        setLoading(false);
+        setLoading(false); // Set loading to false after fetch completes
       }
     }
     fetchStats();
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   if (loading) {
-    return <Typography>Loading handicap data...</Typography>;
+    return <Typography>Loading handicap data...</Typography>; // Show loading message
   }
 
   if (!stats) {
-    return <Typography>Error loading data</Typography>;
+    return <Typography>Error loading data</Typography>; // Show error message if stats are null
   }
 
+  // Prepare data for the pie chart
   const data = [
     { label: "Putts", value: stats.avg_putts_per_round },
     { label: "Penalties", value: stats.avg_penalities_per_round },
@@ -82,8 +85,9 @@ export default function HandicapBreakdown() {
     { label: "GIR %", value: stats.gir_percentage },
   ];
 
-  const total = data.reduce((sum, item) => sum + item.value, 0);
+  const total = data.reduce((sum, item) => sum + item.value, 0); // Calculate total contribution
 
+  // Define colors for each segment of the pie chart
   const colors = [
     "hsl(220, 78.20%, 65.90%)", // Putts - blue
     "hsl(0, 100.00%, 48.40%)", // Penalties - red
@@ -119,23 +123,24 @@ export default function HandicapBreakdown() {
             series={[
               {
                 data,
-                innerRadius: 75,
-                outerRadius: 100,
-                paddingAngle: 2,
-                highlightScope: { faded: "global", highlighted: "item" },
+                innerRadius: 75, // Inner radius for donut chart effect
+                outerRadius: 100, // Outer radius of the pie chart
+                paddingAngle: 2, // Space between segments
+                highlightScope: { faded: "global", highlighted: "item" }, // Highlight behavior
               },
             ]}
             height={260}
             width={260}
-            slotProps={{ legend: { hidden: true } }}
+            slotProps={{ legend: { hidden: true } }} // Hide legend
           >
             <PieCenterLabel
-              primaryText={`${total.toFixed(1)}`}
+              primaryText={`${total.toFixed(1)}`} // Display total contribution
               secondaryText="Total Contribution"
             />
           </PieChart>
         </Box>
 
+        {/* Render a list of stats with progress bars */}
         {data.map((item, index) => (
           <Stack
             key={index}
@@ -152,10 +157,10 @@ export default function HandicapBreakdown() {
                 }}
               >
                 <Typography variant="body2" sx={{ fontWeight: "500" }}>
-                  {item.label}
+                  {item.label} {/* Label for the stat */}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {item.value.toFixed(1)}
+                  {item.value.toFixed(1)} {/* Value of the stat */}
                 </Typography>
               </Stack>
               <LinearProgress
@@ -163,7 +168,7 @@ export default function HandicapBreakdown() {
                 value={Math.min(item.value * 1.5, 100)} // Normalize values for display
                 sx={{
                   [`& .${linearProgressClasses.bar}`]: {
-                    backgroundColor: colors[index],
+                    backgroundColor: colors[index], // Set progress bar color
                   },
                 }}
               />

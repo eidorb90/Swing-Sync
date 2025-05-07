@@ -15,15 +15,21 @@ import { Container, Title } from "@mantine/core";
 export default function CourseDetails(props) {
   const location = useLocation();
   const { course } = location.state;
+
+  // State for selected gender, tee, and holes
   const [selectedGender, setSelectedGender] = React.useState("");
   const [selectedTee, setSelectedTee] = React.useState("");
   const [holes, setHoles] = React.useState([]);
+
+  // Columns for holes DataGrid
   const columes = [
     { field: "hole", headerName: "Hole", width: 250 },
     { field: "par", headerName: "Par", width: 250 },
     { field: "yardage", headerName: "Yardage", width: 250 },
     { field: "handicap", headerName: "Handicap", width: 250 },
   ];
+
+  // Rows for holes DataGrid
   const rows = holes.map((hole, index) => ({
     id: index + 1,
     hole: index + 1,
@@ -31,6 +37,8 @@ export default function CourseDetails(props) {
     yardage: hole.yardage,
     handicap: hole.handicap,
   }));
+
+  // Columns for tee information DataGrid
   const columes2 = [
     { field: "tee_name", headerName: "Tee Name", width: 150 },
     { field: "course_rating", headerName: "Course Rating", width: 150 },
@@ -63,6 +71,8 @@ export default function CourseDetails(props) {
     { field: "back_slope_rating", headerName: "Back Slope Rating", width: 200 },
     { field: "back_bogey_rating", headerName: "Back Bogey Rating", width: 200 },
   ];
+
+  // Rows for tee information DataGrid
   const rows2 = selectedTee
     ? [
         {
@@ -111,14 +121,15 @@ export default function CourseDetails(props) {
       ]
     : [];
 
+  // Handle gender selection change
   const handleGenderChange = (event) => {
     const gender = event.target.value;
     setSelectedGender(gender);
-    setSelectedTee("");
-    setHoles([]);
+    setSelectedTee(""); // Reset tee selection when gender changes
+    setHoles([]); // Reset holes when gender changes
   };
 
-  // Handle tee selection
+  // Handle tee selection change
   const handleTeeChange = (event) => {
     const teeName = event.target.value;
     setSelectedTee(teeName);
@@ -134,6 +145,7 @@ export default function CourseDetails(props) {
     }
   };
 
+  // State to toggle tee information visibility
   const [showTeeInfo, setShowTeeInfo] = React.useState(false);
 
   return (
@@ -214,7 +226,7 @@ export default function CourseDetails(props) {
                 </Box>
               )}
 
-              {/* Display Holes */}
+              {/* Display Holes or Tee Information */}
               {selectedTee && holes.length > 0 && (
                 <Box mt={4}>
                   <Button

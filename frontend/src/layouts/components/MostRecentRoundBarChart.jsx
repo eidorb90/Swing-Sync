@@ -12,35 +12,34 @@ export default function PageViewsBarChart() {
   const theme = useTheme();
 
   const defaultHoles = Array.from({ length: 9 }, (_, i) => `Hole ${i + 1}`);
-  const defaultData = Array(9).fill(4); // Par 4 as default
+  const defaultData = Array(9).fill(4); // Default par value for each hole
 
   const colorPalette = [
-    (theme.vars || theme).palette.error.main,
-    (theme.vars || theme).palette.primary.main,
-    (theme.vars || theme).palette.primary.light,
+    (theme.vars || theme).palette.error.main, // Color for penalties
+    (theme.vars || theme).palette.primary.main, // Color for putts
+    (theme.vars || theme).palette.primary.light, // Color for other strokes
   ];
 
   const [chartData, setChartData] = useState({
     strokes: defaultData.map(() => 0), // Default strokes
-    putts: defaultData.map(() => 0),
-    par: defaultData.map(() => 0), // Par values
-    pen: defaultData.map(() => 0), // Adding penalties with default 0
+    putts: defaultData.map(() => 0), // Default putts
+    par: defaultData.map(() => 0), // Default par values
+    pen: defaultData.map(() => 0), // Default penalties
   });
 
-  // Add holeLabels state
-  const [Loading, setIsLoading] = useState(true);
-  const [roundInfo, setRoundInfo] = useState({ date: "Today", totalScore: 0 });
+  const [Loading, setIsLoading] = useState(true); // Loading state
+  const [roundInfo, setRoundInfo] = useState({ date: "Today", totalScore: 0 }); // Round info state
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        setIsLoading(true);
-        const user_id = localStorage.getItem("userId") || "1";
+        setIsLoading(true); // Start loading
+        const user_id = localStorage.getItem("userId") || "1"; // Get user ID from localStorage
         const response = await fetch(
           `http://localhost:8000/api/player/${user_id}/stats`,
           {
             headers: {
-              Authorization: "Bearer " + localStorage.getItem("token"),
+              Authorization: "Bearer " + localStorage.getItem("token"), // Add authorization token
             },
           }
         );
@@ -69,9 +68,6 @@ export default function PageViewsBarChart() {
               const penData = frontNineScores.map(
                 (score) => score.penalties || 0
               );
-              const holes = frontNineScores.map(
-                (score) => `Hole ${score.hole}`
-              );
 
               // Calculate total score
               const totalScore = strokeData.reduce((sum, val) => sum + val, 0);
@@ -84,9 +80,7 @@ export default function PageViewsBarChart() {
                 pen: penData,
               });
 
-              // Update hole labels
-              // Update hole labels (removed as it's unused)
-              // Update round info
+              // Format the round date
               const formattedDate = new Date(mostRecentRound.date)
                 .toLocaleString("en-US", {
                   year: "numeric",
@@ -99,6 +93,7 @@ export default function PageViewsBarChart() {
                 .replace(",", "/")
                 .replace(" ", "");
 
+              // Update round info
               setRoundInfo({
                 date: formattedDate,
                 totalScore: totalScore,
@@ -108,9 +103,9 @@ export default function PageViewsBarChart() {
           }
         }
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        console.error("Error fetching stats:", error); // Log any errors
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Stop loading
       }
     };
 
@@ -122,7 +117,7 @@ export default function PageViewsBarChart() {
     return chartData.strokes.map((stroke, i) => {
       const putt = chartData.putts[i] || 0;
       const pen = chartData.pen[i] || 0;
-      return Math.max(0, stroke - putt - pen);
+      return Math.max(0, stroke - putt - pen); // Ensure no negative values
     });
   };
 
@@ -142,53 +137,53 @@ export default function PageViewsBarChart() {
             }}
           >
             <Typography variant="h4" component="p">
-              {roundInfo.totalScore}
+              {roundInfo.totalScore} {/* Display total score */}
             </Typography>
-            <Chip size="small" color="main" label={roundInfo.date} />
+            <Chip size="small" color="main" label={roundInfo.date} /> {/* Display round date */}
           </Stack>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            {roundInfo.note}
+            {roundInfo.note} {/* Display round note */}
           </Typography>
         </Stack>
         <BarChart
           borderRadius={8}
-          colors={colorPalette}
+          colors={colorPalette} // Use defined color palette
           xAxis={[
             {
               scaleType: "band",
               categoryGapRatio: 0.5,
-              data: chartData.strokes.map((_, i) => `Hole ${i + 1}`),
+              data: chartData.strokes.map((_, i) => `Hole ${i + 1}`), // X-axis labels
             },
           ]}
           series={[
             {
               id: "penalties",
               label: "Penalties",
-              data: chartData.pen,
+              data: chartData.pen, // Penalty data
               stack: "A",
-              color: colorPalette[0], // Assign a specific color
+              color: colorPalette[0], // Assign specific color
             },
             {
               id: "putts",
               label: "Putts",
-              data: chartData.putts,
+              data: chartData.putts, // Putt data
               stack: "A",
-              color: colorPalette[1], // Assign a specific color
+              color: colorPalette[1], // Assign specific color
             },
             {
               id: "other-strokes",
               label: "Other Strokes",
-              data: calculateOtherStrokes(),
+              data: calculateOtherStrokes(), // Other strokes data
               stack: "A",
-              color: colorPalette[2], // Assign a specific color
+              color: colorPalette[2], // Assign specific color
             },
           ]}
           height={250}
           margin={{ left: 50, right: 0, top: 20, bottom: 20 }}
-          grid={{ horizontal: true }}
+          grid={{ horizontal: true }} // Enable horizontal grid lines
           slotProps={{
             legend: {
-              hidden: true,
+              hidden: true, // Hide legend
             },
           }}
         />

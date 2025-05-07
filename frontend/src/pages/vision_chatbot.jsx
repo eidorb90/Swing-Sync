@@ -18,38 +18,38 @@ import SideMenu from "../layouts/components/SideMenu";
 import AppTheme from "../layouts/theme/AppTheme";
 
 export function SwingReview(props) {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [uploadResponse, setUploadResponse] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const messagesEndRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState(null); // State to store the selected file
+  const [uploadResponse, setUploadResponse] = useState(null); // State to store the server's response after file upload
+  const [loading, setLoading] = useState(false); // State to indicate loading status
+  const [messages, setMessages] = useState([]); // State to store chat messages
+  const [input, setInput] = useState(""); // State to store user input in the chat
+  const messagesEndRef = useRef(null); // Ref to scroll to the bottom of the chat
 
   useEffect(() => {
+    // Automatically scroll to the bottom of the chat when messages change
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (input.trim() === "" || loading) return;
+    if (input.trim() === "" || loading) return; // Prevent sending empty messages or sending while loading
 
-    const userMessage = { text: input, sender: "user", timestamp: new Date() };
+    const userMessage = { text: input, sender: "user", timestamp: new Date() }; // Create a user message object
 
     const url = "http://localhost:8000/api/vision/";
     const formData = new FormData();
 
-    formData.append("message", userMessage.text);
+    formData.append("message", userMessage.text); // Append the user message to the form data
 
-    setLoading(true);
+    setLoading(true); // Set loading state to true
 
-    setMessages([...messages, userMessage]);
-    setInput("");
-    setLoading(true);
+    setMessages([...messages, userMessage]); // Add the user message to the chat
+    setInput(""); // Clear the input field
 
     try {
       const response = await axios.post(url, formData, {
-        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") }, // Include authorization token
       });
 
       const botMessage = {
@@ -57,7 +57,7 @@ export function SwingReview(props) {
         sender: "bot",
         timestamp: new Date(),
       };
-      setMessages((prevMessages) => [...prevMessages, botMessage]);
+      setMessages((prevMessages) => [...prevMessages, botMessage]); // Add the bot's response to the chat
     } catch (error) {
       console.error("Error sending message:", error);
       const errorMessage = {
@@ -65,9 +65,9 @@ export function SwingReview(props) {
         sender: "bot",
         timestamp: new Date(),
       };
-      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+      setMessages((prevMessages) => [...prevMessages, errorMessage]); // Add an error message to the chat
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   };
 
@@ -75,27 +75,27 @@ export function SwingReview(props) {
     const url = "http://localhost:8000/api/vision/";
     const formData = new FormData();
 
-    formData.append("video", file);
+    formData.append("video", file); // Append the selected file to the form data
 
-    setLoading(true);
+    setLoading(true); // Set loading state to true
 
     try {
       const response = await axios.post(url, formData, {
-        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") }, // Include authorization token
       });
 
-      setUploadResponse(response.data.response);
+      setUploadResponse(response.data.response); // Store the server's response
       const botMessage = {
         text: response.data.response,
         sender: "bot",
         timestamp: new Date(),
       };
-      setMessages([botMessage]);
+      setMessages([botMessage]); // Add the server's response as a bot message
     } catch (error) {
       console.error("Error uploading file:", error);
-      setUploadResponse("**Upload failed**. Please try again!");
+      setUploadResponse("**Upload failed**. Please try again!"); // Handle upload failure
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
     }
   }
 
@@ -122,8 +122,8 @@ export function SwingReview(props) {
                 placeholder="Choose a video file..."
                 accept="video/*"
                 onChange={(file) => {
-                  setSelectedFile(file);
-                  if (file) sendFileToServer(file);
+                  setSelectedFile(file); // Update the selected file state
+                  if (file) sendFileToServer(file); // Upload the file if selected
                 }}
               />
 
@@ -133,9 +133,9 @@ export function SwingReview(props) {
                 alignItems="center"
                 sx={{ mt: 2 }}
               >
-                {loading && <CircularProgress size={24} />}
+                {loading && <CircularProgress size={24} />} {/* Show loading spinner */}
                 {selectedFile && (
-                  <Typography>File: {selectedFile.name}</Typography>
+                  <Typography>File: {selectedFile.name}</Typography> // Display the selected file name
                 )}
               </Stack>
 
@@ -149,7 +149,7 @@ export function SwingReview(props) {
                     boxShadow: 1,
                   }}
                 >
-                  <ReactMarkdown>{uploadResponse}</ReactMarkdown>
+                  <ReactMarkdown>{uploadResponse}</ReactMarkdown> {/* Render the server's response */}
                 </Box>
               )}
 
@@ -157,8 +157,8 @@ export function SwingReview(props) {
                 variant="contained"
                 color="secondary"
                 sx={{ mt: 3 }}
-                disabled={!selectedFile || loading}
-                onClick={() => setSelectedFile(null)}
+                disabled={!selectedFile || loading} // Disable button if no file is selected or loading
+                onClick={() => setSelectedFile(null)} // Clear the selected file
               >
                 Clear Selection
               </Button>
@@ -182,7 +182,7 @@ export function SwingReview(props) {
                   <Box
                     key={index}
                     sx={{
-                      textAlign: message.sender === "user" ? "right" : "left",
+                      textAlign: message.sender === "user" ? "right" : "left", // Align messages based on sender
                       marginBottom: 1,
                     }}
                   >
@@ -195,15 +195,15 @@ export function SwingReview(props) {
                         backgroundColor:
                           message.sender === "user"
                             ? "primary.light"
-                            : "grey.300",
+                            : "grey.300", // Different background colors for user and bot messages
                         color: message.sender === "user" ? "white" : "black",
                       }}
                     >
-                      <ReactMarkdown>{message.text}</ReactMarkdown>
+                      <ReactMarkdown>{message.text}</ReactMarkdown> {/* Render message text */}
                     </Typography>
                   </Box>
                 ))}
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef} /> {/* Scroll to this element when messages change */}
               </Box>
 
               <Stack direction="row" spacing={2}>
@@ -211,15 +211,15 @@ export function SwingReview(props) {
                   fullWidth
                   variant="outlined"
                   placeholder="Ask a question about the video..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  disabled={loading}
+                  value={input} // Bind input value to state
+                  onChange={(e) => setInput(e.target.value)} // Update state on input change
+                  disabled={loading} // Disable input while loading
                 />
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleSendMessage}
-                  disabled={loading || input.trim() === ""}
+                  onClick={handleSendMessage} // Send message on button click
+                  disabled={loading || input.trim() === ""} // Disable button if loading or input is empty
                 >
                   Send
                 </Button>
