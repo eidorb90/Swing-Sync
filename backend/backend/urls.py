@@ -9,6 +9,11 @@ from api.views import (
     UsersView,
     CourseTeeView,
     TeeHoleView,
+    ChatBotView,
+    UserStats,
+    LeaderBoardView,
+    VisionChatBotView,
+    CourseTeeDebugView,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -19,10 +24,12 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # API endpoints
     # User section
-    path("api/user/register/", CreateUserView.as_view(), name="register"),
+    path("api/user/signup/", CreateUserView.as_view(), name="signup"),
     path("api/user/login/", LoginUserView.as_view(), name="login"),
     path("api/user/", UsersView.as_view(), name="users"),
     path("api/user/<int:user_id>", UsersView.as_view(), name="user_detail"),
+    path("api/player/<int:user_id>/stats", UserStats.as_view(), name="player_stats"),
+    path("api/leaderboard/", LeaderBoardView.as_view(), name="leaderboard"),
     # Token section
     path("api/token/", TokenObtainPairView.as_view(), name="get_token"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="refresh"),
@@ -39,4 +46,12 @@ urlpatterns = [
     path("api/rounds/", RoundView.as_view(), name="round"),
     path("api/rounds/<int:round_id>", RoundView.as_view(), name="round_detail"),
     path("api-auth", include("rest_framework.urls")),
+    # custom ai chatbot section
+    path("api/chat/", ChatBotView.as_view(), name="chatbot"),
+    path("api/vision/", VisionChatBotView.as_view(), name="vision_chatbot"),
+    path(
+        "api/courses/<int:course_id>/tees/debug/",
+        CourseTeeDebugView.as_view(),
+        name="course_tee_debug",
+    ),
 ]

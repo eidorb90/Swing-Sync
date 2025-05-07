@@ -1,185 +1,174 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import { PieChart } from '@mui/x-charts/PieChart';
-import { useDrawingArea } from '@mui/x-charts/hooks';
-import { styled } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
+import * as React from "react";
+import { useState, useEffect } from "react";
+import { PieChart } from "@mui/x-charts/PieChart";
+import { useDrawingArea } from "@mui/x-charts/hooks";
+import { styled } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import LinearProgress, {
+  linearProgressClasses,
+} from "@mui/material/LinearProgress";
 
-
-
-const data = [
-  { label: 'India', value: 50000 },
-  { label: 'USA', value: 35000 },
-  { label: 'Brazil', value: 10000 },
-  { label: 'Other', value: 5000 },
-];
-
-const countries = [
-  {
-    name: 'India',
-    value: 50,
-    
-    color: 'hsl(220, 25%, 65%)',
-  },
-  {
-    name: 'USA',
-    value: 35,
-    
-    color: 'hsl(220, 25%, 45%)',
-  },
-  {
-    name: 'Brazil',
-    value: 10,
-    
-    color: 'hsl(220, 25%, 30%)',
-  },
-  {
-    name: 'Other',
-    value: 5,
-    
-    color: 'hsl(220, 25%, 20%)',
-  },
-];
-
-const StyledText = styled('text', {
-  shouldForwardProp: (prop) => prop !== 'variant',
-})(({ theme }) => ({
-  textAnchor: 'middle',
-  dominantBaseline: 'central',
-  fill: (theme.vars || theme).palette.text.secondary,
-  variants: [
-    {
-      props: {
-        variant: 'primary',
-      },
-      style: {
-        fontSize: theme.typography.h5.fontSize,
-      },
-    },
-    {
-      props: ({ variant }) => variant !== 'primary',
-      style: {
-        fontSize: theme.typography.body2.fontSize,
-      },
-    },
-    {
-      props: {
-        variant: 'primary',
-      },
-      style: {
-        fontWeight: theme.typography.h5.fontWeight,
-      },
-    },
-    {
-      props: ({ variant }) => variant !== 'primary',
-      style: {
-        fontWeight: theme.typography.body2.fontWeight,
-      },
-    },
-  ],
+// Styled text component for the center label in the pie chart
+const StyledText = styled("text")(({ theme }) => ({
+  textAnchor: "middle",
+  dominantBaseline: "central",
+  fill: theme.palette.text.secondary,
+  fontSize: theme.typography.body2.fontSize,
+  fontWeight: theme.typography.body2.fontWeight,
 }));
 
+// Component to render the center label inside the pie chart
 function PieCenterLabel({ primaryText, secondaryText }) {
   const { width, height, left, top } = useDrawingArea();
-  const primaryY = top + height / 2 - 10;
-  const secondaryY = primaryY + 24;
+  const primaryY = top + height / 2 - 10; // Position for primary text
+  const secondaryY = primaryY + 24; // Position for secondary text
 
   return (
-    <React.Fragment>
-      <StyledText variant="primary" x={left + width / 2} y={primaryY}>
+    <>
+      <StyledText x={left + width / 2} y={primaryY}>
         {primaryText}
       </StyledText>
-      <StyledText variant="secondary" x={left + width / 2} y={secondaryY}>
+      <StyledText x={left + width / 2} y={secondaryY}>
         {secondaryText}
       </StyledText>
-    </React.Fragment>
+    </>
   );
 }
 
-PieCenterLabel.propTypes = {
-  primaryText: PropTypes.string.isRequired,
-  secondaryText: PropTypes.string.isRequired,
-};
+export default function HandicapBreakdown() {
+  const [stats, setStats] = useState(null); // State to store fetched stats
+  const [loading, setLoading] = useState(true); // State to track loading status
 
-const colors = [
-  'hsl(220, 20%, 65%)',
-  'hsl(220, 20%, 42%)',
-  'hsl(220, 20%, 35%)',
-  'hsl(220, 20%, 25%)',
-];
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const user_id = localStorage.getItem("userId"); // Get user ID from local storage
+        const response = await fetch(
+          `http://localhost:8000/api/player/${user_id}/stats`,
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"), // Include auth token
+            },
+          }
+        );
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+        const data = await response.json();
+        setStats(data); // Update stats state with fetched data
+      } catch (error) {
+        console.error("Error fetching user stats:", error);
+        setStats(null); // Handle error by setting stats to null
+      } finally {
+        setLoading(false); // Set loading to false after fetch completes
+      }
+    }
+    fetchStats();
+  }, []); // Empty dependency array ensures this runs only once on mount
 
-export default function ChartUserByCountry() {
+  if (loading) {
+    return <Typography>Loading handicap data...</Typography>; // Show loading message
+  }
+
+  if (!stats) {
+    return <Typography>Error loading data</Typography>; // Show error message if stats are null
+  }
+
+  // Prepare data for the pie chart
+  const data = [
+    { label: "Putts", value: stats.avg_putts_per_round },
+    { label: "Penalties", value: stats.avg_penalities_per_round },
+    { label: "Score", value: stats.avg_score_per_round },
+    { label: "Fairway Hit %", value: stats.fairway_hit_percentage },
+    { label: "GIR %", value: stats.gir_percentage },
+  ];
+
+  const total = data.reduce((sum, item) => sum + item.value, 0); // Calculate total contribution
+
+  // Define colors for each segment of the pie chart
+  const colors = [
+    "hsl(220, 78.20%, 65.90%)", // Putts - blue
+    "hsl(0, 100.00%, 48.40%)", // Penalties - red
+    "hsl(268, 90.50%, 49.40%)", // Score - purple
+    "hsl(123, 84.30%, 50.20%)", // Fairway Hit % - green
+    "hsl(69, 88.00%, 49.20%)", // GIR % - dark blue/gray
+  ];
+
   return (
     <Card
       variant="outlined"
-      sx={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1 }}
+      sx={{
+        width: "100%",
+        border: "1px solid",
+        borderColor: "divider",
+        boxShadow: 3,
+      }}
     >
       <CardContent>
         <Typography component="h2" variant="subtitle2">
-          Users by country
+          Handicap Breakdown
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <PieChart
             colors={colors}
-            margin={{
-              left: 80,
-              right: 80,
-              top: 80,
-              bottom: 80,
-            }}
+            margin={{ left: 80, right: 80, top: 80, bottom: 80 }}
             series={[
               {
                 data,
-                innerRadius: 75,
-                outerRadius: 100,
-                paddingAngle: 0,
-                highlightScope: { faded: 'global', highlighted: 'item' },
+                innerRadius: 75, // Inner radius for donut chart effect
+                outerRadius: 100, // Outer radius of the pie chart
+                paddingAngle: 2, // Space between segments
+                highlightScope: { faded: "global", highlighted: "item" }, // Highlight behavior
               },
             ]}
             height={260}
             width={260}
-            slotProps={{
-              legend: { hidden: true },
-            }}
+            slotProps={{ legend: { hidden: true } }} // Hide legend
           >
-            <PieCenterLabel primaryText="98.5K" secondaryText="Total" />
+            <PieCenterLabel
+              primaryText={`${total.toFixed(1)}`} // Display total contribution
+              secondaryText="Total Contribution"
+            />
           </PieChart>
         </Box>
-        {countries.map((country, index) => (
+
+        {/* Render a list of stats with progress bars */}
+        {data.map((item, index) => (
           <Stack
             key={index}
             direction="row"
-            sx={{ alignItems: 'center', gap: 2, pb: 2 }}
+            sx={{ alignItems: "center", gap: 2, pb: 2 }}
           >
-            {country.flag}
             <Stack sx={{ gap: 1, flexGrow: 1 }}>
               <Stack
                 direction="row"
                 sx={{
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  justifyContent: "space-between",
+                  alignItems: "center",
                   gap: 2,
                 }}
               >
-                <Typography variant="body2" sx={{ fontWeight: '500' }}>
-                  {country.name}
+                <Typography variant="body2" sx={{ fontWeight: "500" }}>
+                  {item.label} {/* Label for the stat */}
                 </Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {country.value}%
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {item.value.toFixed(1)} {/* Value of the stat */}
                 </Typography>
               </Stack>
               <LinearProgress
                 variant="determinate"
-                aria-label="Number of users by country"
-                value={country.value}
+                value={Math.min(item.value * 1.5, 100)} // Normalize values for display
                 sx={{
                   [`& .${linearProgressClasses.bar}`]: {
-                    backgroundColor: country.color,
+                    backgroundColor: colors[index], // Set progress bar color
                   },
                 }}
               />

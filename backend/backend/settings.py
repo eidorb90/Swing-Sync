@@ -14,6 +14,8 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
+from celery.schedules import crontab
+
 
 load_dotenv()
 
@@ -32,6 +34,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+AUTH_USER_MODEL = "api.User"
+
+USER_ONLINE_TIMEOUT = 15 * 60
+
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -43,7 +49,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(
         days=1,
     ),
@@ -66,6 +72,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -73,7 +80,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
+    "api.middleware.UserOnlineStatusMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -150,6 +157,15 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWS_CREDENTIALS = True
+
+
+CORS_ALLOW_CREDENTIALS = True
 
 APPEND_SLASH = True
+
+CELERY_BEAT_SCHEDULE = {
+    "update-user-status": {
+        "task": "api.tasks.update_user_status",
+        "schedule": crontab(minute="*/15"),  # Run every 15 minutes
+    },
+}

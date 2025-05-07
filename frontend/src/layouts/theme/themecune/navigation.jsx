@@ -186,7 +186,7 @@ export const navigationCustomizations = {
         padding: '6px 8px',
         marginBottom: '8px',
         textTransform: 'none',
-        minWidth: 'fit-content',
+        maxWidth: '100%', 
         minHeight: 'fit-content',
         color: (theme.vars || theme).palette.text.secondary,
         borderRadius: (theme.vars || theme).shape.borderRadius,

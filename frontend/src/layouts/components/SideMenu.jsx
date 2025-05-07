@@ -1,86 +1,83 @@
-import * as React from 'react';
-import { styled } from '@mui/material/styles';
-import Avatar from '@mui/material/Avatar';
-import MuiDrawer, { drawerClasses } from '@mui/material/Drawer';
-import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import SelectContent from './SelectContent';
-import MenuContent from './MenuContent';
+import React, { useState, useEffect } from "react";
+import { styled } from "@mui/material/styles";
+import Avatar from "@mui/material/Avatar";
+import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import MenuContent from "./MenuContent";
+import OptionsMenu from "./OptionsMenu";
 
-import OptionsMenu from './OptionsMenu';
+const drawerWidth = 275;
 
-const drawerWidth = 240;
-
+// Styled Drawer component with custom width and styles
 const Drawer = styled(MuiDrawer)({
   width: drawerWidth,
   flexShrink: 0,
-  boxSizing: 'border-box',
+  boxSizing: "border-box",
   mt: 10,
   [`& .${drawerClasses.paper}`]: {
     width: drawerWidth,
-    boxSizing: 'border-box',
+    boxSizing: "border-box",
   },
 });
 
 export default function SideMenu() {
+  // Retrieve user information from localStorage
+  const Lastname = localStorage.getItem("lastname");
+  const Firstname = localStorage.getItem("firstname");
+  const Email = localStorage.getItem("email");
+
   return (
     <Drawer
       variant="permanent"
       sx={{
-        display: { xs: 'none', md: 'block' },
+        display: { xs: "none", md: "block" }, // Hide drawer on small screens
         [`& .${drawerClasses.paper}`]: {
-          backgroundColor: 'background.paper',
+          backgroundColor: "background.paper", // Set background color
         },
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          mt: 'calc(var(--template-frame-height, 0px) + 4px)',
-          p: 1.5,
-        }}
-      >
-        <SelectContent />
-      </Box>
       <Divider />
       <Box
         sx={{
-          overflow: 'auto',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
+          overflow: "auto", // Enable scrolling if content overflows
+          height: "100%",
+          display: "flex",
+          flexDirection: "column", // Stack children vertically
         }}
       >
-        <MenuContent />
-        
+        <MenuContent /> {/* Main menu content */}
       </Box>
       <Stack
         direction="row"
         sx={{
-          p: 2,
-          gap: 1,
-          alignItems: 'center',
-          borderTop: '1px solid',
-          borderColor: 'divider',
+          p: 2, // Padding
+          gap: 1, // Gap between items
+          alignItems: "center", // Align items vertically
+          borderTop: "1px solid", // Top border
+          borderColor: "divider", // Use theme divider color
         }}
       >
         <Avatar
           sizes="small"
-          alt="Riley Carter"
-          src="/static/images/avatar/7.jpg"
-          sx={{ width: 36, height: 36 }}
+          alt={`${Firstname} ${Lastname}`} // Alt text for accessibility
+          src="/static/images/avatar/7.jpg" // Placeholder avatar image
+          sx={{ width: 36, height: 36 }} // Avatar size
         />
-        <Box sx={{ mr: 'auto' }}>
-          <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: '16px' }}>
-            Riley Carter
+        <Box sx={{ mr: "auto" }}>
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 500, lineHeight: "16px" }} // User's name styling
+          >
+            {`${Firstname} ${Lastname}`}
           </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            riley@email.com
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            {`${Email}`} {/* User's email */}
           </Typography>
         </Box>
-        <OptionsMenu />
+        <OptionsMenu /> {/* Options menu for additional actions */}
       </Stack>
     </Drawer>
   );
