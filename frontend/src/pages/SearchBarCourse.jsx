@@ -1,3 +1,20 @@
+/**
+ * SearchBarCourse Component
+ *
+ * This component serves as a page layout for a course search functionality.
+ * It wraps the content with a custom theme provider and includes a sidebar,
+ * top navigation bar, header, and a search bar in the main content area.
+ *
+ *
+ * Structure:
+ * - AppTheme: Provides consistent theming across the app.
+ * - CssBaseline: Ensures consistent color scheme and resets CSS.
+ * - SideMenu: Sidebar menu for navigation.
+ * - AppNavbar: Top navigation bar.
+ * - Header: Displays the header section.
+ * - Search: Main search bar component for course search.
+ * - Container: Additional container for spacing or extra content.
+ */
 import * as React from "react";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";

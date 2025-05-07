@@ -1,3 +1,16 @@
+/**
+ * ChatBot component renders a chat interface where users can interact with a chatbot.
+ * It includes a message display area, an input field for user messages, and a send button.
+ * The chatbot responds to user messages by fetching responses from an API.
+ *
+ * @description
+ * - Uses Material-UI components for styling and layout.
+ * - Maintains state for messages, user input, and loading status.
+ * - Automatically scrolls to the latest message when new messages are added.
+ * - Handles user input submission via button click or pressing Enter.
+ * - Fetches chatbot responses from an API and streams the response text.
+ * - Displays a loading indicator while waiting for the chatbot's response.
+ */
 import React, { useState, useRef, useEffect } from "react";
 import {
   Box,

@@ -1,3 +1,14 @@
+/**
+ * Dashboard component that serves as the main layout for the account page.
+ * It wraps the application in a custom theme provider and includes various UI components
+ * such as a sidebar, navigation bar, header, and main content grid.
+ * @description
+ * - Uses Material-UI components for styling and layout.
+ * - Integrates Mantine components for additional UI elements.
+ * - Applies custom theme configurations for various components.
+ * - Displays a header, main content area, and a link to add rounds.
+ * - Ensures responsive design and consistent styling across different screen sizes.
+ */
 import * as React from "react";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";

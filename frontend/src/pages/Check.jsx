@@ -1,3 +1,9 @@
+/**
+ * A higher-order component that protects routes by verifying the presence
+ * and validity of a JSON Web Token (JWT) in local storage. If the token is
+ * missing, expired, or invalid, the user is redirected to the sign-in page.
+ *
+ */
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
