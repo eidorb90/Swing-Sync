@@ -63,10 +63,10 @@ uv pip install -e .
 
 # Run migrations
 cd backend
-python manage.py migrate
+uv run python manage.py migrate
 
 # Start development server
-python manage.py runserver
+uv run python manage.py runserver
 ```
 
 3. Frontend Setup
