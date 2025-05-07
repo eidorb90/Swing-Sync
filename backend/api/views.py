@@ -1,3 +1,14 @@
+# ╔════════════════════════════════════════════════════════════════════╗
+# ║   Python Script                                                    ║
+# ╠════════════════════════════════════════════════════════════════════╣
+# ║  Author  : Brodie Rogers                                           ║
+# ║  Contact : Brodieman500@gmail.com                                  ║
+# ║  Created : 05-06-2025                                              ║
+# ║  Purpose : View for the backend api to connect to                  ║
+# ║  Notes   : Ollama is the best                                      ║
+# ╚════════════════════════════════════════════════════════════════════╝
+
+
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import User
 from rest_framework import generics, status
@@ -29,31 +40,52 @@ logger = logging.getLogger(__name__)
 
 
 class CreateUserView(generics.CreateAPIView):
+    """
+    API endpoint for creating new users.
+
+    Uses the UserSerializer to validate and create a new user account.
+    No authentication is required to access this endpoint.
+    """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
 
 class LoginUserView(APIView):
+    """
+    API endpoint for user authentication.
+
+    Validates user credentials and returns JWT tokens upon successful authentication.
+    Also updates the user's online status and last login timestamp.
+    """
+
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """
+        Process login request and generate authentication tokens.
+
+        Args:
+            request: HTTP request containing user credentials
+
+        Returns:
+            Response: JWT tokens and user data if authentication successful,
+                     error message otherwise
+        """
         username = request.data.get("username")
         password = request.data.get("password")
         first_name = request.data.get("first_name")
         last_name = request.data.get("last_name")
         email = request.data.get("email")
 
-        # Authenticate the user
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            # Update user status
             user.is_online = True
             user.last_login = timezone.now()
             user.save()
 
-            # Generate token
             refresh = RefreshToken.for_user(user)
 
             return Response(
@@ -75,9 +107,26 @@ class LoginUserView(APIView):
 
 
 class UsersView(APIView):
+    """
+    API endpoint for retrieving user information.
+
+    Allows fetching details for a specific user or listing all users.
+    Requires authentication to access.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, user_id=None):
+        """
+        Retrieve user data for a specific user or list all users.
+
+        Args:
+            request: HTTP request
+            user_id: Optional ID of specific user to retrieve
+
+        Returns:
+            Response: Serialized user data
+        """
         if user_id:
             user = get_object_or_404(User, pk=user_id)
             return Response({"user": UserSerializer(user).data})
@@ -106,6 +155,15 @@ class CourseSearchAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """
+        Search for golf courses and save results to database.
+
+        Args:
+            request: HTTP request containing search parameters
+
+        Returns:
+            Response: List of matching golf courses
+        """
         search_query = request.query_params.get("search", "")
         if not search_query:
             return Response(
@@ -166,7 +224,15 @@ class CourseSearchAPIView(APIView):
             )
 
     def save_single_course(self, course_data):
-        """Process and save a single course and its tees"""
+        """
+        Process and save a single course and its tees.
+
+        Args:
+            course_data: Dictionary containing course information
+
+        Returns:
+            Course: The saved course object or None if an error occurred
+        """
         try:
             location = course_data.get("location", {})
             course_id = course_data.get("id")
@@ -203,7 +269,17 @@ class CourseSearchAPIView(APIView):
             return None
 
     def _create_or_update_tee(self, course, tee_data, gender):
-        """Helper method to create or update a tee and its holes"""
+        """
+        Helper method to create or update a tee and its holes.
+
+        Args:
+            course: Course object to which the tee belongs
+            tee_data: Dictionary containing tee information
+            gender: Gender designation for the tee ('M' or 'F')
+
+        Returns:
+            Tee: The created/updated tee object or None if an error occurred
+        """
         try:
             tee_name = tee_data.get("tee_name", "").strip()
 
@@ -253,15 +329,36 @@ class CourseSearchAPIView(APIView):
 
 
 class SavedCourseView(APIView):
+    """
+    API endpoint for retrieving saved golf courses.
+
+    Returns a list of all courses stored in the database with their associated tees and holes.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """
+        Retrieve all saved courses with their tees and holes.
+
+        Args:
+            request: HTTP request
+
+        Returns:
+            Response: List of serialized course data
+        """
         courses = Course.objects.prefetch_related("tees__holes").all()
         serializer = CourseSerializer(courses, many=True)
         return Response(serializer.data)
 
 
 class RoundView(APIView):
+    """
+    API endpoint for managing golf rounds.
+
+    Allows creating, retrieving, and updating golf round records including hole scores.
+    """
+
     permission_classes = [IsAuthenticated]
 
     @transaction.atomic
@@ -283,12 +380,14 @@ class RoundView(APIView):
                 green_in_regulation: Boolean (optional),
                 penalties: Number of penalties (optional)
             }
+
+        Returns:
+            Response: Round details or error message
         """
         try:
             data = request.data.copy()
             logger.info("Processing round data: %s", data)
 
-            # Required fields validation
             required_fields = ["course_id", "tee_name"]
             for field in required_fields:
                 if field not in data:
@@ -301,21 +400,20 @@ class RoundView(APIView):
             tee_name = data.get("tee_name", "").strip()
 
             try:
-                # Get the course
                 course = Course.objects.get(id=course_id)
                 logger.info("Found course: %s (ID: %d)", course.course_name, course.id)
 
-                # Find the tee by name
                 tee = Tee.objects.filter(
                     course=course, tee_name__iexact=tee_name
                 ).first()
 
                 if not tee:
-                    # Log available tees for debugging
                     available_tees = Tee.objects.filter(course=course)
                     tee_names = [t.tee_name for t in available_tees]
                     logger.error(
-                        "Tee '%s' not found. Available tees: %s", tee_name, ', '.join(tee_names)
+                        "Tee '%s' not found. Available tees: %s",
+                        tee_name,
+                        ", ".join(tee_names),
                     )
 
                     return Response(
@@ -335,7 +433,6 @@ class RoundView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Process hole scores
             hole_scores_data = data.get("hole_scores", [])
             if not hole_scores_data:
                 return Response(
@@ -343,7 +440,6 @@ class RoundView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Update existing round
             if round_id is not None:
                 round_obj = get_object_or_404(Round, id=round_id, player=request.user)
                 round_obj.tee = tee
@@ -357,7 +453,6 @@ class RoundView(APIView):
 
                 logger.info("Updated round: %d", round_obj.id)
 
-                # Update hole scores
                 for score_data in hole_scores_data:
                     hole_id = score_data.get("hole_id")
                     if not hole_id:
@@ -382,7 +477,6 @@ class RoundView(APIView):
                 message = "Scorecard updated successfully"
                 status_code = status.HTTP_200_OK
 
-            # Create new round
             else:
                 round_obj = Round.objects.create(
                     tee=tee,
@@ -397,7 +491,6 @@ class RoundView(APIView):
 
                 logger.info("Created new round: %d", round_obj.id)
 
-                # Create hole scores
                 for score_data in hole_scores_data:
                     hole_id = score_data.get("hole_id")
                     if not hole_id:
@@ -413,7 +506,8 @@ class RoundView(APIView):
                             putts=score_data.get("putts", 0),
                             fairway_hit=score_data.get("fairway_hit", False),
                             green_in_regulation=score_data.get(
-                                "green_in_regulation", False),
+                                "green_in_regulation", False
+                            ),
                             penalties=score_data.get("penalties", 0),
                         )
                     except Hole.DoesNotExist:
@@ -422,12 +516,10 @@ class RoundView(APIView):
 
                 message = "Scorecard created successfully"
                 status_code = status.HTTP_201_CREATED
-                
-            # Calculate total score and other statistics
+
             total_score = sum(
                 score_data.get("strokes", 0) for score_data in hole_scores_data
             )
-            
 
             return Response(
                 {
@@ -459,6 +551,13 @@ class RoundView(APIView):
 
         If round_id is provided, returns detailed information about that round.
         Otherwise, returns a list of rounds for the current user.
+
+        Args:
+            request: HTTP request
+            round_id: Optional ID of specific round to retrieve
+
+        Returns:
+            Response: Round details or list of rounds
         """
         if round_id:
             try:
@@ -466,7 +565,6 @@ class RoundView(APIView):
                     id=round_id
                 )
 
-                # Check if user has permission to view this round
                 if round_obj.player != request.user:
                     return Response(
                         {"error": "You are not permitted to view this round"},
@@ -515,7 +613,6 @@ class RoundView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
         else:
-            # Return list of rounds for current user
             rounds = Round.objects.filter(player=request.user).order_by("-date_played")
 
             return Response(
@@ -534,9 +631,25 @@ class RoundView(APIView):
 
 
 class CourseTeeView(APIView):
+    """
+    API endpoint for retrieving tees for a specific course.
+
+    Returns tees associated with a given course ID.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, course_id):
+        """
+        Retrieve tees for a specific course.
+
+        Args:
+            request: HTTP request
+            course_id: ID of the course
+
+        Returns:
+            Response: Serialized tee data
+        """
         course = get_object_or_404(Course, id=course_id)
         tees = Tee.objects.filter(course=course).prefetch_related("holes")
         serializer = CourseSerializer(tees, many=True)
@@ -544,9 +657,25 @@ class CourseTeeView(APIView):
 
 
 class TeeHoleView(APIView):
+    """
+    API endpoint for retrieving holes for a specific tee.
+
+    Returns holes associated with a given tee ID.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, tee_id):
+        """
+        Retrieve holes for a specific tee.
+
+        Args:
+            request: HTTP request
+            tee_id: ID of the tee
+
+        Returns:
+            Response: Serialized hole data
+        """
         tee = get_object_or_404(Tee, id=tee_id)
         holes = Hole.objects.filter(tee=tee)
         serializer = CourseSerializer(holes, many=True)
@@ -554,9 +683,25 @@ class TeeHoleView(APIView):
 
 
 class ChatBotView(APIView):
+    """
+    API endpoint for interacting with the chat bot.
+
+    Processes text prompts and returns AI-generated responses.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def stream_response(self, prompt, rounds_text):
+        """
+        Generate streaming response from chat bot.
+
+        Args:
+            prompt: User's message to the chat bot
+            rounds_text: Context information about recent rounds
+
+        Yields:
+            str: Chunks of the generated response
+        """
         bot = ChatBot()
         response_stream = bot.answer_question(prompt, rounds_text)
 
@@ -564,6 +709,15 @@ class ChatBotView(APIView):
             yield chunk
 
     def post(self, request):
+        """
+        Process a chat prompt and return streaming response.
+
+        Args:
+            request: HTTP request containing the chat prompt
+
+        Returns:
+            StreamingHttpResponse: Streaming AI-generated response
+        """
         prompt = request.data.get("message")
         if not prompt:
             return Response(
@@ -587,11 +741,25 @@ class ChatBotView(APIView):
 
 
 class VisionChatBotView(APIView):
-    permission_classes = [IsAuthenticated]
+    """
+    API endpoint for interacting with the vision-enabled chat bot.
 
+    Processes text prompts or video content and returns AI-generated responses.
+    """
+
+    permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def post(self, request):
+        """
+        Process a chat prompt or video and return AI-generated response.
+
+        Args:
+            request: HTTP request containing message or video file
+
+        Returns:
+            Response: AI-generated response
+        """
         message = request.data.get("message")
         video_file = request.FILES.get("video")
 
@@ -630,9 +798,25 @@ class VisionChatBotView(APIView):
 
 
 class UserStats(APIView):
+    """
+    API endpoint for retrieving user golf statistics.
+
+    Calculates and returns various performance metrics for a user.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, user_id):
+        """
+        Calculate and retrieve golf statistics for a user.
+
+        Args:
+            request: HTTP request
+            user_id: ID of the user
+
+        Returns:
+            Response: User golf statistics
+        """
         user = User.objects.get(id=user_id)
         user.save()
         rounds = Round.objects.filter(player=user).order_by("-date_played")[:10]
@@ -651,7 +835,6 @@ class UserStats(APIView):
                 }
             )
 
-        # Initialize counters
         p, pen, s, fir, gir = 0, 0, 0, 0, 0
         differentials = []
 
@@ -664,16 +847,13 @@ class UserStats(APIView):
 
             num_holes = round.hole_scores.count()
 
-            # Handicap calculation using USGA formula, adjusted for 9-hole rounds
             course_rating = round.tee.course_rating
             slope_rating = round.tee.slope_rating
 
             if num_holes == 9:
-                # For 9-hole rounds, double the score and use full course rating
                 adjusted_score = round.total_score * 2
                 differential = (adjusted_score - course_rating) * 113 / slope_rating
             elif num_holes == 18:
-                # Standard calculation for 18 holes
                 differential = (round.total_score - course_rating) * 113 / slope_rating
             else:
                 continue
@@ -686,7 +866,6 @@ class UserStats(APIView):
         fhp = fir / round_count
         girp = gir / round_count
 
-        # Calculate handicap index (average of best differentials * 0.96)
         best_differentials = sorted(differentials)[: max(1, round_count // 2)]
         handicap = (
             builtins.round(
@@ -733,9 +912,24 @@ class UserStats(APIView):
 
 
 class LeaderBoardView(APIView):
+    """
+    API endpoint for retrieving the golf leaderboard.
+
+    Calculates and returns player rankings based on performance metrics.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """
+        Calculate and retrieve leaderboard data.
+
+        Args:
+            request: HTTP request
+
+        Returns:
+            Response: Leaderboard data sorted by average score
+        """
         players = User.objects.all()[:50]
         leader_board = []
 
@@ -752,31 +946,25 @@ class LeaderBoardView(APIView):
             for player_round in player_rounds:
                 total += player_round.total_score
 
-            # Calculate handicap using same logic as UserStats view
             differentials = []
             for player_round in player_rounds:
-                # Get number of holes in this round by counting hole scores
                 num_holes = player_round.hole_scores.count()
 
                 course_rating = player_round.tee.course_rating
                 slope_rating = player_round.tee.slope_rating
 
                 if num_holes == 9:
-                    # For 9-hole rounds, double the score and use full course rating
                     adjusted_score = player_round.total_score * 2
                     differential = (adjusted_score - course_rating) * 113 / slope_rating
                 elif num_holes == 18:
-                    # Standard calculation for 18 holes
                     differential = (
                         (player_round.total_score - course_rating) * 113 / slope_rating
                     )
                 else:
-                    # Skip rounds that don't have exactly 9 or 18 holes
                     continue
 
                 differentials.append(differential)
 
-            # Calculate handicap index
             best_differentials = sorted(differentials)[: max(1, round_count // 2)]
             handicap = None
             if best_differentials:
@@ -808,9 +996,25 @@ class LeaderBoardView(APIView):
 
 
 class CourseTeeDebugView(APIView):
+    """
+    Debugging endpoint for course and tee data.
+
+    Provides detailed information about a course's tees for debugging purposes.
+    """
+
     permission_classes = [AllowAny]
 
     def get(self, request, course_id):
+        """
+        Retrieve debugging information about a course's tees.
+
+        Args:
+            request: HTTP request
+            course_id: ID of the course to debug
+
+        Returns:
+            Response: Detailed course and tee information
+        """
         try:
             course = Course.objects.get(id=course_id)
             tees = Tee.objects.filter(course=course)

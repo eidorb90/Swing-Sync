@@ -1,3 +1,20 @@
+"""
+╔════════════════════════════════════════════════════════════════════╗
+║ Python Script                                                      ║
+╠════════════════════════════════════════════════════════════════════╣
+║ Author : Brodie Rogers                                             ║
+║ Contact : Brodieman500@gmail.com                                   ║
+║ Created : 05-06-2025                                               ║
+║ Purpose : Database models for golf scoring application             ║
+║ Notes : Ollama is the best                                         ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+This module defines the database models for a golf scoring application.
+It includes models for users, courses, tees, holes, rounds, and hole scores,
+with relationships that reflect the structure of golf course data and scoring.
+"""
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
@@ -6,6 +23,13 @@ from django.utils.timezone import now
 
 
 class User(AbstractUser):
+    """
+    Extended user model with additional fields for golf app functionality.
+
+    Adds tracking for online status, phone numbers, and preferred course,
+    while extending Django's built-in user authentication model.
+    """
+
     phone_regex = RegexValidator(
         regex=r"^\+?1?\d{9,15}$",
         message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.",
@@ -19,10 +43,18 @@ class User(AbstractUser):
     is_online = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        # Normalize username
+        """
+        Override save method to add custom behavior.
+
+        Normalizes username to lowercase and updates online status
+        based on login activity time thresholds.
+
+        Args:
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
+        """
         self.username = self.username.lower()
 
-        # Track login duration (if applicable)
         if self.last_login:
             time_since_last_login = now() - self.last_login
             if time_since_last_login.total_seconds() > 3600:
@@ -37,11 +69,24 @@ class User(AbstractUser):
         verbose_name_plural = _("users")
 
     def __str__(self):
+        """
+        String representation of user with online status.
+
+        Returns:
+            str: Username with online/offline indicator
+        """
         status = "online" if self.is_online else "offline"
         return f"{self.username} ({status})"
 
 
 class Course(models.Model):
+    """
+    Golf course model with location and identification information.
+
+    Stores basic course details including name, address, and geographic
+    coordinates for mapping functionality.
+    """
+
     club_name = models.CharField(max_length=100)
     course_name = models.CharField(max_length=100)
     address = models.CharField(max_length=200)
@@ -54,10 +99,23 @@ class Course(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """
+        String representation of course.
+
+        Returns:
+            str: Course name
+        """
         return self.course_name
 
 
 class Tee(models.Model):
+    """
+    Tee box model with difficulty ratings and course measurements.
+
+    Contains detailed rating information used for handicap calculations
+    and course statistics, with different ratings for front and back nine.
+    """
+
     GENDER_CHOICES = [
         ("M", "Male"),
         ("F", "Female"),
@@ -83,12 +141,25 @@ class Tee(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """
+        String representation of tee with course name, tee name, and gender.
+
+        Returns:
+            str: Formatted tee information
+        """
         return (
             f"{self.course.course_name} - {self.tee_name} ({self.get_gender_display()})"
         )
 
 
 class Hole(models.Model):
+    """
+    Golf hole model with difficulty and distance information.
+
+    Represents a single hole on a course with its number, par,
+    distance, and relative difficulty (handicap).
+    """
+
     tee = models.ForeignKey(Tee, on_delete=models.CASCADE, related_name="holes")
     hole_number = models.IntegerField()
     par = models.IntegerField()
@@ -101,10 +172,23 @@ class Hole(models.Model):
         ordering = ["hole_number"]
 
     def __str__(self):
+        """
+        String representation of hole with course name and hole number.
+
+        Returns:
+            str: Course name and hole number
+        """
         return f"{self.tee.course.course_name} - Hole {self.hole_number}"
 
 
 class HoleScore(models.Model):
+    """
+    Score and statistics model for a single hole in a round.
+
+    Tracks detailed performance metrics for a specific hole, including
+    strokes, putts, accuracy, and penalties.
+    """
+
     round = models.ForeignKey(
         "Round", on_delete=models.CASCADE, related_name="hole_scores"
     )
@@ -121,10 +205,23 @@ class HoleScore(models.Model):
         ordering = ["hole__hole_number"]
 
     def __str__(self):
+        """
+        String representation of hole score.
+
+        Returns:
+            str: Hole number and stroke count
+        """
         return f"Hole {self.hole.hole_number} - {self.strokes} strokes"
 
 
 class Round(models.Model):
+    """
+    Golf round model with player, course, and date information.
+
+    Serves as the parent record for a complete round of golf, with
+    calculated properties for various performance statistics.
+    """
+
     tee = models.ForeignKey(Tee, on_delete=models.CASCADE)
     player = models.ForeignKey(User, on_delete=models.CASCADE)
     date_played = models.DateTimeField(auto_now_add=True)
@@ -136,10 +233,22 @@ class Round(models.Model):
 
     @property
     def total_score(self):
+        """
+        Calculate total strokes for the round.
+
+        Returns:
+            int: Sum of strokes across all holes
+        """
         return sum(score.strokes for score in self.hole_scores.all())
 
     @property
     def front_nine_score(self):
+        """
+        Calculate score for the front nine holes.
+
+        Returns:
+            int: Sum of strokes for holes 1-9
+        """
         return sum(
             score.strokes
             for score in self.hole_scores.all()
@@ -148,6 +257,12 @@ class Round(models.Model):
 
     @property
     def back_nine_score(self):
+        """
+        Calculate score for the back nine holes.
+
+        Returns:
+            int: Sum of strokes for holes 10-18
+        """
         return sum(
             score.strokes
             for score in self.hole_scores.all()
@@ -156,6 +271,12 @@ class Round(models.Model):
 
     @property
     def green_in_regulation(self):
+        """
+        Calculate percentage of greens hit in regulation.
+
+        Returns:
+            float: Percentage of greens in regulation (0-100)
+        """
         hole_scores = self.hole_scores.all()
         if not hole_scores:
             return 0.0
@@ -170,6 +291,12 @@ class Round(models.Model):
 
     @property
     def fairways_hit_percent(self):
+        """
+        Calculate percentage of fairways hit.
+
+        Returns:
+            float: Percentage of fairways hit (0-100)
+        """
         hole_scores = self.hole_scores.all()
         if not hole_scores:
             return 0.0
@@ -180,10 +307,22 @@ class Round(models.Model):
 
     @property
     def putt_total(self):
+        """
+        Calculate total number of putts.
+
+        Returns:
+            int: Sum of putts across all holes
+        """
         return sum(score.putts for score in self.hole_scores.all())
 
     @property
     def putt_per_hole(self):
+        """
+        Calculate average putts per hole.
+
+        Returns:
+            float: Average number of putts per hole
+        """
         hole_scores = self.hole_scores.all()
         if not hole_scores:
             return 0.0
@@ -191,16 +330,34 @@ class Round(models.Model):
 
     @property
     def penalties_total(self):
+        """
+        Calculate total penalty strokes.
+
+        Returns:
+            int: Sum of penalties across all holes
+        """
         return sum(score.penalties for score in self.hole_scores.all())
 
     @property
     def penalties_per_hole(self):
+        """
+        Calculate average penalties per hole.
+
+        Returns:
+            float: Average number of penalties per hole
+        """
         hole_scores = self.hole_scores.all()
         if not hole_scores:
             return 0.0
         return round(self.penalties_total / len(self.hole_scores.all()), 2)
 
     def __str__(self):
+        """
+        String representation of round with player, course, and date.
+
+        Returns:
+            str: Formatted round information
+        """
         return (
             f"{self.player.username} - {self.course.course_name} ({self.date_played})"
         )

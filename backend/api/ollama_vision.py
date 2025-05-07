@@ -1,3 +1,15 @@
+"""
+╔════════════════════════════════════════════════════════════════════╗
+║ Python Script                                                      ║
+╠════════════════════════════════════════════════════════════════════╣
+║ Author : Brodie Rogers                                             ║
+║ Contact : Brodieman500@gmail.com                                   ║
+║ Created : 05-06-2025                                               ║
+║ Purpose : This is the Ai Swing analysis ollama                     ║
+║ Notes : Ollama is the best                                         ║
+╚════════════════════════════════════════════════════════════════════╝
+"""
+
 import ollama
 import base64
 import cv2
@@ -6,7 +18,15 @@ import tempfile
 
 
 class ChatBot:
+    """
+    A golf-focused chatbot using Ollama's Gemma3 model to provide instruction and analysis.
+
+    The chatbot can analyze golf swings from images and videos, as well as respond
+    to text queries with golf-specific expertise.
+    """
+
     def __init__(self):
+        """Initialize the ChatBot with a golf instructor system prompt."""
         self.system_prompt = """
 You are GolfPro, an expert golf instructor with a friendly personality. Respond based on the type of message received:
 
@@ -44,6 +64,15 @@ Make sure to respond in a markdown format, using **bold** for key terms and emoj
         self.messages = [{"role": "system", "content": self.system_prompt}]
 
     def answer_question(self, content):
+        """
+        Process user input and return appropriate response based on the content.
+
+        Args:
+            content (str): The user's input message
+
+        Returns:
+            str: Response from the chatbot
+        """
         if content.lower() == "reset":
             return self.handle_reset()
 
@@ -58,7 +87,15 @@ Make sure to respond in a markdown format, using **bold** for key terms and emoj
             return res["message"]["content"]
 
     def handle_image(self, file_path=None):
-        """Handle image analysis for golf swing"""
+        """
+        Process and analyze a golf swing from an image.
+
+        Args:
+            file_path (str, optional): Path to the image file. If None, prompts user for input.
+
+        Returns:
+            str: Analysis of the golf swing from the image
+        """
         if file_path is None:
             image_path = input("Please provide the image path: ")
         else:
@@ -132,7 +169,15 @@ You are SwingCoach, an expert golf instructor specializing in swing analysis. Wh
             return f"Error processing image: {str(e)}"
 
     def handle_video(self, file_path=None):
-        """Handle video analysis for golf swing"""
+        """
+        Process and analyze a golf swing from a video.
+
+        Args:
+            file_path (str, optional): Path to the video file. If None, prompts user for input.
+
+        Returns:
+            str: Analysis of the golf swing from the video
+        """
         if file_path is None:
             video_path = input("Please provide the video path: ")
         else:
@@ -211,7 +256,7 @@ You are SwingCoach, an expert golf instructor specializing in swing analysis. Wh
 
     def process_golf_video(self, video_path, frame_interval=10):
         """
-        Process a golf swing video by extracting frames
+        Process a golf swing video by extracting key frames.
 
         Args:
             video_path (str): Path to the video file
@@ -278,9 +323,13 @@ You are SwingCoach, an expert golf instructor specializing in swing analysis. Wh
         print(f"Selected {len(frames)} frames for analysis")
         return frames
 
-    def handle_conversation(
-        self,
-    ):
+    def handle_conversation(self):
+        """
+        Handle an interactive conversation with the user.
+
+        Returns:
+            str: Chatbot's response to user input
+        """
         while True:
             user_input = input("You: ")
             if user_input.lower() == "exit":
@@ -288,9 +337,13 @@ You are SwingCoach, an expert golf instructor specializing in swing analysis. Wh
             else:
                 return f"AI: {self.answer_question(user_input)}"
 
-    def handle_reset(
-        self,
-    ):
+    def handle_reset(self):
+        """
+        Reset the conversation history.
+
+        Returns:
+            str: Confirmation message of reset
+        """
         try:
             self.messages = [{"role": "system", "content": self.system_prompt}]
             return "Conversation Reset!"
