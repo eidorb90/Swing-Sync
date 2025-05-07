@@ -1,9 +1,38 @@
+"""
+╔════════════════════════════════════════════════════════════════════╗
+║ Python Script                                                      ║
+╠════════════════════════════════════════════════════════════════════╣
+║ Author : Brodie Rogers                                             ║
+║ Contact : Brodieman500@gmail.com                                   ║
+║ Created : 05-06-2025                                               ║
+║ Purpose : Golf coach chatbot implementation using Ollama           ║
+║ Notes : Ollama is the best                                         ║
+╚════════════════════════════════════════════════════════════════════╝
+
+
+This module implements a conversational golf coach chatbot using the Ollama API.
+The chatbot, named Woody, provides golf advice with a sarcastic, straight-talking
+personality that blends technical tips with locker-room banter.
+"""
+
 import ollama
 import os
 
 
 class ChatBot:
+    """
+    A golf coach chatbot implementation that interfaces with the Ollama API.
+
+    The chatbot maintains conversation history and provides personalized
+    golf coaching advice with a distinct personality. It can incorporate
+    user's round data into the conversation for more relevant advice.
+    """
+
     def __init__(self):
+        """
+        Initialize the ChatBot with a system prompt defining its personality
+        and conversation history.
+        """
         self.system_prompt = """
 Woody.ai - Your No-Nonsense Personal Golf Coach
 You are Woody, a sarcastic, straight-talking golf coach with 20+ years of experience. You give honest, funny, and helpful advice to golfers, blending tough love with technical tips and locker-room banter.
@@ -16,7 +45,7 @@ Speak like you're chatting at the 19th hole. No robotic intros. Use casual phras
 
 🔄 VARIABILITY RULES:
 
-Always change up your greetings, especially on repeated inputs like “hello” or “hi”
+Always change up your greetings, especially on repeated inputs like "hello" or "hi"
 
 Randomize the opening line of your messages — some warm and friendly, others snarky or straight to business
 
@@ -28,43 +57,43 @@ Sometimes end with a question, other times with a roast or joke
 
 💬 RESPONSE TYPES:
 
-First Interaction / Greeting (e.g., “hello”, “hi”)
+First Interaction / Greeting (e.g., "hello", "hi")
 Examples:
 
-“Well hey there, sunshine. You bringing data or just vibes today?”
+"Well hey there, sunshine. You bringing data or just vibes today?"
 
-“Let’s get into it. Got your recent scores handy, or are we flying blind?”
+"Let's get into it. Got your recent scores handy, or are we flying blind?"
 
-“Back again? Alright, let’s see if we can shave a few strokes off that number that’s been haunting your dreams.”
+"Back again? Alright, let's see if we can shave a few strokes off that number that's been haunting your dreams."
 
-“Hope you brought stats, not excuses.”
+"Hope you brought stats, not excuses."
 
 Performance Reviews
 Lead with their strengths, question the weak spots.
 End with motivation or a roast like:
 
-“Keep hitting like that and you'll owe me a beer at the turn.”
+"Keep hitting like that and you'll owe me a beer at the turn."
 
-“If we can fix your driver, you'll finally stop losing balls and sleep.”
+"If we can fix your driver, you'll finally stop losing balls and sleep."
 
 Technical Questions
 Mix helpful advice with sarcasm:
 
-“Alright, your slice has officially offended me. Let’s fix it.”
+"Alright, your slice has officially offended me. Let's fix it."
 
-“That grip? I’ve seen kinder hands on a bar brawl.”
+"That grip? I've seen kinder hands on a bar brawl."
 
 Casual Chit-Chat
 Short, natural, varied.
 
-“Another weekend warrior, I see.”
+"Another weekend warrior, I see."
 
-“If you’re not here to vent about your 4-putt, what’s up?”
+"If you're not here to vent about your 4-putt, what's up?"
 
 Golf Stories / Analogies
 Use them sparingly, and always tie them into a lesson:
 
-“Reminds me of a guy I coached who couldn’t hit a fairway if it was a parking lot…”
+"Reminds me of a guy I coached who couldn't hit a fairway if it was a parking lot…"
 
 Speak like you're chatting at the 19th hole - casual but knowledgeable
 Ask follow-up questions to understand the player better
@@ -129,6 +158,19 @@ Remember: You're the golf buddy who knows their stuff - helpful but not afraid t
         self.initialized = False
 
     def answer_question(self, content, last_rounds):
+        """
+        Process user input and generate a response from the chatbot.
+
+        Args:
+            content (str): The user's input message
+            last_rounds (str): Optional string containing the user's recent golf rounds data
+
+        Returns:
+            Generator: Yields chunks of the response message
+
+        Note:
+            Returns "Conversation has been reset." if input is "reset"
+        """
         if content.lower() == "reset":
             return self.handle_reset()
         else:
@@ -155,6 +197,21 @@ Remember: You're the golf buddy who knows their stuff - helpful but not afraid t
             return response_content
 
     def handle_conversation(self, user_input=None, last_rounds=None):
+        """
+        Manage ongoing conversation with the user.
+
+        This method can be used in two ways:
+        1. With parameters for API usage
+        2. Without parameters for CLI interactive mode
+
+        Args:
+            user_input (str, optional): The user's input message
+            last_rounds (str, optional): String containing the user's recent golf rounds data
+
+        Returns:
+            The chatbot's response if user_input is provided
+            None if running in interactive CLI mode
+        """
         if user_input:
             return self.answer_question(user_input, last_rounds)
         else:
@@ -165,6 +222,14 @@ Remember: You're the golf buddy who knows their stuff - helpful but not afraid t
                 print(f"AI: {self.answer_question(user_input, last_rounds)}")
 
     def handle_reset(self):
+        """
+        Reset the conversation history.
+
+        Clears the message history and resets initialization status.
+
+        Returns:
+            str: Confirmation message indicating the conversation has been reset
+        """
         self.messages = []
         self.initialized = False
         return "Conversation has been reset."
