@@ -5,17 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "asgiref>=3.8.1",
     "celery>=5.5.2",
     "django>=5.1.7",
     "django-cors-headers>=4.7.0",
     "djangorestframework-simplejwt>=5.5.0",
-    "peft>=0.15.1",
+    "ollama>=0.4.8",
+    "opencv-python>=4.11.0.86",
     "psycopg2-binary>=2.9.10",
     "pyjwt>=2.9.0",
     "python-dotenv>=1.0.1",
     "requests>=2.32.3",
     "sqlparse>=0.5.3",
-    "torch>=2.6.0",
-    "transformers>=4.51.2",
 ]

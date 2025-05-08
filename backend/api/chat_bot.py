@@ -16,8 +16,14 @@ personality that blends technical tips with locker-room banter.
 """
 
 import ollama
+from ollama import Client
 import os
 
+# Get the Ollama host from environment variable
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://ollama:11434")
+
+# Use the host in your client
+client = Client(host=OLLAMA_HOST)
 
 class ChatBot:
     """

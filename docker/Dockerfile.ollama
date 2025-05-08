@@ -1,0 +1,9 @@
+# Dockerfile for Ollama
+FROM ollama/ollama:latest
+
+# Expose Ollama API port
+EXPOSE 11434
+
+# Set volume for models - this ensures models are persisted across container restarts
+VOLUME /root/.ollama
+

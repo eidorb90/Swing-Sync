@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.dev
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000/api
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+
+  backend:  
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.dev
+    volumes:
+      - ./:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    environment:
+      - USE_SQLITE=True
+      - OLLAMA_HOST=http://ollama:11434  # Change from localhost to the service name
+      - PYTHONPATH=/app
+    depends_on:
+      - ollama
+    working_dir: /app
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 30s
+
+  ollama:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ollama
+    volumes:
+      - ollama_models_dev:/root/.ollama
+    ports:
+      - "11434:11434"
+
+volumes:
+  ollama_models_dev:

@@ -39,6 +39,27 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class HealthCheckView(APIView):
+    """
+    Health check endpoint to verify if the API is running.
+
+    Returns a simple JSON response indicating the API is up and running.
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        """
+        Handle GET request for health check.
+
+        Args:
+            request: HTTP request
+
+        Returns:
+            Response: JSON response indicating API status
+        """
+        return Response({"status": "API is up and running!"})
+
 class CreateUserView(generics.CreateAPIView):
     """
     API endpoint for creating new users.
