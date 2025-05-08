@@ -11,11 +11,18 @@
 """
 
 import ollama
+from ollama import Client
 import base64
 import cv2
 import os
 import tempfile
 
+
+# Get the Ollama host from environment variable
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://ollama:11434")
+
+# Use the host in your client
+client = Client(host=OLLAMA_HOST)
 
 class ChatBot:
     """

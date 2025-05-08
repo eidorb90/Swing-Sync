@@ -14,6 +14,7 @@ from api.views import (
     LeaderBoardView,
     VisionChatBotView,
     CourseTeeDebugView,
+    HealthCheckView
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -21,6 +22,7 @@ from rest_framework_simplejwt.views import (
 )
 
 urlpatterns = [
+    path("api/health/", HealthCheckView.as_view(), name="health_check"),
     path("admin/", admin.site.urls),
     # API endpoints
     # User section

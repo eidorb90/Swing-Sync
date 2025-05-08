@@ -1,0 +1,12 @@
+# Dockerfile.dev for Frontend
+FROM node:20-alpine
+
+WORKDIR /app
+
+# No need to copy package files as they will be mounted as volumes
+
+# Expose port 5173 (Vite default)
+EXPOSE 5173
+
+# Start development server with hot reloading
+CMD ["/bin/sh", "-c", "cd frontend && npm install && npm run dev -- --host 0.0.0.0"]
